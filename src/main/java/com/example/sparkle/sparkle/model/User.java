@@ -31,7 +31,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Gender gender;
     @Temporal(TemporalType.DATE)
-    @Column(nullable = false)
+    @Column(name = "birth_date")
     private LocalDate birthDate;
 
     @ManyToOne(fetch = FetchType.LAZY)

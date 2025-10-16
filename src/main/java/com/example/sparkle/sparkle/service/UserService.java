@@ -1,40 +1,40 @@
 package com.example.sparkle.sparkle.service;
 
-import com.example.sparkle.sparkle.dto.user.UserDTO;
+import com.example.sparkle.sparkle.dto.user.*;
+import com.example.sparkle.sparkle.model.User;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public interface UserService {
 
-    ResponseEntity<?> registerUser(UserDTO userDto);
+    UserDtoRegister registerUser(UserDtoRegister userDtoRegister);
 
     /**
      * Аутентификация пользователя
      */
 
-    ResponseEntity<?> authenticateUser(UserDTO userDto);
+    UserDtoGetAuthenticateUser authenticateUser(UserDtoAuthenticate userDtoAuthenticate);
 
     /**
      * Получение информации о текущем авторизованном пользователе
      */
 
-    ResponseEntity<UserDTO> getCurrentUserProfile();
+    UserDtoGet getCurrentUserProfile(Long userId);
 
     /**
      * Редактирование профиля пользователя
      */
 
-    ResponseEntity<UserDTO> updateUserProfile(UserDTO updatedUserDto);
-
+    UserDtoGetAuthenticateUser updateUserProfile(UserDtoRegister userDtoRegister);
     /**
-     * Загрузка фотографии пользователя
+     * Получение профиля пользователя по email
      */
-
-    ResponseEntity<String> uploadUserPhoto(MultipartFile file);
-
+    User getUserByEmail(String email);
     /**
-     * Удаление фотографии пользователя
+     * Получение профиля пользователя по id
      */
+    UserDtoAuthenticate getUserById(Long userId);
 
-    ResponseEntity<Void> removeUserPhoto(Long photoId);
+    List<UserDtoAuthenticate> getUserAll();
 }
