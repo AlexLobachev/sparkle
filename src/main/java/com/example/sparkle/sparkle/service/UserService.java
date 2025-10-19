@@ -1,20 +1,22 @@
 package com.example.sparkle.sparkle.service;
 
-import com.example.sparkle.sparkle.dto.user.*;
+import com.example.sparkle.sparkle.dto.user.UserDtoGet;
+import com.example.sparkle.sparkle.dto.user.UserDtoRegister;
+import com.example.sparkle.sparkle.dto.user.UserDtoRegisterGet;
+import com.example.sparkle.sparkle.dto.user.UserDtoUpdate;
 import com.example.sparkle.sparkle.model.User;
-import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 public interface UserService {
 
-    UserDtoRegister registerUser(UserDtoRegister userDtoRegister);
+    UserDtoRegisterGet registerUser(UserDtoRegister userDtoRegister);
 
     /**
      * Аутентификация пользователя
      */
 
-    UserDtoGetAuthenticateUser authenticateUser(UserDtoAuthenticate userDtoAuthenticate);
+    UserDtoRegisterGet authenticateUser(User userDtoAuthenticate);
 
     /**
      * Получение информации о текущем авторизованном пользователе
@@ -26,7 +28,7 @@ public interface UserService {
      * Редактирование профиля пользователя
      */
 
-    UserDtoGetAuthenticateUser updateUserProfile(UserDtoRegister userDtoRegister);
+    int updateUserProfile(UserDtoUpdate userDtoRegister);
     /**
      * Получение профиля пользователя по email
      */
@@ -34,7 +36,14 @@ public interface UserService {
     /**
      * Получение профиля пользователя по id
      */
-    UserDtoAuthenticate getUserById(Long userId);
+    UserDtoRegisterGet getUserById(Long userId);
+    /**
+     * Получение списка всех пользователей
+     */
+    List<UserDtoRegisterGet> getUserAll();
 
-    List<UserDtoAuthenticate> getUserAll();
+    /**
+     * Удаление пользователя по ID
+     */
+    void deleteUserById(Long userId);
 }

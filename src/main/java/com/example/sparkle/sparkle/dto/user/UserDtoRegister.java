@@ -1,30 +1,27 @@
 package com.example.sparkle.sparkle.dto.user;
 
-import com.example.sparkle.sparkle.model.City;
 import com.example.sparkle.sparkle.model.Gender;
 import jakarta.validation.constraints.*;
-import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDate;
 
 @Getter
 @Setter
+@ToString
 public class UserDtoRegister {
     private Long id;
     @NotBlank(message = "Имя не может быть пустым")
     private String username;
     @NotBlank(message = "Пароль не может быть пустым")
-    @Size(min = 6, message = "Пароль не должен быть короче 6 символов")
+    @Size(min = 6, max = 255)
     @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*\\d).{8,}$",
-            message = "Пароль должен содержать буквы и цифры")
+            message = "Пароль должен содержать минимум 8 символов, включая буквы и цифры")
     private String password;
-    @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*\\d).{8,}$",
-            message = "Пароль должен содержать буквы и цифры")
-    private String oldPassword;
-    private Gender gender;
+    @NotBlank(message = "Гендер не может быть пустым")
+    private String gender;
     @Email(message = "Email введен не корректно данные должны быть в формате (abcabc@.abc.abc)")
     @NotBlank(message = "Email не может быть пустым")
     private String email;

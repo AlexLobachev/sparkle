@@ -8,9 +8,17 @@ public enum Gender {
 
     Gender(String gender) {
         this.gender = gender;
+
     }
 
     public String toString(Gender gen) {
         return gender;
+    }
+
+    public static Gender gender (String gen){
+        if (gen.equals("Женский")){
+            return Gender.WOMEN;
+        }
+        return Gender.MAN;
     }
 }
