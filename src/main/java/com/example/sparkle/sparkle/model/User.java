@@ -16,6 +16,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
 
     @Column(nullable = false)
@@ -28,8 +29,8 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Enumerated(EnumType.STRING)
-    private Gender gender;
+    //@Enumerated(EnumType.STRING)
+    private String gender;
     @Temporal(TemporalType.DATE)
     @Column(name = "birth_date")
     private LocalDate birthDate;

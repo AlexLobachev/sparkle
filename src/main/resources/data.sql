@@ -66,3 +66,4 @@ CREATE TABLE user_interests
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (interest_id) REFERENCES interests (id)
 );
+
