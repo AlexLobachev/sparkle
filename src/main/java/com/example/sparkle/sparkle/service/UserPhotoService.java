@@ -1,19 +1,29 @@
 package com.example.sparkle.sparkle.service;
 
-import org.springframework.web.multipart.MultipartFile;
+import com.example.sparkle.sparkle.model.Photo;
+import com.example.sparkle.sparkle.model.UserPhoto;
 
-import java.io.IOException;
+import java.util.List;
 
 public interface UserPhotoService {
     /**
-     * Загрузка фотографии пользователя
+     * Сохранение фото пользователя
      */
+    UserPhoto saveUserPhoto(UserPhoto userPhoto);
 
-    MultipartFile uploadUserPhoto(MultipartFile multipartFile, Long userId) throws IOException;
 
     /**
-     * Удаление фотографии пользователя
+     * Удаление фото пользователя
+     */
+    void deleteByPhotoId(Long photoId);
+    /**
+     * Получение фото пользователя
      */
 
-    void removeUserPhoto(Long photoId);
+    public UserPhoto getPhotoById(Long photoId);
+
+    /**
+     * Получение всех фото пользователя
+     */
+    public List<UserPhoto> getAllPhotoByIdUser(Long userId);
 }

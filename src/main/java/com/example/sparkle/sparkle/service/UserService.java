@@ -1,46 +1,40 @@
 package com.example.sparkle.sparkle.service;
 
-import com.example.sparkle.sparkle.dto.user.UserDtoGet;
-import com.example.sparkle.sparkle.dto.user.UserDtoRegister;
-import com.example.sparkle.sparkle.dto.user.UserDtoRegisterGet;
-import com.example.sparkle.sparkle.dto.user.UserDtoUpdate;
 import com.example.sparkle.sparkle.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
-
-    UserDtoRegisterGet registerUser(UserDtoRegister userDtoRegister);
-
     /**
-     * Аутентификация пользователя
+     * Регистрация пользователя
      */
+    User registerUser(User user);
 
-    UserDtoRegisterGet authenticateUser(User userDtoAuthenticate);
 
     /**
      * Получение информации о текущем авторизованном пользователе
      */
 
-    UserDtoGet getCurrentUserProfile(Long userId);
+    Optional<User> getCurrentUserProfile(Long userId);
 
     /**
      * Редактирование профиля пользователя
      */
 
-    int updateUserProfile(UserDtoUpdate userDtoRegister);
+    int updateUserProfile(User user);
     /**
      * Получение профиля пользователя по email
      */
-    User getUserByEmail(String email);
+    Optional<User> getUserByEmail(String email);
     /**
      * Получение профиля пользователя по id
      */
-    UserDtoRegisterGet getUserById(Long userId);
+    Optional<User> getUserById(Long userId);
     /**
      * Получение списка всех пользователей
      */
-    List<UserDtoRegisterGet> getUserAll();
+    List<User> getUserAll();
 
     /**
      * Удаление пользователя по ID

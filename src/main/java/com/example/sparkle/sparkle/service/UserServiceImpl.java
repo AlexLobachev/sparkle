@@ -1,11 +1,8 @@
 package com.example.sparkle.sparkle.service;
 
-import com.example.sparkle.sparkle.dto.user.UserDtoGet;
-import com.example.sparkle.sparkle.dto.user.UserDtoRegister;
-import com.example.sparkle.sparkle.dto.user.UserDtoRegisterGet;
-import com.example.sparkle.sparkle.dto.user.UserDtoUpdate;
 import com.example.sparkle.sparkle.model.User;
 import com.example.sparkle.sparkle.repository.UserRepository;
+import com.example.sparkle.sparkle.validator.ValidatorUser;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -28,52 +25,41 @@ public class UserServiceImpl implements UserService {
         this.userRepository = userRepository;
     }
 
+
     /**
      * Регистрация нового пользователя
      * Пользователь вводит Имя, Пол, Дату рождения
      */
-    public UserDtoRegisterGet registerUser(UserDtoRegister userDtoRegister) {
-        User user = userRepository.save(userBuilder(userDtoRegister));
-        return userDtoRegisterGetBuilder(user);
-    }
-
-    /**
-     * Аутентификация пользователя
-     */
-
-    public UserDtoRegisterGet authenticateUser(User userDtoAuthenticate) {
-        User user = userRepository.findByEmail(userDtoAuthenticate.getEmail());
-        return userDtoRegisterGetBuilder(user);
+    @Override
+    public User registerUser(User user) {
+        return userRepository.save(user);
     }
 
     /**
      * Получение информации о текущем авторизованном пользователе
      */
-
-    public UserDtoGet getCurrentUserProfile(Long userId) {
-        User user = userRepository.findById(userId).get();
-        UserDtoGet userDtoGet = new UserDtoGet();
-        userDtoGet.setUsername(user.getUsername());
-        userDtoGet.setGender(user.getGender());
-        userDtoGet.setCity(user.getCity());
-        userDtoGet.setBirthDate(user.getBirthDate());
-        userDtoGet.setEmail(user.getEmail());
-        userDtoGet.setInterests(user.getInterests());
-        userDtoGet.setPhotos(user.getPhotos());
-        return userDtoGet;
+    @Override
+    public Optional<User> getCurrentUserProfile(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        ValidatorUser.userNotFoundAndForbidden(user.orElseThrow(),userId);
+        return userRepository.findById(userId);
     }
 
     /**
      * Редактирование профиля пользователя
      */
+
     @Transactional
-    public int updateUserProfile(UserDtoUpdate userDtoUpdate) {
+    @Override
+    public int updateUserProfile(User user) {
         int affectedRows =
                 userRepository.userUpdate(
-                        userDtoUpdate.getUsername(), userDtoUpdate.getPassword(),
-                        userDtoUpdate.getGender(), userDtoUpdate.getEmail(),
-                        userDtoUpdate.getBirthDate(), userDtoUpdate.getId());
-        entityManager.refresh(userRepository.findById(userDtoUpdate.getId()).get());
+                        user.getUsername(),
+                        user.getGender(),
+                        user.getEmail(),
+                        user.getBirthDate(),
+                        user.getId());
+        entityManager.refresh(userRepository.findById(user.getId()).orElseThrow());
         return affectedRows;
     }
 
@@ -81,24 +67,25 @@ public class UserServiceImpl implements UserService {
     /**
      * Получение профиля пользователя по email
      */
-
-    public User getUserByEmail(String email) {
+    @Override
+    public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
     /**
      * Получение профиля пользователя по id
      */
-    public UserDtoRegisterGet getUserById(Long userId) {
-        return userDtoRegisterGetBuilder(userRepository.findById(userId).get());
+    @Override
+    public Optional<User> getUserById(Long userId) {
+        return userRepository.findById(userId);
     }
 
     /**
      * Получение списка всех пользователей
      */
-    public List<UserDtoRegisterGet> getUserAll() {
-
-        return userRepository.findAll().stream().map(this::userDtoRegisterGetBuilder).collect(Collectors.toList());
+    @Override
+    public List<User> getUserAll() {
+        return userRepository.findAll();
     }
 
     /**
@@ -108,24 +95,5 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(userId);
     }
 
-    private UserDtoRegisterGet userDtoRegisterGetBuilder(User user) {
-        UserDtoRegisterGet userDtoRegisterGet = new UserDtoRegisterGet();
-        userDtoRegisterGet.setId(user.getId());
-        userDtoRegisterGet.setUsername(user.getUsername());
-        userDtoRegisterGet.setGender(user.getGender());
-        userDtoRegisterGet.setEmail(user.getEmail());
-        userDtoRegisterGet.setBirthDate(user.getBirthDate());
-        return userDtoRegisterGet;
-    }
 
-    private User userBuilder(UserDtoRegister userDtoRegister) {
-
-        User user = new User();
-        user.setUsername(userDtoRegister.getUsername());
-        user.setGender(userDtoRegister.getGender());
-        user.setBirthDate(userDtoRegister.getBirthDate());
-        user.setPassword(userDtoRegister.getPassword());
-        user.setEmail(userDtoRegister.getEmail());
-        return user;
-    }
 }

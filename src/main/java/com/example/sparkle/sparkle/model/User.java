@@ -22,9 +22,6 @@ public class User {
     @Column(nullable = false)
     private String username;
 
-    @Column(nullable = false)
-    private String password;
-
     @Email
     @Column(unique = true, nullable = false)
     private String email;
@@ -48,19 +45,19 @@ public class User {
     private Set<Interest> interests = new HashSet<>();
 
     // Список фотографий пользователя
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<UserPhoto> photos = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Photo> photos = new ArrayList<>();
 
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof User user)) return false;
-        return getId().equals(user.getId()) && getUsername().equals(user.getUsername()) && getPassword().equals(user.getPassword()) && getEmail().equals(user.getEmail()) && getGender().equals(user.getGender()) && getBirthDate().equals(user.getBirthDate()) && getCity().equals(user.getCity()) && getInterests().equals(user.getInterests()) && getPhotos().equals(user.getPhotos());
+        return getId().equals(user.getId()) && getUsername().equals(user.getUsername()) && getEmail().equals(user.getEmail()) && getGender().equals(user.getGender()) && getBirthDate().equals(user.getBirthDate()) && getCity().equals(user.getCity()) && getInterests().equals(user.getInterests()) && getPhotos().equals(user.getPhotos());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getUsername(), getPassword(), getEmail(), getGender(), getBirthDate(), getCity(), getInterests(), getPhotos());
+        return Objects.hash(getId(), getUsername(), getEmail(), getGender(), getBirthDate(), getCity(), getInterests(), getPhotos());
     }
 }
