@@ -11,7 +11,6 @@ import java.time.LocalDate;
 public class UserDtoUpdate {
     private Long id;
     private String username;
-    private String password;
     private String gender;
     private String email;
     private LocalDate birthDate;
