@@ -1,6 +1,5 @@
 package com.example.sparkle.sparkle.service;
 
-import com.example.sparkle.sparkle.model.Photo;
 import com.example.sparkle.sparkle.model.UserPhoto;
 import com.example.sparkle.sparkle.repository.UserPhotoRepository;
 import org.springframework.beans.factory.annotation.Autowired;

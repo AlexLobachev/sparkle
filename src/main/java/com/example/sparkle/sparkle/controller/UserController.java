@@ -1,6 +1,5 @@
 package com.example.sparkle.sparkle.controller;
 
-import com.example.sparkle.sparkle.builder.BuilderUser;
 import com.example.sparkle.sparkle.dto.user.UserDtoRegister;
 import com.example.sparkle.sparkle.dto.user.UserDtoUpdate;
 import com.example.sparkle.sparkle.model.User;
@@ -20,6 +19,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/sparkle/users")
@@ -40,14 +40,16 @@ public class UserController {
      */
     @PostMapping("/register/next-page")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserDtoRegister userDtoRegister) {
-        Optional<User> user = userService.getUserByEmail(userDtoRegister.getEmail());
         try {
+            Optional<User> user = userService.getUserByEmail(userDtoRegister.getEmail());
+
             if (user.isPresent() && user.get().getEmail().equals(userDtoRegister.getEmail())) {
                 log.info("Попытка зарегистрироваться по существующему email = {}", userDtoRegister.getEmail());
                 return ResponseEntity.badRequest().body("Пользователь с таким email уже зарегистрирован");
             }
-            user = Optional.ofNullable(userService.registerUser(BuilderUser.userBuilder(userDtoRegister)));
-            return ResponseEntity.ok(BuilderUser.userDtoRegisterBuilder(user.orElseThrow()));
+            user = Optional.ofNullable(userService.registerUser(UserDtoRegister.toUser(userDtoRegister)));
+            log.info("user>>>>>>>>> " + user);
+            return ResponseEntity.ok(User.toUserDtoRegister(user.orElseThrow()));
         } catch (MethodArgumentNotValidException e) {
             Map<String, String> errors = new HashMap<>();
             for (FieldError error : e.getBindingResult().getFieldErrors()) {
@@ -82,7 +84,9 @@ public class UserController {
     public ResponseEntity<?> updateUserProfile(@PathVariable @Min(1) Long userId,
                                                @Valid @RequestBody UserDtoUpdate userDtoUpdate) {
         try {
+
             Optional<User> user = userService.getUserById(userId);
+
             ResponseEntity<?> validationResult = ValidatorUser.userNotFoundAndForbidden(
                     user.orElse(null),
                     userId);
@@ -91,7 +95,8 @@ public class UserController {
                 return validationResult;
             }
 
-            UserDtoRegister validationDto = BuilderUser.userDtoRegisterBuilder(user.orElseThrow());
+            UserDtoRegister validationDto = User.toUserDtoRegister(user.orElseThrow());
+            log.debug(" validationDto>>>>>> " + validationDto);
             if (userDtoUpdate.getUsername() != null) {
                 validationDto.setUsername(userDtoUpdate.getUsername());
             }
@@ -104,50 +109,28 @@ public class UserController {
             if (userDtoUpdate.getGender() != null) {
                 validationDto.setGender(userDtoUpdate.getGender());
             }
+
+            if (userDtoUpdate.getAboutMe() != null) {
+                validationDto.setAboutMe(userDtoUpdate.getAboutMe());
+            }
             log.info("Валидация данных");
             Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
-            if (userDtoUpdate.getUsername() == null || userDtoUpdate.getUsername().isBlank()) {
-                Set<ConstraintViolation<UserDtoRegister>> violations = validator.validateProperty(
-                        validationDto, "username"
-                );
-                if (!violations.isEmpty()) {
-                    return ResponseEntity.badRequest()
-                            .body(violations.iterator().next().getMessage());
-                }
-            }
 
-            if (userDtoUpdate.getEmail() != null || userDtoUpdate.getEmail() == null) {
-                Set<ConstraintViolation<UserDtoRegister>> violations = validator.validateProperty(
-                        validationDto, "email"
-                );
-                if (!violations.isEmpty()) {
-                    return ResponseEntity.badRequest()
-                            .body(violations.iterator().next().getMessage())
-                            ;
-                }
-            }
+            Set<ConstraintViolation<UserDtoRegister>> violations = validator.validate(validationDto);
 
-            if (userDtoUpdate.getGender() != null || userDtoUpdate.getGender() == null) {
-                Set<ConstraintViolation<UserDtoRegister>> violations = validator.validateProperty(
-                        validationDto, "gender"
-                );
-                if (!violations.isEmpty()) {
-                    return ResponseEntity.badRequest()
-                            .body(violations.iterator().next().getMessage());
-                }
+            if (!violations.isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(violations.stream()
+                                .map(ConstraintViolation::getMessage)
+                                .collect(Collectors.toList()));
             }
-            if (userDtoUpdate.getBirthDate() != null || userDtoUpdate.getBirthDate() == null) {
-                Set<ConstraintViolation<UserDtoRegister>> violations = validator.validateProperty(
-                        validationDto, "birthDate"
-                );
-                if (!violations.isEmpty()) {
-                    return ResponseEntity.badRequest()
-                            .body(violations.iterator().next().getMessage());
-                }
-            }
+            userDtoUpdate.setId(userId);
+            if (userDtoUpdate.getGender() == null)
+                userDtoUpdate.setGender(user.get().getGender());
 
-            int affectedRows = userService.updateUserProfile(BuilderUser.userDtoUpdateBuilder(userDtoUpdate));
+
+            int affectedRows = userService.updateUserProfile(UserDtoUpdate.toUser(userDtoUpdate));
 
             if (affectedRows == 0) {
                 log.warn("Обновление пользователя с ID = {} не выполнено - запись не найдена", userId);
@@ -155,7 +138,7 @@ public class UserController {
             }
             log.info("Обновление пользователя с ID = {} прошло успешно", userDtoUpdate.getId());
             user = userService.getUserById(userId);
-            return ResponseEntity.ok(BuilderUser.userDtoRegisterBuilder(user.orElseThrow()));
+            return ResponseEntity.ok(User.toUserDtoBuilder(user.orElseThrow()));
 
 
         } catch (RuntimeException e) {
@@ -182,7 +165,7 @@ public class UserController {
             return ResponseEntity.noContent().build();
 
         }
-        return ResponseEntity.ok(users.stream().map(BuilderUser::userDtoRegisterBuilder));
+        return ResponseEntity.ok(users.stream().map(User::toUserDtoBuilder));
     }
 
     /**
@@ -198,7 +181,7 @@ public class UserController {
         if (!validationResult.getStatusCode().is2xxSuccessful()) {
             return validationResult;
         }
-        return ResponseEntity.ok(BuilderUser.userDtoRegisterBuilder(user.orElseThrow()));
+        return ResponseEntity.ok(User.toUserDtoBuilder(user.orElseThrow()));
     }
 
     /**

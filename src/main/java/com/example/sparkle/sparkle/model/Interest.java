@@ -1,33 +1,77 @@
 package com.example.sparkle.sparkle.model;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
-import java.util.Objects;
+import java.util.Arrays;
 
-@Entity
-@Table(name = "interests")
-@Getter
-@Setter
-public class Interest {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public enum Interest {
 
-    @Column(nullable = false)
-    private String title;
+    // Спортивные интересы
+    FOOTBALL("Футбол"),
+    BASKETBALL("Баскетбол"),
+    TENNIS("Теннис"),
+    SWIMMING("Плавание"),
+    GYM("Фитнес и спортзал"),
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Interest interest)) return false;
-        return getId().equals(interest.getId()) && getTitle().equals(interest.getTitle());
+    // Творческие интересы
+    PAINTING("Рисование"),
+    MUSIC("Музыка"),
+    DANCE("Танцы"),
+    WRITING("Писательство"),
+
+    // Хобби и увлечения
+    COOKING("Кулинария"),
+    PHOTOGRAPHY("Фотография"),
+    READING("Чтение"),
+    TRAVEL("Путешествия"),
+
+    // Образование и развитие
+    PROGRAMMING("Программирование"),
+    LANGUAGES("Изучение языков"),
+    SCIENCE("Наука и технологии"),
+    BUSINESS("Бизнес и предпринимательство"),
+
+    // Развлечения
+    MOVIES("Кино"),
+    GAMING("Видеоигры"),
+    SOCIAL_MEDIA("Социальные сети"),
+
+    // Другое
+    OTHER("Другое");
+
+    private final String interestName;
+
+    Interest(String interestName) {
+        this.interestName = interestName;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), getTitle());
+    @JsonValue
+    public String getInterestName() {
+        return interestName;
     }
+
+    @JsonCreator
+    public static Interest fromString(String interestName) {
+        return Arrays.stream(Interest.values())
+                .filter(i -> i.interestName.equals(interestName))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Неверный интерес: " + interestName));
+    }
+
+    //@JsonCreator
+    //public static Interest fromString(String interestName) {
+    //    return Arrays.stream(Interest.values())
+    //            .filter(i -> i.interestName.equals(interestName))
+    //            .findFirst()
+    //            .orElseThrow(() -> new IllegalArgumentException("Неверный интерес: " + interestName));
+    //}
+//
+    //// Метод для получения всех значений в виде списка строк
+    //public static List<String> getAllInterests() {
+    //    return Arrays.stream(Interest.values())
+    //            .map(Interest::getInterestName)
+    //            .collect(Collectors.toList());
+    //}
 }

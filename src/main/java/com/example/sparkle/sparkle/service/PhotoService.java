@@ -4,7 +4,6 @@ import com.example.sparkle.sparkle.model.Photo;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 
 public interface PhotoService {
     /**

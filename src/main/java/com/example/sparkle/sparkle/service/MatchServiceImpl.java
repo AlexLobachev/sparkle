@@ -1,7 +1,7 @@
 package com.example.sparkle.sparkle.service;
 
-import com.example.sparkle.sparkle.dto.MatchDTO;
 import com.example.sparkle.sparkle.repository.MatchRepository;
+import com.example.sparkle.sparkle.dto.MatchDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

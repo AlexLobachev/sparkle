@@ -1,7 +1,7 @@
 package com.example.sparkle.sparkle.service;
 
-import com.example.sparkle.sparkle.model.User;
 import com.example.sparkle.sparkle.repository.UserRepository;
+import com.example.sparkle.sparkle.model.User;
 import com.example.sparkle.sparkle.validator.ValidatorUser;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -32,6 +32,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User registerUser(User user) {
+
         return userRepository.save(user);
     }
 
@@ -55,9 +56,10 @@ public class UserServiceImpl implements UserService {
         int affectedRows =
                 userRepository.userUpdate(
                         user.getUsername(),
-                        user.getGender(),
+                        user.getGender().toString(),
                         user.getEmail(),
                         user.getBirthDate(),
+                        user.getAboutMe(),
                         user.getId());
         entityManager.refresh(userRepository.findById(user.getId()).orElseThrow());
         return affectedRows;

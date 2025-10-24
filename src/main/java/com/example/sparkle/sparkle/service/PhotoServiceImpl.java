@@ -1,8 +1,8 @@
 package com.example.sparkle.sparkle.service;
 
 import com.example.sparkle.sparkle.model.Photo;
-import com.example.sparkle.sparkle.model.UserPhoto;
 import com.example.sparkle.sparkle.repository.PhotoRepository;
+import com.example.sparkle.sparkle.model.UserPhoto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

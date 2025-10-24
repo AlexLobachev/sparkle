@@ -1,24 +1,33 @@
 package com.example.sparkle.sparkle.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
+import java.util.Arrays;
+
 public enum Gender {
-    WOMEN ("Женский"),
-    MAN ("Мужской");
+    WOMEN("Женский"),
+    MAN("Мужской");
 
     private final String gender;
 
     Gender(String gender) {
         this.gender = gender;
-
     }
 
-    public String toString(Gender gen) {
+    @JsonValue
+    public String getGender() {
         return gender;
     }
 
-    public static Gender gender (String gen){
-        if (gen.equals("Женский")){
-            return Gender.WOMEN;
-        }
-        return Gender.MAN;
+    @JsonCreator
+    public static Gender fromString(String gender) {
+        return Arrays.stream(Gender.values())
+                .filter(g -> g.gender.equals(gender))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Неверный пол: " + gender));
     }
 }
+
+
+

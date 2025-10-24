@@ -2,7 +2,6 @@ package com.example.sparkle.sparkle.service;
 
 import com.example.sparkle.sparkle.model.User;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public interface LocationService {
