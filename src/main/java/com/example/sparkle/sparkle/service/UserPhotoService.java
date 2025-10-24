@@ -1,6 +1,5 @@
 package com.example.sparkle.sparkle.service;
 
-import com.example.sparkle.sparkle.model.Photo;
 import com.example.sparkle.sparkle.model.UserPhoto;
 
 import java.util.List;

@@ -1,7 +1,7 @@
 package com.example.sparkle.sparkle.service;
 
-import com.example.sparkle.sparkle.model.User;
 import com.example.sparkle.sparkle.repository.UserRepository;
+import com.example.sparkle.sparkle.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,5 +1,6 @@
 package com.example.sparkle.sparkle.repository;
 
+import com.example.sparkle.sparkle.model.Gender;
 import com.example.sparkle.sparkle.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -20,7 +21,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "SET username   = COALESCE (:username, u.username), " +
             "    gender     = COALESCE(:gender, u.gender), " +
             "    email      = COALESCE (:email, u.email)," +
-            "    birth_date  = COALESCE (:birthDate, u.birth_date) " +
+            "    birth_date  = COALESCE (:birthDate, u.birth_date), " +
+            "    about_me  = COALESCE (:aboutMe, u.about_me) " +
             "WHERE u.id = :id",
             nativeQuery = true)
     int userUpdate(
@@ -28,7 +30,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("gender") String gender,
             @Param("email") String email,
             @Param("birthDate") LocalDate birthDate,
+            @Param("aboutMe") String aboutMe,
             @Param("id") Long userId);
+
+
 
 
 

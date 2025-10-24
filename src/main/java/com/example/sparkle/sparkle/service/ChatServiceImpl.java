@@ -2,7 +2,6 @@ package com.example.sparkle.sparkle.service;
 
 import com.example.sparkle.sparkle.dto.MessageDTO;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

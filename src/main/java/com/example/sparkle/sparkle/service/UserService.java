@@ -40,4 +40,5 @@ public interface UserService {
      * Удаление пользователя по ID
      */
     void deleteUserById(Long userId);
+
 }
