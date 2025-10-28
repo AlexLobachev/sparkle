@@ -35,6 +35,7 @@ public class InterestController {
     /**
      * Сохраняем интересы пользователю
      */
+
     @PostMapping("/create-all/users/{userId}")
     public ResponseEntity<?> saveInterest(@PathVariable Long userId, @RequestBody List<UserInterest> listInterest) {
         Optional<User> user = userService.getUserById(userId);

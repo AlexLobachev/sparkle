@@ -1,8 +1,11 @@
 package com.example.sparkle.sparkle.controller;
 
+import com.example.sparkle.sparkle.dto.LocationRequestDto;
 import com.example.sparkle.sparkle.dto.user.UserDtoRegister;
 import com.example.sparkle.sparkle.dto.user.UserDtoUpdate;
+import com.example.sparkle.sparkle.model.City;
 import com.example.sparkle.sparkle.model.User;
+import com.example.sparkle.sparkle.service.GeocodingService;
 import com.example.sparkle.sparkle.service.UserService;
 import com.example.sparkle.sparkle.validator.ValidatorUser;
 import jakarta.validation.ConstraintViolation;
@@ -27,11 +30,12 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private final UserService userService;
-
+    private final GeocodingService geocodingService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, GeocodingService geocodingService) {
         this.userService = userService;
+        this.geocodingService = geocodingService;
     }
 
     /**
@@ -96,7 +100,7 @@ public class UserController {
             }
 
             UserDtoRegister validationDto = User.toUserDtoRegister(user.orElseThrow());
-            log.debug(" validationDto>>>>>> " + validationDto);
+
             if (userDtoUpdate.getUsername() != null) {
                 validationDto.setUsername(userDtoUpdate.getUsername());
             }
@@ -109,10 +113,14 @@ public class UserController {
             if (userDtoUpdate.getGender() != null) {
                 validationDto.setGender(userDtoUpdate.getGender());
             }
+            if (userDtoUpdate.getPreferredGender() != null) {
+                validationDto.setGender(userDtoUpdate.getPreferredGender());
+            }
 
             if (userDtoUpdate.getAboutMe() != null) {
                 validationDto.setAboutMe(userDtoUpdate.getAboutMe());
             }
+
             log.info("Валидация данных");
             Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
@@ -207,5 +215,29 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.CONFLICT);
 
     }
+
+
+    //@PostMapping("/location")
+    @PostMapping("/location/{userId}")
+    public ResponseEntity<?> saveUserLocation(@RequestBody LocationRequestDto location, @PathVariable Long userId
+            /*@AuthenticationPrincipal UserDetails userDetails*/) {
+        // Получаем текущего пользователя
+        //User user = userService.getUserByUserName(userDetails.getUsername());
+        User user = userService.getUserById(userId).orElseThrow();
+
+        // Получаем город по координатам
+        City city = geocodingService.getCityByCoordinates(location.getLatitude(), location.getLongitude());
+
+        if (city == null) {
+            return ResponseEntity.badRequest().body("Не удалось определить город");
+        }
+
+        // Связываем пользователя с городом
+        user.setCity(city);
+
+
+        return ResponseEntity.ok(userService.updateUserProfile(user));
+    }
+
 
 }

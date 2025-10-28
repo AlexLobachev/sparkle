@@ -19,6 +19,7 @@ public class UserDtoGetAllInterest {
     private Long id;
     private String username;
     private Gender gender;
+    private Gender preferredGender;
     private String email;
     private LocalDate birthDate;
     private String aboutMe;

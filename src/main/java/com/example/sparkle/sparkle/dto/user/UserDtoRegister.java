@@ -19,6 +19,7 @@ public class UserDtoRegister {
     @Size(min = 2, max = 50, message = "Длина имени должна быть от 2 до 50 символов")
     private String username;
     private Gender gender;
+    private Gender preferredGender;
     @Email(message = "Email введен не корректно данные должны быть в формате (mail@mail.ru)")
     @NotBlank(message = "Email не может быть пустым")
     private String email;
@@ -33,6 +34,7 @@ public class UserDtoRegister {
         user.setId(userDtoRegister.getId());
         user.setUsername(userDtoRegister.getUsername());
         user.setGender(userDtoRegister.getGender());
+        user.setPreferredGender(userDtoRegister.getPreferredGender());
         user.setBirthDate(userDtoRegister.getBirthDate());
         user.setEmail(userDtoRegister.getEmail());
         user.setAboutMe(userDtoRegister.getAboutMe());
