@@ -37,6 +37,9 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "preferred_gender")
+    private Gender preferredGender;
     @Temporal(TemporalType.DATE)
     @Column(name = "birth_date")
     private LocalDate birthDate;
@@ -63,6 +66,7 @@ public class User {
         userDtoRegister.setId(user.getId());
         userDtoRegister.setUsername(user.getUsername());
         userDtoRegister.setGender(user.getGender());
+        userDtoRegister.setPreferredGender(user.getPreferredGender());
         userDtoRegister.setBirthDate(user.getBirthDate());
         userDtoRegister.setEmail(user.getEmail());
         userDtoRegister.setAboutMe(user.getAboutMe());
@@ -76,23 +80,15 @@ public class User {
         userDto.setId(user.getId());
         userDto.setUsername(user.getUsername());
         userDto.setGender(user.getGender());
+        userDto.setPreferredGender(user.getPreferredGender());
         userDto.setBirthDate(user.getBirthDate());
         userDto.setAboutMe(user.getAboutMe());
         userDto.setEmail(user.getEmail());
         userDto.setInterests(interestList);
-        return userDto;
-    }
+        if (user.getCity() != null)
+            userDto.setCityDto(City.cityDto(user.getCity()));
 
-    public static UserDtoGetAllInterest toUserDtoGetAllInterest(User user) {
-        UserDtoGetAllInterest userDtoGetAllInterest = new UserDtoGetAllInterest();
-        userDtoGetAllInterest.setId(user.getId());
-        userDtoGetAllInterest.setUsername(user.getUsername());
-        userDtoGetAllInterest.setGender(user.getGender());
-        userDtoGetAllInterest.setBirthDate(user.getBirthDate());
-        userDtoGetAllInterest.setAboutMe(user.getAboutMe());
-        userDtoGetAllInterest.setEmail(user.getEmail());
-        userDtoGetAllInterest.setInterests(user.getInterests());
-        return userDtoGetAllInterest;
+        return userDto;
     }
 
 

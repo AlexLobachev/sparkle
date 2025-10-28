@@ -1,12 +1,13 @@
 package com.example.sparkle.sparkle.service;
 
-import com.example.sparkle.sparkle.repository.UserRepository;
 import com.example.sparkle.sparkle.model.User;
+import com.example.sparkle.sparkle.repository.UserRepository;
 import com.example.sparkle.sparkle.validator.ValidatorUser;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +43,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> getCurrentUserProfile(Long userId) {
         Optional<User> user = userRepository.findById(userId);
-        ValidatorUser.userNotFoundAndForbidden(user.orElseThrow(),userId);
+        ValidatorUser.userNotFoundAndForbidden(user.orElseThrow(), userId);
         return userRepository.findById(userId);
     }
 
@@ -57,6 +58,7 @@ public class UserServiceImpl implements UserService {
                 userRepository.userUpdate(
                         user.getUsername(),
                         user.getGender().toString(),
+                        user.getPreferredGender().toString(),
                         user.getEmail(),
                         user.getBirthDate(),
                         user.getAboutMe(),
@@ -87,15 +89,24 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public List<User> getUserAll() {
-        return userRepository.findAll();
+        Sort sort = Sort.by("id").ascending();
+        return userRepository.findAll(sort);
     }
 
     /**
      * Удаление пользователя по ID
      */
+    @Override
     public void deleteUserById(Long userId) {
         userRepository.deleteById(userId);
     }
 
+    /**
+     * Получение пользователя по имени
+     */
+    @Override
+    public User getUserByUserName(String name) {
+        return userRepository.findByUsername(name).orElseThrow();
+    }
 
 }

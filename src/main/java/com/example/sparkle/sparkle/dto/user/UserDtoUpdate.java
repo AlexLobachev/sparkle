@@ -14,6 +14,7 @@ public class UserDtoUpdate {
     private Long id;
     private String username;
     private Gender gender;
+    private Gender preferredGender;
     private String email;
     private LocalDate birthDate;
     private String aboutMe;
@@ -23,6 +24,7 @@ public class UserDtoUpdate {
         user.setId(userDtoUpdate.getId());
         user.setUsername(userDtoUpdate.getUsername());
         user.setGender(userDtoUpdate.getGender());
+        user.setPreferredGender(userDtoUpdate.getPreferredGender());
         user.setBirthDate(userDtoUpdate.getBirthDate());
         user.setEmail(userDtoUpdate.getEmail());
         user.setAboutMe(userDtoUpdate.getAboutMe());

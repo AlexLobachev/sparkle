@@ -1,42 +1,44 @@
-//package com.example.sparkle.sparkle.config;
-//
-//        import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-//import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-//import org.springframework.security.config.http.SessionCreationPolicy;
-//import org.springframework.security.web.SecurityFilterChain;
-//import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-//
-//        @Configuration
-//        @EnableWebSecurity
-//        public class SecurityConfig {
-//
-//                @Bean
-//                public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//                return http
-//                                        .authorizeHttpRequests(auth -> auth
-//                                                                .anyRequest().authenticated()
-//                                        )
-//                                        .oauth2Login(oauth2 -> oauth2
-//                                                                .loginPage("/login")
-//                                                // Убираем устаревший redirectionEndpoint()
-//                                                .defaultSuccessUrl("/")
-//                                        )
-//                        .logout(logout -> logout
-//                                                                .logoutUrl("/logout")
-//                                                .logoutSuccessUrl("/")
-//                                        )
-//                        .csrf(csrf -> csrf
-//                                                                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-//                                        )
-//                                        .sessionManagement(session -> session
-//                                                                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-//                                        )
-//                                        .build();
-//
-//
-//            }
-//    }
+package com.example.sparkle.sparkle.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.SecurityFilterChain;
+
+import static org.springframework.security.config.Customizer.withDefaults;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .cors(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authz -> authz
+                        // Разрешаем доступ к эндпоинту регистрации
+                        .requestMatchers("/sparkle/users/**").permitAll()
+                        .requestMatchers("/sparkle/match/**").permitAll()
+                        //.requestMatchers("/api/user/location").authenticated()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(withDefaults())
+                .httpBasic(withDefaults());
+
+        return http.build();
 
 
+        /*
+        http
+                .authorizeHttpRequests((authz) -> authz
+                        .requestMatchers("/api/user/location").authenticated()
+                        .anyRequest().permitAll()
+                )
+                .formLogin(withDefaults())
+                .httpBasic(withDefaults());
+         */
+    }
+}

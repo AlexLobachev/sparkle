@@ -1,25 +1,21 @@
 package com.example.sparkle.sparkle.dto.user;
 
 import com.example.sparkle.sparkle.dto.CityDto;
-import com.example.sparkle.sparkle.model.*;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.example.sparkle.sparkle.model.Gender;
+import com.example.sparkle.sparkle.model.Interest;
+import com.example.sparkle.sparkle.model.UserPhoto;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
 @Getter
 @Setter
-@ToString
-public class UserDto {
+public class UserMatchDto {
     private Long id;
     private String username;
-    private String email;
     private Gender gender;
-    private Gender preferredGender;
     private LocalDate birthDate;
     private String aboutMe;
     private CityDto cityDto;

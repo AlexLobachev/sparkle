@@ -18,7 +18,7 @@ public class Message {
     private Long id;
 
     @Lob
-    @Column(/*columnDefinition = "TEXT"*/)
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)

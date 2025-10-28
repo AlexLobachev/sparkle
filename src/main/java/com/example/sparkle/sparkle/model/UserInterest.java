@@ -1,6 +1,7 @@
 package com.example.sparkle.sparkle.model;
 
 import com.example.sparkle.sparkle.dto.user.UserInterestsDto;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,6 +39,7 @@ public class UserInterest {
         user.setId(interest.getUser().getId());
         user.setUsername(interest.getUser().getUsername());
         user.setGender(interest.getUser().getGender());
+        user.setPreferredGender(interest.getUser().getPreferredGender());
         user.setBirthDate(interest.getUser().getBirthDate());
         user.setEmail(interest.getUser().getEmail());
         user.setAboutMe(interest.getUser().getAboutMe());
