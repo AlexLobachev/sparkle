@@ -19,14 +19,15 @@ public class UserDtoUpdate {
     private LocalDate birthDate;
     private String aboutMe;
 
+
     public static User toUser(UserDtoUpdate userDtoUpdate) {
         User user = new User();
         user.setId(userDtoUpdate.getId());
         user.setUsername(userDtoUpdate.getUsername());
         user.setGender(userDtoUpdate.getGender());
         user.setPreferredGender(userDtoUpdate.getPreferredGender());
-        user.setBirthDate(userDtoUpdate.getBirthDate());
         user.setEmail(userDtoUpdate.getEmail());
+        user.setBirthDate(userDtoUpdate.getBirthDate());
         user.setAboutMe(userDtoUpdate.getAboutMe());
         return user;
     }

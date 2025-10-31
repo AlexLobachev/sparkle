@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.Objects;
 @Table(name = "matches")
 @Getter
 @Setter
+@Slf4j
 @ToString
 public class Match {
 
@@ -53,14 +55,16 @@ public class Match {
 
     public static UserMatchDto toUserMatchDto(User user) {
         List<Interest> interestList = new ArrayList<>();
-        user.getInterests().forEach(interest -> interestList.add(interest.getInterest()));
+        if (user.getInterests() != null)
+            user.getInterests().forEach(interest -> interestList.add(interest.getInterest()));
         UserMatchDto userMatchDto = new UserMatchDto();
         userMatchDto.setId(user.getId());
         userMatchDto.setUsername(user.getUsername());
         userMatchDto.setGender(user.getGender());
         userMatchDto.setBirthDate(user.getBirthDate());
         userMatchDto.setAboutMe(user.getAboutMe());
-        userMatchDto.setCityDto(City.cityDto(user.getCity()));
+        if (user.getCity() != null)
+            userMatchDto.setCityDto(City.cityDto(user.getCity()));
         userMatchDto.setInterests(interestList);
         userMatchDto.setPhotos(user.getPhotos());
         return userMatchDto;

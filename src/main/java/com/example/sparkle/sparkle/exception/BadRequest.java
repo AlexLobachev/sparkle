@@ -1,9 +1,10 @@
 package com.example.sparkle.sparkle.exception;
 
-public class Conflict extends RuntimeException{
+public class BadRequest extends RuntimeException {
 
-    public Conflict(String message) {
+    public BadRequest(String message) {
         super(message);
+
 
     }
     public String getErrorMessage(){

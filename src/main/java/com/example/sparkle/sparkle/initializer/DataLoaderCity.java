@@ -1,4 +1,4 @@
-package com.example.sparkle.sparkle.service.test.city;
+package com.example.sparkle.sparkle.initializer;
 
 import com.example.sparkle.sparkle.model.City;
 import com.example.sparkle.sparkle.repository.CityRepository;
@@ -15,13 +15,13 @@ import org.springframework.stereotype.Component;
 @Component
 @Profile("development")
 @Slf4j
-public class TestDataLoader implements CommandLineRunner {
+public class DataLoaderCity implements CommandLineRunner {
 
 
     private final CityRepository cityRepository;
 
     @Autowired
-    public TestDataLoader(CityRepository cityRepository) {
+    public DataLoaderCity(CityRepository cityRepository) {
         this.cityRepository = cityRepository;
     }
 

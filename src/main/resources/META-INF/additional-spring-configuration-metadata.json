@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "management.endpoint.httptrace.enabled",
+      "type": "java.lang.String",
+      "description": "Description for management.endpoint.httptrace.enabled."
+  }
+] }
