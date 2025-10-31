@@ -1,26 +1,26 @@
 package com.example.sparkle.sparkle.controller;
 
 import com.example.sparkle.sparkle.model.Match;
-import com.example.sparkle.sparkle.model.User;
 import com.example.sparkle.sparkle.service.MatchService;
-import com.example.sparkle.sparkle.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Класс-контроллер для обработки лайков
+ */
 @RestController
 @RequestMapping("/sparkle/match")
 public class MatchController {
 
     private final MatchService matchService;
-    private final UserService userService;
 
     @Autowired
-    public MatchController(MatchService matchService, UserService userService) {
+    public MatchController(MatchService matchService) {
         this.matchService = matchService;
-        this.userService = userService;
+
     }
 
     /**
@@ -31,9 +31,7 @@ public class MatchController {
             @RequestParam Long userId,
             @RequestParam(defaultValue = "40.0") double distance,
             @PageableDefault(page = 0, size = 1) Pageable pageable) {
-        //обязательно добавить проверку существования пользователя и т д
-        User user = userService.getUserById(userId).orElseThrow();
-        return ResponseEntity.ok(matchService.getNextCandidate(user, distance, pageable));
+        return ResponseEntity.ok(matchService.getNextCandidate(userId, distance, pageable));
     }
 
     /**
@@ -41,7 +39,6 @@ public class MatchController {
      */
     @PostMapping("/like/{firstUser}/users/{secondUser}")
     public ResponseEntity<?> likeUser(@PathVariable Long firstUser, @PathVariable Long secondUser) {
-        //обязательно добавить проверку существования пользователя и т д
         return ResponseEntity.ok(Match.toMatchDto(Match.toUserMatchDto(matchService.likeUser(firstUser, secondUser))));
     }
 

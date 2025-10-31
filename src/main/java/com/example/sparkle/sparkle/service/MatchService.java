@@ -6,13 +6,15 @@ import com.example.sparkle.sparkle.model.User;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-
+/**
+ * Интерфейс для обработки лайков
+ */
 public interface MatchService {
     /**
      * Получить следующий кандидат для свайпа
      */
 
-    UserDto getNextCandidate(User user, double distance, Pageable pageable);
+    UserDto getNextCandidate(Long user, double distance, Pageable pageable);
 
     /**
      * Выразить симпатию пользователю

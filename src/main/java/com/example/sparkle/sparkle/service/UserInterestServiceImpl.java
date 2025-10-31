@@ -1,8 +1,11 @@
 package com.example.sparkle.sparkle.service;
 
+import com.example.sparkle.sparkle.model.Interest;
 import com.example.sparkle.sparkle.model.User;
 import com.example.sparkle.sparkle.model.UserInterest;
 import com.example.sparkle.sparkle.repository.UserInterestRepository;
+import com.example.sparkle.sparkle.validator.ValidatorInterest;
+import com.example.sparkle.sparkle.validator.ValidatorUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,32 +13,70 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Set;
+import java.util.stream.Collectors;
+/**
+ * Класс для работы с интересами пользователя
+ */
 @Service
 @Slf4j
 public class UserInterestServiceImpl implements UserInterestService {
     private final UserInterestRepository userInterestRepository;
     private final UserService userService;
+    private final ValidatorInterest validatorInterest;
+    private final ValidatorUser validatorUser;
 
     @Autowired
-    public UserInterestServiceImpl(UserInterestRepository userInterestRepository, UserService userService) {
+    public UserInterestServiceImpl(UserInterestRepository userInterestRepository, UserService userService,
+                                   ValidatorInterest validatorInterest, ValidatorUser validatorUser) {
         this.userInterestRepository = userInterestRepository;
         this.userService = userService;
+        this.validatorInterest = validatorInterest;
+        this.validatorUser = validatorUser;
     }
 
     /**
-     * Сохраняем интересы пользователю
+     * Сохраняем интересы пользователю списком
      */
     @Override
-    public List<UserInterest> saveAllInterest(List<UserInterest> listInterest) {
-        log.info("Сохранение интереса");
+    public List<UserInterest> saveAllInterest(Long userId, List<UserInterest> listInterest) {
+        User user = userService.getUserById(userId).orElseThrow();
+        // Получаем текущие интересы пользователя
+        List<UserInterest> existingInterests = userInterestRepository.findAllByUserId(userId);
+        Set<Interest> existingInterestSet = existingInterests.stream()
+                .map(UserInterest::getInterest)
+                .collect(Collectors.toSet());
+        // Фильтруем новые интересы, оставляя только уникальные
+        List<UserInterest> newInterests = listInterest.stream()
+                .filter(interest -> !existingInterestSet.contains(interest.getInterest()))
+                .peek(interest -> {
+                    interest.setUser(user);
+                    interest.setId(null); // сбрасываем ID для новой записи
+                }).toList();
+        // Возвращаем обновленный список интересов
 
-        return userInterestRepository.saveAll(listInterest);
+        if (!newInterests.isEmpty()) {
+            userInterestRepository.saveAll(newInterests);
+        }
+
+        List<UserInterest> updatedInterests = getAllInterestUserById(user.getId());
+        validatorInterest.interestNoContent(updatedInterests);
+        return updatedInterests;
     }
-
+    /**
+     * Сохраняем интересы пользователю по одному
+     */
     @Override
-    public UserInterest saveInterest(UserInterest interest) {
-        log.info("Сохранение интереса");
+    public UserInterest saveInterest(Long userId, UserInterest interest) {
+        User user = userService.getUserById(userId).orElseThrow();
+        interest.setUser(user);
+        if (userInterestRepository.findAllByUserId((user.getId()))
+                .stream()
+                .anyMatch(userInterest -> userInterest.getInterest().equals(interest.getInterest()))) {
+            interest.setUser(user);
+            return getAllByUserIdAndInterest(interest);
+        }
+
         return userInterestRepository.save(interest);
     }
 
@@ -44,7 +85,10 @@ public class UserInterestServiceImpl implements UserInterestService {
      */
     @Override
     public List<UserInterest> getAllInterestUserById(Long userId) {
-        return userInterestRepository.findAllByUserId(userId);
+        userService.getUserById(userId);
+        List<UserInterest> userInterests = userInterestRepository.findAllByUserId(userId);
+        validatorInterest.interestNoContent(userInterests);
+        return userInterests;
     }
 
     /**
@@ -52,29 +96,32 @@ public class UserInterestServiceImpl implements UserInterestService {
      * Метод нужен что-бы не дублировать интерес если он уже есть в БД
      */
     @Override
-    public UserInterest getInterestUserById(UserInterest userInterest) {
-        return userInterestRepository.findAllByUserIdAndInterest(userInterest.getUser().getId(), userInterest.getInterest());
+    public UserInterest getAllByUserIdAndInterest(UserInterest userInterest) {
+        return userInterestRepository.findAllByUserIdAndInterest(userInterest.getUser().getId(),userInterest.getInterest());
 
     }
 
     /**
-     * Получаем все пользователей с общими интересами
-     * Если параметр ID не указан возвращаются пользователи с общими интересами
-     * Если параметр ID указан то возвращаются пользователи только с теми интересами которые есть у заданного пользователя
+     * Получаем пользователей с общими интересами как у пользователя по ID
+
      */
     @Override
     public List<User> getUsersWithTheSameInterests(Long userId) {
+        userService.getUserById(userId);
         List<String> interests = new ArrayList<>();
-
-            getAllInterestUserById(userId)
-                    .forEach(inter -> interests.add(inter.getInterest().name()));
-            return userInterestRepository.getUsersWithTheSameInterestsByUserId(interests);
+        getAllInterestUserById(userId)
+                .forEach(inter -> interests.add(inter.getInterest().name()));
+        return userInterestRepository.getUsersWithTheSameInterestsByUserId(interests);
     }
+    /**
+     * Получаем всех пользователей с общими интересами
 
+     */
     @Override
-    public List<User> getUsersWithTheSameInterests() {
-
-        return userInterestRepository.getUsersWithTheSameInterests();
+    public List<User> getAllUsersWithTheSameInterests() {
+        List<User> usersInterest = userInterestRepository.getUsersWithTheSameInterests();
+        validatorUser.userNoContent(usersInterest);
+        return usersInterest;
     }
 
     /**
@@ -82,10 +129,12 @@ public class UserInterestServiceImpl implements UserInterestService {
      */
     @Override
     @Transactional
-    public void deleteInterestByUserId(UserInterest userInterest) {
-
-        userInterestRepository.deleteByUserIdAndInterest(userInterest.getUser().getId(), userInterest.getInterest());
-        //userInterestRepository.deleteById(userInterest.getId());
+    public void deleteInterestByUserId(Long userId, UserInterest interest) {
+        User user = userService.getUserById(userId).orElseThrow();
+        interest.setUser(user);
+        userInterestRepository.deleteByUserIdAndInterest(userId, interest.getInterest());
+        validatorInterest.interestConflictDelete(getAllByUserIdAndInterest(interest));
+        userInterestRepository.deleteByUserIdAndInterest(interest.getUser().getId(), interest.getInterest());
     }
 
 }

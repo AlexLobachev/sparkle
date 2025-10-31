@@ -18,7 +18,9 @@ public class UserDtoRegister {
     @NotBlank(message = "Имя не может быть пустым")
     @Size(min = 2, max = 50, message = "Длина имени должна быть от 2 до 50 символов")
     private String username;
+    @NotNull(message = "Гендер обязателен к заполнению")
     private Gender gender;
+    @NotNull(message = "Предпочтительный пол обязателен к заполнению")
     private Gender preferredGender;
     @Email(message = "Email введен не корректно данные должны быть в формате (mail@mail.ru)")
     @NotBlank(message = "Email не может быть пустым")

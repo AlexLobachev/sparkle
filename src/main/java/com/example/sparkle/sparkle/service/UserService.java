@@ -1,32 +1,31 @@
 package com.example.sparkle.sparkle.service;
 
+import com.example.sparkle.sparkle.dto.LocationRequestDto;
+import com.example.sparkle.sparkle.dto.user.UserDtoUpdate;
+import com.example.sparkle.sparkle.model.City;
 import com.example.sparkle.sparkle.model.User;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.Optional;
-
+/**
+ * Интерфейс для работы с пользователями
+ */
 public interface UserService {
     /**
      * Регистрация пользователя
      */
-    User registerUser(User user);
+    Optional<User> registerUser(User user);
 
-
-    /**
-     * Получение информации о текущем авторизованном пользователе
-     */
-
-    Optional<User> getCurrentUserProfile(Long userId);
 
     /**
      * Редактирование профиля пользователя
      */
 
-    int updateUserProfile(User user);
-    /**
-     * Получение профиля пользователя по email
-     */
-    Optional<User> getUserByEmail(String email);
+    Optional<User> updateUserProfile(Long userId, UserDtoUpdate userDtoUpdate);
+
     /**
      * Получение профиля пользователя по id
      */
@@ -40,5 +39,13 @@ public interface UserService {
      * Удаление пользователя по ID
      */
     void deleteUserById(Long userId);
-    User getUserByUserName(String name);
+    /**
+     * Получение пользователя по имени
+     */
+    Optional<User> getUserByUserName(String name);
+    /**
+     * Сохранение локации пользователя
+     */
+    Optional<User> saveUserLocation(LocationRequestDto location, Long userId);
+
 }

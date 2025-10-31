@@ -70,6 +70,25 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     );
 
+    @Query(value = """
+                SELECT u.*
+                FROM users u                
+                JOIN user_interests i on u.id = i.user_id
+                WHERE                    
+                    (:gender IS NULL OR u.gender = :gender)
+                    AND (:interests IS NULL OR i.interest IN :interests)
+                    AND u.id != :currentUserId
+                                
+            """, nativeQuery = true)
+    Page<User> findUsersOffLocation(
+            @Param("gender") String gender,
+            @Param("interests") List<String> interests,
+            @Param("currentUserId") Long currentUserId,
+            Pageable pageable
+
+    );
+
+
     /*@Query(value = """
                 SELECT u.*
                 FROM users u
