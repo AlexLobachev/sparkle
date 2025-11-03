@@ -19,7 +19,7 @@ public interface UserPhotoService {
      * Получение фото пользователя
      */
 
-    public UserPhoto getPhotoById(Long photoId, Long userId);
+    public UserPhoto getPhotoById(Long userId, Long photoId);
 
     /**
      * Получение всех фото пользователя

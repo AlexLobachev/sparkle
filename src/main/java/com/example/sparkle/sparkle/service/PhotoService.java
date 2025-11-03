@@ -16,7 +16,7 @@ public interface PhotoService {
      * Удаление фотографии пользователя
      */
 
-    void removeUserPhoto(Long photoId,Long userId) throws IOException;
+    void removeUserPhoto(Long userId,Long photoId) throws IOException;
 
 
 

@@ -44,9 +44,9 @@ public class UserPhotoServiceImpl implements UserPhotoService {
      * Получение фото пользователя
      */
     @Override
-    public UserPhoto getPhotoById(Long photoId, Long userId) {
+    public UserPhoto getPhotoById(Long userId, Long photoId) {
         userService.getUserById(userId).orElseThrow();
-        UserPhoto userPhoto = userPhotoRepository.findByPhotoId(photoId);
+        UserPhoto userPhoto = userPhotoRepository.findByUserIdAndPhotoId(userId,photoId);
         validatorPhoto.photoNoContent(userPhoto);
         validatorUser.userForbidden(userPhoto.getUser(), userId);
         return userPhoto;

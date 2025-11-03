@@ -60,7 +60,7 @@ public class PhotoServiceImpl implements PhotoService {
      * Удаление фотографии пользователя
      */
     @Override
-    public void removeUserPhoto(Long photoId, Long userId) throws IOException {
+    public void removeUserPhoto(Long userId, Long photoId) throws IOException {
         userService.getUserById(userId).orElseThrow();
         List<UserPhoto> userPhotoList = userPhotoService.getAllPhotoByIdUser(userId);
 

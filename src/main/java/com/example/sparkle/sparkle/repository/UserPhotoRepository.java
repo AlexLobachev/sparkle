@@ -8,7 +8,7 @@ import java.util.List;
 public interface UserPhotoRepository extends JpaRepository <UserPhoto,Long> {
 
     List<UserPhoto> findByUserId(Long userId);
-    UserPhoto findByPhotoId(Long photoId);
+    UserPhoto findByUserIdAndPhotoId(Long userId,Long photoId);
     void deleteByPhotoId(Long photoId);
 
 
