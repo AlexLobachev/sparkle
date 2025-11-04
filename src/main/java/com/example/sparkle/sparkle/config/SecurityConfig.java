@@ -22,6 +22,7 @@ public class SecurityConfig {
                         // Разрешаем доступ к эндпоинту регистрации
                         .requestMatchers("/sparkle/users/**").permitAll()
                         .requestMatchers("/sparkle/match/**").permitAll()
+                        .requestMatchers("/sparkle/chat/**").permitAll()
                         //.requestMatchers("/api/user/location").authenticated()
                         .anyRequest().authenticated()
                 )

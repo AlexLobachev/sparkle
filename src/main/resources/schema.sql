@@ -161,4 +161,6 @@ WHERE ST_DWithin(
 --  AND second_user_id = 4;
 --
 
-DELETE FROM matches WHERE first_user_id = 1 AND second_user_id = 2;
+--DELETE FROM matches WHERE first_user_id = 1 AND second_user_id = 2;
+
+SELECT * FROM messages;

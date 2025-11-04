@@ -4,7 +4,7 @@ import com.example.sparkle.sparkle.model.User;
 import lombok.Getter;
 
 @Getter
-public class MessageDTO {
+public class MessageDto {
     private User receiver;
 
 }

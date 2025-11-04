@@ -13,7 +13,7 @@ import java.util.List;
 public class ValidatorInterest {
     public void interestNoContent(List<UserInterest> user) {
         if (user.isEmpty()) {
-            log.info("Пришел пустой массив");
+            log.info("У пользователя нет интересов");
             throw new NoContent();
         }
 

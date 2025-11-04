@@ -1,51 +1,69 @@
 package com.example.sparkle.sparkle.controller;
 
-import com.example.sparkle.sparkle.dto.MessageDTO;
+import com.example.sparkle.sparkle.model.ChatMessage;
 import com.example.sparkle.sparkle.service.ChatService;
+import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/api/chat")
+@RequestMapping("/sparkle/chat")
 public class ChatController {
 
-private final ChatService chatService;
-private final SimpMessagingTemplate messagingTemplate;
+    private final ChatService chatService;
 
-@Autowired
-public ChatController(ChatService chatService, SimpMessagingTemplate messagingTemplate) {
-    this.chatService = chatService;
-    this.messagingTemplate = messagingTemplate;
-}
+
+    @Autowired
+    public ChatController(ChatService chatService) {
+        this.chatService = chatService;
+
+    }
 
     /**
      * Отображение списка чатов текущего пользователя
      */
- @GetMapping("/chats")
- public ResponseEntity<List<Long>> listChatsForCurrentUser() {
-     return ResponseEntity.ok(chatService.listChatsForCurrentUser()).getBody();
- }
+    @GetMapping("/chats/users/{userId}")
+    public ResponseEntity<?> listChatsForCurrentUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(chatService.listChatsForCurrentUser(userId));
+    }
 
- /**
-  * Отправка сообщения другому пользователю
-  */
- @PostMapping("/message")
- public ResponseEntity<MessageDTO> sendMessage(@RequestBody MessageDTO messageDto) {
-     MessageDTO savedMessage = chatService.sendMessage(messageDto).getBody();
-     messagingTemplate.convertAndSend("/topic/public/" + savedMessage.getReceiver(), savedMessage);
-     return ResponseEntity.created(null).body(savedMessage);
- }
+    /**
+     * Создание нового чата
+     */
+    @PostMapping()
+    public ResponseEntity<?> createChat(@RequestParam @Min(1) Long senderId,
+                                        @RequestParam @Min(1) Long receiverId) {
+        return ResponseEntity.created(null).body(chatService.createChat(senderId, receiverId));
+    }
 
- /**
-  * История сообщений для определенного чата
-  */
- @GetMapping("/history/{chatId}")
- public ResponseEntity<List<MessageDTO>> getChatHistory(@PathVariable Long chatId) {
-     return ResponseEntity.ok(chatService.getChatHistory(chatId)).getBody();
- }
+
+    /**
+     * Отправка сообщения другому пользователю
+     */
+    @PostMapping("/message")
+    public ResponseEntity<?> sendMessage(@RequestParam @Min(1) Long chatId,
+                                         @RequestParam @Min(1) Long senderId,
+                                         @RequestBody ChatMessage chatMessage) {
+        return ResponseEntity.created(null).body(chatService.sendMessage(senderId, chatId, chatMessage));
+    }
+
+    /**
+     * История сообщений для определенного чата
+     */
+    @GetMapping("/history/{chatId}/users/{userId}")
+    public ResponseEntity<?> getChatHistory(@PathVariable Long userId, @PathVariable Long chatId) {
+        return ResponseEntity.ok().body(chatService.getChatHistory(userId, chatId)
+                .stream()
+                .map(ChatMessage::toMessageDtoHistory));
+    }
+
+    /**
+     * Удаление чата для одного пользователя
+     */
+    @DeleteMapping()
+    public ResponseEntity<?> deleteChat(@RequestParam Long userId, @RequestParam Long chatId) {
+
+        return ResponseEntity.ok().body(chatService.deleteChat(userId, chatId));
+    }
 }
