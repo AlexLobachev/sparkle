@@ -84,6 +84,19 @@ public class ErrorHandler {
     }
     /**
      *
+     * Обработка Forbidden (403 No Content)
+     */
+
+    @ExceptionHandler(Forbidden.class)
+    public ResponseEntity<Map<String, String>> handleUserForbidden(Forbidden e) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", e.getErrorMessage());
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN).body(error);
+
+    }
+    /**
+     *
      * Общая обработка любых других исключений (500 Internal Server Error)
      */
 
