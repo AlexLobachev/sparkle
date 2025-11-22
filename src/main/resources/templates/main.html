@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="https://thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="https://thymeleaf.org ">
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  window.currentUserId = [[${userId}]];
+  /*]]>*/
+</script>
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Сайт знакомств</title>
+  <!-- Корректное подключение CSS -->
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+  <!-- CSRF-токен -->
+  <meta name="csrf-token" th:content="${_csrf.token}"/>
+
+</head>
+<body>
+
+<header>
+  <h1>Знакомьтесь с новыми людьми</h1>
+  <div class="auth-controls">
+    <button id="profileBtn" class="action-btn profile">Мой профиль</button>
+    <button id="logoutBtn" class="action-btn logout">Выход</button>
+    <button id="editProfileBtn" class="action-btn edit-profile">Настроить профиль</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- Блок запроса email -->
+  <th:block th:if="${user != null and user.emailPending}">
+    <div class="alert">
+      <p>Пожалуйста, укажите email для улучшения безопасности вашего аккаунта:</p>
+      <form method="post" th:action="@{/update-email}">
+        <label>
+          <input type="email" name="email" placeholder="example@domain.com" required>
+        </label>
+        <button type="submit" class="action-btn">Сохранить</button>
+        <small>Мы не будем передавать ваш email третьим лицам</small>
+      </form>
+
+    </div>
+  </th:block>
+
+  <section class="profile-viewer" id="profileViewer">
+    <div class="photo-slider" id="photoSlider">
+      <div class="photo" id="currentPhoto"></div>
+      <button class="slide-btn prev-photo" id="prevPhoto">‹</button>
+      <button class="slide-btn next-photo" id="nextPhoto">›</button>
+    </div>
+
+    <div class="profile-info" id="profileInfo"></div>
+
+    <!-- Исправленный блок controls (добавлен id="controls") -->
+    <div class="controls" id="controls">
+
+      <button class="action-btn dislike" id="dislikeBtn">Дизлайк</button>
+      <button class="action-btn like" id="likeBtn">Лайк</button>
+    </div>
+
+    <div class="indicator" id="indicator"></div>
+    <div class="photo-indicator" id="photoIndicator"></div>
+  </section>
+</main>
+
+<footer>
+  <p>© 2025 Сайт знакомств. Все права защищены.</p>
+</footer>
+
+<!-- Корректное подключение JS -->
+<script th:src="@{/js/script.js}"></script> <!-- Должно быть только один раз -->
+
+</body>
+</html>

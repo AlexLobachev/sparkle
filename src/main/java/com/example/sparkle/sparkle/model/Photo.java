@@ -20,7 +20,7 @@ public class Photo {
     private String fileName;
 
     @Column(name = "file_path")
-    private String filePath;
+    private String url;
 
     @Column(name = "file_size")
     private Long fileSize;
@@ -28,17 +28,16 @@ public class Photo {
     @Column(name = "file_type")
     private String fileType;
 
-
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Photo photo)) return false;
-        return getId().equals(photo.getId()) && getFilePath().equals(photo.getFilePath());
+        return Objects.equals(getId(), photo.getId()) && Objects.equals(getFileName(), photo.getFileName()) && Objects.equals(getUrl(), photo.getUrl()) && Objects.equals(getFileSize(), photo.getFileSize()) && Objects.equals(getFileType(), photo.getFileType());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getFilePath());
+        return Objects.hash(getId(), getFileName(), getUrl(), getFileSize(), getFileType());
     }
 }
+

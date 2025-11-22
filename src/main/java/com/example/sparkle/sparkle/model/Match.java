@@ -64,7 +64,7 @@ public class Match {
         userMatchDto.setBirthDate(user.getBirthDate());
         userMatchDto.setAboutMe(user.getAboutMe());
         if (user.getCity() != null)
-            userMatchDto.setCityDto(City.cityDto(user.getCity()));
+            userMatchDto.setCity(user.getCity());
         userMatchDto.setInterests(interestList);
         userMatchDto.setPhotos(user.getPhotos());
         return userMatchDto;

@@ -2,7 +2,6 @@ package com.example.sparkle.sparkle.dto.user;
 
 import com.example.sparkle.sparkle.dto.CityDto;
 import com.example.sparkle.sparkle.model.*;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -22,7 +21,7 @@ public class UserDto {
     private Gender preferredGender;
     private LocalDate birthDate;
     private String aboutMe;
-    private CityDto cityDto;
+    private CityDto city;
     private List<Interest> interests = new ArrayList<>();
-    private List<UserPhoto> photos = new ArrayList<>();
+    private List<UserPhotoDto> photos = new ArrayList<>();
 }

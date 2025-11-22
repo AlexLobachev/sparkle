@@ -1,6 +1,7 @@
 package com.example.sparkle.sparkle.model;
 
 import com.example.sparkle.sparkle.dto.user.UserInterestsDto;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -19,6 +20,7 @@ public class UserInterest {
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
     @Enumerated(EnumType.STRING)
     @Column(name = "interest", nullable = false)

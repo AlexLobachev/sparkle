@@ -1,5 +1,6 @@
 package com.example.sparkle.sparkle.repository;
 
+import com.example.sparkle.sparkle.model.AuthProvider;
 import com.example.sparkle.sparkle.model.Interest;
 import com.example.sparkle.sparkle.model.User;
 import com.example.sparkle.sparkle.model.UserInterest;
@@ -20,10 +21,37 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
+    @Query(value = """
+                SELECT u FROM User u 
+                JOIN FETCH u.photos up 
+                JOIN FETCH up.photo 
+                WHERE u.id = :userId    
+            """)
+    Optional<User> findUserWithPhotosById(@Param("userId") Long userId);
+
+    //@Modifying
+    //@Query(value = "" +
+    //        "UPDATE users AS u " +
+    //        "SET " +
+    //        "    gender     = COALESCE(:gender, u.gender), " +
+    //        "    preferred_gender     = COALESCE(:preferredGender, u.preferred_gender), " +
+    //        "    email      = COALESCE (:email, u.email)," +
+    //        "    birth_date  = COALESCE (:birthDate, u.birth_date), " +
+    //        "    about_me  = COALESCE (:aboutMe, u.about_me) " +
+    //        "WHERE u.id = :id",
+    //        nativeQuery = true)
+    //int userUpdate(
+    //        @Param("gender") String gender,
+    //        @Param("preferredGender") String preferredGender,
+    //        @Param("email") String email,
+    //        @Param("birthDate") LocalDate birthDate,
+    //        @Param("aboutMe") String aboutMe,
+    //        @Param("id") Long userId);
+
     @Modifying
     @Query(value = "" +
             "UPDATE users AS u " +
-            "SET username   = COALESCE (:username, u.username), " +
+            "SET " +
             "    gender     = COALESCE(:gender, u.gender), " +
             "    preferred_gender     = COALESCE(:preferredGender, u.preferred_gender), " +
             "    email      = COALESCE (:email, u.email)," +
@@ -32,7 +60,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "WHERE u.id = :id",
             nativeQuery = true)
     int userUpdate(
-            @Param("username") String username,
             @Param("gender") String gender,
             @Param("preferredGender") String preferredGender,
             @Param("email") String email,
@@ -43,32 +70,34 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUsername(String name);
 
+
+
     @Query(value = """
-                SELECT u.*
-                FROM users u
-                JOIN cities c on u.city_id = c.id
-                JOIN user_interests i on u.id = i.user_id
-                WHERE
-                     ST_DWithin(
-                                c.location,
-                                ST_SetSRID(ST_MakePoint(:x,:y), 4326),
-                                :distance
-                                )
-                                AND u.gender = :gender
-                                AND i.interest IN :interests
-                                AND u.id != :currentUserId
-                                
-            """, nativeQuery = true)
-    Page<User> findUsersNearLocation(
+    SELECT u.id
+    FROM users u
+    JOIN cities c ON u.city_id = c.id
+    JOIN user_interests i ON u.id = i.user_id
+    WHERE
+        ST_DWithin(c.location, ST_SetSRID(ST_MakePoint(:x, :y), 4326), :distance)
+        AND u.gender = :gender
+        AND i.interest IN :interests
+        AND u.id != :currentUserId
+        AND u.id NOT IN (:seenIds)
+    ORDER BY RANDOM()
+    LIMIT 10
+    """, nativeQuery = true)
+    List<Long> findCandidateIdsNearLocation(
             @Param("x") double x,
             @Param("y") double y,
             @Param("distance") double distance,
             @Param("gender") String gender,
             @Param("interests") List<String> interests,
             @Param("currentUserId") Long currentUserId,
-            Pageable pageable
-
+            @Param("seenIds") List<Long> seenIds
     );
+
+
+
 
     @Query(value = """
                 SELECT u.*
@@ -87,6 +116,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
             Pageable pageable
 
     );
+
+    Optional<User> findByExternalId(String externalId);
+
+    Optional<User> findByExternalIdAndProvider(String externalId, AuthProvider provider);
 
 
     /*@Query(value = """

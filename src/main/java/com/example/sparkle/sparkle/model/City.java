@@ -1,6 +1,5 @@
 package com.example.sparkle.sparkle.model;
 
-import com.example.sparkle.sparkle.dto.CityDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,22 +22,8 @@ public class City {
     @Column(name = "city_name")
     private String name;
 
-    // Координаты города для точного вычисления расстояния
-    //@Column(name = "location",columnDefinition = "GEOGRAPHY(Point, 4326)", nullable = false)
-    //@Embedded
-    //@Column(name = "location")
-
-    //@Transient
-    //@Column(name = "location",columnDefinition = "geometry(Point,4326)")
     @Column(columnDefinition = "geometry(Point,4326)")
     private Point location;
-
-    public static CityDto cityDto (City city){
-        CityDto cityDto = new CityDto();
-        cityDto.setId(city.getId());
-        cityDto.setCityName(city.getName());
-        return cityDto;
-    }
 
 
     @Override

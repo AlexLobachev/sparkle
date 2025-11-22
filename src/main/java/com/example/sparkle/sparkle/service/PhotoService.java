@@ -10,13 +10,13 @@ public interface PhotoService {
      * Загрузка фотографии пользователя
      */
 
-    Photo uploadUserPhoto(MultipartFile multipartFile, Long userId) throws IOException;
+    Photo uploadUserPhoto(MultipartFile multipartFile) throws IOException;
 
     /**
      * Удаление фотографии пользователя
      */
 
-    void removeUserPhoto(Long userId,Long photoId) throws IOException;
+    void removeUserPhoto(Long photoId) throws IOException;
 
 
 

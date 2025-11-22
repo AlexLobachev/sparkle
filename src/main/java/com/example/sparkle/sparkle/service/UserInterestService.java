@@ -1,5 +1,6 @@
 package com.example.sparkle.sparkle.service;
 
+import com.example.sparkle.sparkle.dto.user.UserDto;
 import com.example.sparkle.sparkle.model.User;
 import com.example.sparkle.sparkle.model.UserInterest;
 
@@ -11,11 +12,8 @@ public interface UserInterestService {
     /**
      * Сохраняем интересы пользователю списком
      */
-    List<UserInterest> saveAllInterest(Long userId, List<UserInterest> listInterest);
-    /**
-     * Сохраняем интересы пользователю по одному
-     */
-    UserInterest saveInterest(Long userId, UserInterest interest);
+    List<UserInterest> saveAllInterest(List<UserInterest> listInterest);
+
 
     /**
      * Получаем все интересы пользователя по его ID
@@ -33,11 +31,10 @@ public interface UserInterestService {
     List<User> getUsersWithTheSameInterests(Long userId);
     /**
      * Получаем всех пользователей с общими интересами
-
      */
-    List<User> getAllUsersWithTheSameInterests();
+    List<UserDto> getAllUsersWithTheSameInterests();
     /**
      * Удаляем интерес у пользователя
      */
-    void deleteInterestByUserId(Long userId,UserInterest interest);
+    void deleteInterestByUserId(String interestKey);
 }

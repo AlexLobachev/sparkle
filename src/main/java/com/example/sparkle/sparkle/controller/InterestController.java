@@ -1,14 +1,19 @@
 package com.example.sparkle.sparkle.controller;
 
-import com.example.sparkle.sparkle.model.User;
+import com.example.sparkle.sparkle.dto.user.UserMapper;
+import com.example.sparkle.sparkle.model.Interest;
 import com.example.sparkle.sparkle.model.UserInterest;
 import com.example.sparkle.sparkle.service.UserInterestService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Класс-контроллер для работы с интересами пользователя
@@ -31,30 +36,22 @@ public class InterestController {
     /**
      * Сохраняем интересы пользователю списком
      */
-
-    @PostMapping("/create-all/users/{userId}")
-    public ResponseEntity<?> saveAllInterest(@PathVariable Long userId, @RequestBody List<UserInterest> listInterest) {
-        List<UserInterest> userInterests = userInterestService.saveAllInterest(userId, listInterest);
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/create-all")
+    public ResponseEntity<?> saveAllInterest(@RequestBody List<UserInterest> listInterest) {
+        List<UserInterest> userInterests = userInterestService.saveAllInterest(listInterest);
+        List<String> interestName = new ArrayList<>();
+        userInterests.forEach(inter->interestName.add(inter.getInterest().getLabel()));
         return ResponseEntity.ok()
-                .body(UserInterest.toUserInterestDto(userInterests));
-    }
-
-    /**
-     * Сохраняем интересы пользователю по одному
-     */
-
-    @PostMapping("/create/users/{userId}")
-    public ResponseEntity<?> saveInterest(@PathVariable Long userId, @RequestBody UserInterest interest) {
-        userInterestService.saveInterest(userId, interest);
-        List<UserInterest> userInterests = userInterestService.getAllInterestUserById(userId);
-        return ResponseEntity.ok(UserInterest.toUserInterestDto(userInterests));
+                .body(interestName);
     }
 
 
     /**
      * Получаем все интересы пользователя по его ID
      */
-    @GetMapping("/users/interests-all/{userId}")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/{userId}")
     public ResponseEntity<?> getAllInterestUserById(@PathVariable Long userId) {
         return ResponseEntity.ok(UserInterest.toUserInterestDto(
                 userInterestService.getAllInterestUserById(userId)));
@@ -63,18 +60,18 @@ public class InterestController {
     /**
      * Получаем всех пользователей с общими интересами как у пользователя по ID
      */
-    @GetMapping(value = "/users/interests-all/general-interest/{userId}")
+    @GetMapping(value = "/general-interest/{userId}")
     public ResponseEntity<?> getUsersWithTheSameInterests(@PathVariable Long userId) {
         return ResponseEntity.ok(userInterestService.getUsersWithTheSameInterests(userId)
                 .stream()
                 .filter(user -> !user.getId().equals(userId))
-                .map(User::toUserDtoBuilder));
+                .map(UserMapper::toUserDto));
     }
 
     /**
      * Получаем всех пользователей с общими интересами
      */
-    @GetMapping(value = "/users/interests-all/general-interest")
+    @GetMapping(value = "/general-interest")
     public ResponseEntity<?> getAllUsersWithTheSameInterests() {
         return ResponseEntity.ok(userInterestService.getAllUsersWithTheSameInterests());
     }
@@ -82,12 +79,27 @@ public class InterestController {
     /**
      * Удаление интереса
      */
-    @DeleteMapping("/create/users/{userId}")
-    ResponseEntity<?> deleteInterestByUserId(@PathVariable Long userId, @RequestBody UserInterest interest) {
-        userInterestService.deleteInterestByUserId(userId, interest);
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @DeleteMapping("/delete/{interestKey}")
+    ResponseEntity<?> deleteInterestByUserId(@PathVariable String interestKey) {
+        userInterestService.deleteInterestByUserId(interestKey);
         return ResponseEntity.ok().build();
-
     }
+
+    /**
+     * Получение списка интересов
+     */
+   @PreAuthorize("hasRole('ROLE_USER')")
+   @GetMapping("/all")
+   ResponseEntity<?> getListInterest() {
+       List<Interest> interestList = Arrays.asList(Interest.values());
+
+       // Преобразуем в список строк (названий интересов)
+       List<String> labels = interestList.stream()
+               .map(Interest::getLabel).toList();
+       return ResponseEntity.ok().body(labels);
+
+   }
 
 
 }

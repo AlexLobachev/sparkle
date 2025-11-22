@@ -51,8 +51,11 @@ FROM users u
 WHERE ST_DWithin(
         c.location,
         ST_SetSRID(ST_MakePoint(37.6173, 55.7558), 4326),
-        0.7)
-  AND gender = 'MAN';
+        0.01);
+  --AND gender = 'WOMEN';
+
+
+SELECT ST_SRID(location) FROM cities WHERE city_name = 'Москва';
 
 SELECT u.*
 FROM users u
@@ -60,10 +63,10 @@ FROM users u
          JOIN user_interests i on u.id = i.user_id
 WHERE ST_DWithin(
         c.location,
-        ST_SetSRID(ST_MakePoint(37.6173, 55.7558), 4326),
-        0.5)
-  AND gender = 'MAN'
-  AND i.interest = 'TRAVEL';
+        ST_SetSRID(ST_MakePoint(37.6172, 55.7558), 4326),
+        0.7)
+  AND gender = 'WOMEN'
+  AND i.interest = 'FOOTBALL';
 
 
 --
@@ -164,3 +167,11 @@ WHERE ST_DWithin(
 --DELETE FROM matches WHERE first_user_id = 1 AND second_user_id = 2;
 
 SELECT * FROM messages;
+
+
+--insert into user_interests (user_id, interest)
+--VALUES (2,'FOOTBALL');
+--insert into user_interests (user_id, interest)
+--VALUES (2,'LITRBALL');
+--insert into user_interests (user_id, interest)
+--VALUES (2,'TENNIS');

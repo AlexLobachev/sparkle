@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="https://thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="https://thymeleaf.org ">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройка профиля</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <!-- CSRF-токен -->
+    <meta name="csrf-token" th:content="${_csrf.token}"/>
+</head>
+<body>
+<script th:inline="javascript">
+    window.currentUserId = [[${userId}]]
+</script>
+
+<header>
+    <h1>Настройка профиля</h1>
+    <div class="auth-controls">
+        <button id="backBtn" class="action-btn">Вернуться</button>
+    </div>
+</header>
+
+<main>
+    <form id="profileForm" class="profile-form">
+        <div class="form-group">
+            <label for="gender">Пол:</label>
+            <select id="gender" name="gender">
+                <option value="">Не указан</option>
+                <option value="MAN">Мужской</option>
+                <option value="WOMEN">Женский</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="preferredGender">Предпочтительный пол:</label>
+            <select id="preferredGender" name="preferredGender">
+                <option value="">Не указан</option>
+                <option value="MAN">Мужской</option>
+                <option value="WOMEN">Женский</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" placeholder="example@domain.com">
+        </div>
+
+        <div class="form-group">
+            <label for="birthDate">День рождения:</label>
+            <input type="date" id="birthDate" name="birthDate">
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="action-btn save">Сохранить изменения</button>
+            <button type="button" id="deleteProfileBtn" class="action-btn delete">Удалить профиль</button>
+        </div>
+    </form>
+</main>
+
+<footer>
+    <p>© 2025 Сайт знакомств. Все права защищены.</p>
+</footer>
+
+<input type="hidden" id="user-id" th:value="${userId}" />
+<script th:src="@{/js/init-user.js}" th:nonce="${cspNonce}"></script>
+<script th:src="@{/js/edit-profile.js}" th:nonce="${cspNonce}"></script>
+</body>
+</html>

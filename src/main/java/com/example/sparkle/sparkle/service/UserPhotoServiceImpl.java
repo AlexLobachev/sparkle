@@ -1,5 +1,6 @@
 package com.example.sparkle.sparkle.service;
 
+import com.example.sparkle.sparkle.dto.user.UserDto;
 import com.example.sparkle.sparkle.model.User;
 import com.example.sparkle.sparkle.model.UserPhoto;
 import com.example.sparkle.sparkle.repository.UserPhotoRepository;
@@ -57,7 +58,7 @@ public class UserPhotoServiceImpl implements UserPhotoService {
      */
     @Override
     public List<UserPhoto> getAllPhotoByIdUser(Long userId) {
-        User user = userService.getUserById(userId).orElseThrow();
+        userService.getUserById(userId).orElseThrow();
         List<UserPhoto> userPhotoList = userPhotoRepository.findByUserId(userId);
         validatorPhoto.listPhotoNoContent(userPhotoList);
         validatorPhoto.photoForbidden(userPhotoList, userId);

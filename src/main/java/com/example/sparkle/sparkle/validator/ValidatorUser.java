@@ -1,7 +1,6 @@
 package com.example.sparkle.sparkle.validator;
 
-import com.example.sparkle.sparkle.dto.user.UserDtoRegister;
-import com.example.sparkle.sparkle.dto.user.UserDtoUpdate;
+import com.example.sparkle.sparkle.dto.user.*;
 import com.example.sparkle.sparkle.exception.*;
 import com.example.sparkle.sparkle.model.User;
 import jakarta.validation.ConstraintViolation;
@@ -9,6 +8,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.ValidationException;
 import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -60,7 +60,7 @@ public class ValidatorUser {
         }
     }
 
-    public void userNoContent(List<User> user) {
+    public void userNoContent(List<UserDto> user) {
         if (user.isEmpty()) {
             log.info("Пришел пустой массив");
             throw new NoContent();
@@ -68,21 +68,25 @@ public class ValidatorUser {
 
     }
 
-    public void invalidRequest(User user, UserDtoUpdate userDtoUpdate) {
-        UserDtoRegister userDtoRegister = User.toUserDtoRegister(user);
-        if (userDtoUpdate.getUsername() != null) userDtoRegister.setUsername(userDtoUpdate.getUsername());
-        if (userDtoUpdate.getGender() != null) userDtoRegister.setGender(userDtoUpdate.getGender());
-        if (userDtoUpdate.getPreferredGender() != null)
-            userDtoRegister.setPreferredGender(userDtoUpdate.getPreferredGender());
-        if (userDtoUpdate.getEmail() != null) userDtoRegister.setEmail(userDtoUpdate.getEmail());
-        if (userDtoUpdate.getBirthDate() != null) userDtoRegister.setBirthDate(userDtoUpdate.getBirthDate());
-        if (userDtoUpdate.getAboutMe() != null) userDtoRegister.setAboutMe(userDtoUpdate.getAboutMe());
+    public UserDtoUpdate invalidRequest(User user, UserDtoUpdate userDtoUpdate) {
+        UserDtoUpdateValidator userDtoUpdateValidator = UserMapper.userDtoUpdateValidator(user);
 
+        if (userDtoUpdate.getGender() != null) userDtoUpdateValidator.setGender(userDtoUpdate.getGender());
+        else
+            userDtoUpdateValidator.setGender(user.getGender());
+        if (userDtoUpdate.getPreferredGender() != null)
+            userDtoUpdateValidator.setPreferredGender(userDtoUpdate.getPreferredGender());
+        else
+            userDtoUpdateValidator.setPreferredGender(user.getGender());
+        if (userDtoUpdate.getEmail() != null) userDtoUpdateValidator.setEmail(userDtoUpdate.getEmail());
+        if (userDtoUpdate.getBirthDate() != null) userDtoUpdateValidator.setBirthDate(userDtoUpdate.getBirthDate());
+        if (userDtoUpdate.getAboutMe() != null) userDtoUpdateValidator.setAboutMe(userDtoUpdate.getAboutMe());
+        log.debug("userDtoUpdateValidator>>>>>>>" +userDtoUpdateValidator);
         log.info("Валидация данных");
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
 
-        Set<ConstraintViolation<UserDtoRegister>> violations = validator.validate(userDtoRegister);
+        Set<ConstraintViolation<UserDtoUpdateValidator>> violations = validator.validate(userDtoUpdateValidator);
 
         if (!violations.isEmpty()) {
             // Собираем ошибки
@@ -90,7 +94,32 @@ public class ValidatorUser {
                     .map(ConstraintViolation::getMessage).toList();
             throw new ValidationException("Ошибки валидации: " + errors);
         }
+        return UserMapper.userDtoUpdateValidator(userDtoUpdateValidator);
 
     }
 
-}
+
+    public void invalidEmail(DataIntegrityViolationException ex) {
+            // Переводим SQLException в более конкретный тип
+            Throwable rootCause = ex.getRootCause();
+            if (rootCause instanceof java.sql.SQLException sqlEx) {
+                String sqlState = sqlEx.getSQLState();
+                String errorCode = sqlEx.getErrorCode() + "";
+
+                // Для PostgreSQL: SQL State 23514 = check_violation
+                if ("23514".equals(sqlState)) {
+                    if (ex.getMessage().contains("valid_email_check")) {
+                        throw new BadRequest(
+                                "Некорректный email: должен быть заполнен и соответствовать формату name@domain.com"
+                        );
+                    }
+                }
+            }
+            // Если не наша ошибка — перебрасываем как есть
+            throw ex;
+        }
+    }
+
+
+
+

@@ -14,13 +14,13 @@ public interface MatchService {
      * Получить следующий кандидат для свайпа
      */
 
-    UserDto getNextCandidate(Long user, double distance, Pageable pageable);
+    UserDto getNextCandidate(double distance, Pageable pageable);
 
     /**
      * Выразить симпатию пользователю
      */
 
-    User likeUser(Long firstUser, Long secondUser);
+    User likeUser(Long secondUser);
 
     /**
      * Посмотреть список текущих matches

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="https://thymeleaf.org">
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    window.currentUserId = [[${userId}]];
+    /*]]>*/
+</script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Профиль пользователя</title>
+    <!-- Подключение общих стилей -->
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <!-- Подключение стилей профиля -->
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
+    <!-- CSRF-токен -->
+    <meta name="csrf-token" th:content="${_csrf.token}"/>
+    <input type="hidden" id="user-id" th:value="${userId}"/>
+    <script th:src="@{/js/init-user.js}" th:nonce="${cspNonce}"></script>
+    <!-- Подключение JS профиля -->
+    <script defer th:src="@{/js/profile.js}"></script>
+</head>
+<body>
+
+
+<!-- Шапка с кнопкой «Вернуться» -->
+<header>
+    <h1>Знакомьтесь с новыми людьми</h1>
+    <div class="auth-controls">
+        <button id="backBtn" class="action-btn back">Вернуться</button>
+    </div>
+</header>
+
+<!-- Основной контент профиля -->
+<div class="profile-container">
+    <h1>Мой профиль</h1>
+
+    <!-- Блок фото -->
+    <div class="photos-section">
+        <h2>Фотографии</h2>
+        <div class="photo-viewer">
+            <button class="nav-btn prev">&lt;</button>
+            <div class="current-photo">
+                <img id="currentPhoto" src="" alt="Фото не загружено">
+                <div class="likes-count">0 лайков</div>
+            </div>
+            <button class="nav-btn next">&gt;</button>
+        </div>
+
+        <div class="photo-controls">
+            <input type="file" id="photoInput" accept="image/*" multiple>
+            <button id="uploadBtn">Загрузить фото</button>
+            <button id="deleteBtn" disabled>Удалить фото</button>
+        </div>
+
+        <div class="thumbnails">
+            <!-- Миниатюры будут подгружаться динамически -->
+        </div>
+    </div>
+
+    <!-- Интересы -->
+    <div class="interests-section">
+        <h2>Интересы</h2>
+        <div class="interest-list">
+            <!-- Список интересов будет подгружаться -->
+        </div>
+        <div class="interest-controls">
+            <select id="interestSelect" multiple>
+                <option value="">Выбрать интерес (можно несколько)</option>
+                <!-- Спортивные интересы -->
+                <option value="FOOTBALL">Футбол</option>
+                <option value="BASKETBALL">Баскетбол</option>
+                <option value="TENNIS">Теннис</option>
+                <option value="SWIMMING">Плавание</option>
+                <option value="GYM">Фитнес и спортзал</option>
+                <!-- Творческие интересы -->
+                <option value="PAINTING">Рисование</option>
+                <option value="MUSIC">Музыка</option>
+                <option value="DANCE">Танцы</option>
+                <option value="WRITING">Писательство</option>
+                <!-- Хобби и увлечения -->
+                <option value="COOKING">Кулинария</option>
+                <option value="PHOTOGRAPHY">Фотография</option>
+                <option value="READING">Чтение</option>
+                <option value="TRAVEL">Путешествия</option>
+                <!-- Образование и развитие -->
+                <option value="PROGRAMMING">Программирование</option>
+                <option value="LANGUAGES">Изучение языков</option>
+                <option value="SCIENCE">Наука и технологии</option>
+                <option value="BUSINESS">Бизнес и предпринимательство</option>
+                <!-- Развлечения -->
+                <option value="MOVIES">Кино</option>
+                <option value="GAMING">Видеоигры</option>
+                <option value="SOCIAL_MEDIA">Социальные сети</option>
+                <!-- Другое -->
+                <option value="OTHER">Другое</option>
+            </select>
+            <button id="addInterestBtn">Добавить</button>
+            <button id="removeInterestBtn">Удалить</button>
+        </div>
+    </div>
+
+    <!-- О себе -->
+    <div class="about-section">
+        <h2>О себе</h2>
+        <textarea id="aboutMe" rows="6"></textarea>
+        <button id="saveAboutBtn">Сохранить</button>
+    </div>
+
+    <div id="messages"></div>
+</div>
+
+<!-- Подвал -->
+<footer>
+    <p>© 2025 Сайт знакомств. Все права защищены.</p>
+</footer>
+
+<!-- Скрипт для обработки кнопки «Вернуться» -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const backBtn = document.getElementById('backBtn');
+        backBtn.addEventListener('click', () => {
+            // Вариант 1: переход на главную страницу
+            window.location.href = '/';
+
+            // Вариант 2: возврат на предыдущую страницу (как кнопка «Назад» в браузере)
+            // window.history.back();
+        });
+    });
+</script>
+
+
+</body>
+</html>

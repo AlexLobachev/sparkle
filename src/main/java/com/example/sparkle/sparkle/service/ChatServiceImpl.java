@@ -1,6 +1,7 @@
 package com.example.sparkle.sparkle.service;
 
 import com.example.sparkle.sparkle.dto.ChatDtoList;
+import com.example.sparkle.sparkle.dto.user.UserMapper;
 import com.example.sparkle.sparkle.exception.BadRequest;
 import com.example.sparkle.sparkle.exception.NotFound;
 import com.example.sparkle.sparkle.model.Chat;
@@ -62,10 +63,9 @@ public class ChatServiceImpl implements ChatService {
                 .findFirst()
                 .orElseThrow(() -> new NotFound("Метч еще не создан"));
 
-        User sender = userService.getUserById(senderId)
-                .orElseThrow(() -> new NotFound("Пользователь не найден"));
-        User receiver = userService.getUserById(receiverId)
-                .orElseThrow(() -> new NotFound("Пользователь не найден"));
+        User sender = UserMapper.toUser(userService.getUserById(senderId).orElseThrow(() -> new NotFound("Пользователь не найден")));
+        User receiver = UserMapper.toUser(userService.getUserById(receiverId)
+                .orElseThrow(() -> new NotFound("Пользователь не найден")));
         ChatDelete chatDelete = deletedChatsRepository.findByUserId(senderId);
         if (chatDelete != null) {
             deletedChatsRepository.deleteByUserIdAndChatId(chatDelete.getUserId(), chatDelete.getChatId());
@@ -90,8 +90,8 @@ public class ChatServiceImpl implements ChatService {
     public ChatMessage sendMessage(Long senderId, Long chatId, ChatMessage savedMessage) {
         Chat chat = chatRepository.findBySenderIdOrReceiverIdAndChatId(senderId, chatId);
         validatorChatAndMessage.chatNotFound(chat);
-        User sender = userService.getUserById(senderId)
-                .orElseThrow(() -> new NotFound("Пользователь не найден"));
+        User sender = UserMapper.toUser(userService.getUserById(senderId)
+                .orElseThrow(() -> new NotFound("Пользователь не найден")));
 
         matchService.getCurrentMatches(chat.getSender().getId())
                 .stream()
@@ -149,8 +149,8 @@ public class ChatServiceImpl implements ChatService {
      */
     public ChatDelete deleteChat(Long userId, Long chatId) {
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new NotFound("Чат не найден"));
-        User user = userService.getUserById(userId)
-                .orElseThrow(() -> new NotFound("Пользователь не найден"));
+        User user = UserMapper.toUser(userService.getUserById(userId)
+                .orElseThrow(() -> new NotFound("Пользователь не найден")));
         validatorChatAndMessage.chatNotFound(chat);
         validatorChatAndMessage.chatForbidden(chat, userId);
         ChatDelete chatDelete = new ChatDelete();
