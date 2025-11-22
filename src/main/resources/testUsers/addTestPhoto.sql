@@ -1,0 +1,57 @@
+--INSERT INTO photos (file_path, file_name, file_size, file_type)
+--VALUES ('/images/testuserMary.jpeg',
+--        'testuserMary.jpeg',
+--        153248,
+--        'image/jpeg');
+--
+--INSERT INTO photos (file_path, file_name, file_size, file_type)
+--VALUES ('/images/testuserAlena.jpeg',
+--        'testuserAlena.jpeg',
+--        153248,
+--        'image/jpeg');
+--
+--INSERT INTO photos (file_path, file_name, file_size, file_type)
+--VALUES ('/images/testuserAnna.jpeg',
+--        'testuserAnna.jpeg',
+--        153248,
+--        'image/jpeg');
+--
+--INSERT INTO photos (file_path, file_name, file_size, file_type)
+--VALUES ('/images/testuserJulia.jpeg',
+--        'testuserJulia.jpeg',
+--        153248,
+--        'image/jpeg');
+--
+--INSERT INTO photos (file_path, file_name, file_size, file_type)
+--VALUES ('/images/testuserEvgeny.jpeg',
+--        'testuserEvgeny.jpeg',
+--        153248,
+--        'image/jpeg');
+--
+--INSERT INTO photos (file_path, file_name, file_size, file_type)
+--VALUES ('/images/testuserNikita.jpeg',
+--        'testuserNikita.jpeg',
+--        153248,
+--        'image/jpeg');
+--
+--INSERT INTO photos (file_path, file_name, file_size, file_type)
+--VALUES ('/images/testuserVlad.jpeg',
+--        'testuserVlad.jpeg',
+--        153248,
+--        'image/jpeg');
+
+
+--INSERT INTO user_photo (user_id, photo_id)
+--VALUES (1, 3);
+--INSERT INTO user_photo (user_id, photo_id)
+--VALUES (2, 4);
+--INSERT INTO user_photo (user_id, photo_id)
+--VALUES (3, 5);
+--INSERT INTO user_photo (user_id, photo_id)
+--VALUES (4, 6);
+--INSERT INTO user_photo (user_id, photo_id)
+--VALUES (5, 7);
+--INSERT INTO user_photo (user_id, photo_id)
+--VALUES (7, 8);
+--INSERT INTO user_photo (user_id, photo_id)
+--VALUES (8, 9);

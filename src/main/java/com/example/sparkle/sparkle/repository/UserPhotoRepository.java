@@ -10,6 +10,7 @@ public interface UserPhotoRepository extends JpaRepository <UserPhoto,Long> {
     List<UserPhoto> findByUserId(Long userId);
     UserPhoto findByUserIdAndPhotoId(Long userId,Long photoId);
     void deleteByPhotoId(Long photoId);
+    UserPhoto findByPhotoId(Long photoId);
 
 
 

@@ -17,10 +17,6 @@ import java.util.List;
 @Getter
 @Setter
 public class UserInterestsDto {
-
     private Long userId;
     private List<Interest> interests;
-
-
-
 }

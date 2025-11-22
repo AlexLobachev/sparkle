@@ -16,7 +16,7 @@ import java.time.LocalDate;
 public class UserDtoRegister {
     private Long id;
     @NotBlank(message = "Имя не может быть пустым")
-    @Size(min = 2, max = 50, message = "Длина имени должна быть от 2 до 50 символов")
+    @Size(min = 2, max = 50, message = "Длина логина должна быть от 2 до 50 символов")
     private String username;
     @NotNull(message = "Гендер обязателен к заполнению")
     private Gender gender;
@@ -31,16 +31,6 @@ public class UserDtoRegister {
     @Size(max = 200, message = "Максимальная длина сообщения не может быть больше 200 символов")
     private String aboutMe;
 
-    public static User toUser(UserDtoRegister userDtoRegister) {
-        User user = new User();
-        user.setId(userDtoRegister.getId());
-        user.setUsername(userDtoRegister.getUsername());
-        user.setGender(userDtoRegister.getGender());
-        user.setPreferredGender(userDtoRegister.getPreferredGender());
-        user.setBirthDate(userDtoRegister.getBirthDate());
-        user.setEmail(userDtoRegister.getEmail());
-        user.setAboutMe(userDtoRegister.getAboutMe());
-        return user;
-    }
+
 
 }

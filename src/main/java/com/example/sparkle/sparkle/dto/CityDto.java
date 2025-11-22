@@ -6,11 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CityDto {
-    private  Long id;
-    private  String CityName;
-
-
-
+    private Long cityId;
+    private String cityName;
 }
-
-

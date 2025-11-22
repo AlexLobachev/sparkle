@@ -1,5 +1,8 @@
 package com.example.sparkle.sparkle.service;
 
+import com.example.sparkle.sparkle.dto.user.UserDto;
+import com.example.sparkle.sparkle.dto.user.UserMapper;
+import com.example.sparkle.sparkle.exception.NotFound;
 import com.example.sparkle.sparkle.model.Interest;
 import com.example.sparkle.sparkle.model.User;
 import com.example.sparkle.sparkle.model.UserInterest;
@@ -8,6 +11,9 @@ import com.example.sparkle.sparkle.validator.ValidatorInterest;
 import com.example.sparkle.sparkle.validator.ValidatorUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 /**
  * Класс для работы с интересами пользователя
  */
@@ -39,10 +46,13 @@ public class UserInterestServiceImpl implements UserInterestService {
      * Сохраняем интересы пользователю списком
      */
     @Override
-    public List<UserInterest> saveAllInterest(Long userId, List<UserInterest> listInterest) {
-        User user = userService.getUserById(userId).orElseThrow();
+    public List<UserInterest> saveAllInterest(List<UserInterest> listInterest) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails currentUser = (UserDetails) auth.getPrincipal();
+        User currentUserEntity = userService.getUserByUserName(currentUser.getUsername())
+                .orElseThrow(() -> new NotFound("Пользователь не найден"));
         // Получаем текущие интересы пользователя
-        List<UserInterest> existingInterests = userInterestRepository.findAllByUserId(userId);
+        List<UserInterest> existingInterests = userInterestRepository.findAllByUserId(currentUserEntity.getId());
         Set<Interest> existingInterestSet = existingInterests.stream()
                 .map(UserInterest::getInterest)
                 .collect(Collectors.toSet());
@@ -50,35 +60,18 @@ public class UserInterestServiceImpl implements UserInterestService {
         List<UserInterest> newInterests = listInterest.stream()
                 .filter(interest -> !existingInterestSet.contains(interest.getInterest()))
                 .peek(interest -> {
-                    interest.setUser(user);
+                    interest.setUser(currentUserEntity);
                     interest.setId(null); // сбрасываем ID для новой записи
                 }).toList();
         // Возвращаем обновленный список интересов
-
         if (!newInterests.isEmpty()) {
             userInterestRepository.saveAll(newInterests);
         }
-
-        List<UserInterest> updatedInterests = getAllInterestUserById(user.getId());
+        List<UserInterest> updatedInterests = getAllInterestUserById(currentUserEntity.getId());
         validatorInterest.interestNoContent(updatedInterests);
         return updatedInterests;
     }
-    /**
-     * Сохраняем интересы пользователю по одному
-     */
-    @Override
-    public UserInterest saveInterest(Long userId, UserInterest interest) {
-        User user = userService.getUserById(userId).orElseThrow();
-        interest.setUser(user);
-        if (userInterestRepository.findAllByUserId((user.getId()))
-                .stream()
-                .anyMatch(userInterest -> userInterest.getInterest().equals(interest.getInterest()))) {
-            interest.setUser(user);
-            return getAllByUserIdAndInterest(interest);
-        }
 
-        return userInterestRepository.save(interest);
-    }
 
     /**
      * Получаем все интересы пользователя по его ID
@@ -97,13 +90,12 @@ public class UserInterestServiceImpl implements UserInterestService {
      */
     @Override
     public UserInterest getAllByUserIdAndInterest(UserInterest userInterest) {
-        return userInterestRepository.findAllByUserIdAndInterest(userInterest.getUser().getId(),userInterest.getInterest());
+        return userInterestRepository.findAllByUserIdAndInterest(userInterest.getUser().getId(), userInterest.getInterest());
 
     }
 
     /**
      * Получаем пользователей с общими интересами как у пользователя по ID
-
      */
     @Override
     public List<User> getUsersWithTheSameInterests(Long userId) {
@@ -113,13 +105,17 @@ public class UserInterestServiceImpl implements UserInterestService {
                 .forEach(inter -> interests.add(inter.getInterest().name()));
         return userInterestRepository.getUsersWithTheSameInterestsByUserId(interests);
     }
-    /**
-     * Получаем всех пользователей с общими интересами
 
+    /**
+     * Получаем всех вообще пользователей с общими интересами
      */
     @Override
-    public List<User> getAllUsersWithTheSameInterests() {
-        List<User> usersInterest = userInterestRepository.getUsersWithTheSameInterests();
+    public List<UserDto> getAllUsersWithTheSameInterests() {
+        List<UserDto> usersInterest = userInterestRepository.getUsersWithTheSameInterests()
+                .stream()
+                .map(UserMapper::toUserDto).toList();
+
+
         validatorUser.userNoContent(usersInterest);
         return usersInterest;
     }
@@ -129,12 +125,18 @@ public class UserInterestServiceImpl implements UserInterestService {
      */
     @Override
     @Transactional
-    public void deleteInterestByUserId(Long userId, UserInterest interest) {
-        User user = userService.getUserById(userId).orElseThrow();
-        interest.setUser(user);
-        userInterestRepository.deleteByUserIdAndInterest(userId, interest.getInterest());
-        validatorInterest.interestConflictDelete(getAllByUserIdAndInterest(interest));
-        userInterestRepository.deleteByUserIdAndInterest(interest.getUser().getId(), interest.getInterest());
+    public void deleteInterestByUserId(String interestKey) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails currentUser = (UserDetails) auth.getPrincipal();
+        User currentUserEntity = userService.getUserByUserName(currentUser.getUsername())
+                .orElseThrow(() -> new NotFound("Пользователь не найден"));
+        UserInterest userInterest = new UserInterest();
+        userInterest.setUser(currentUserEntity);
+        userInterest.setInterest(Interest.valueOf(interestKey));
+        log.debug("interest>>>>>>"+userInterest);
+        userInterestRepository.deleteByUserIdAndInterest(currentUserEntity.getId(), userInterest.getInterest());
+        validatorInterest.interestConflictDelete(getAllByUserIdAndInterest(userInterest));
+
     }
 
 }

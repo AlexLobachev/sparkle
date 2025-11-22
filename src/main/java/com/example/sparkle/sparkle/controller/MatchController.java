@@ -6,13 +6,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.CurrentSecurityContext;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
 /**
  * Класс-контроллер для обработки лайков
  */
 @RestController
-@RequestMapping("/sparkle/match")
+@RequestMapping("/sparkle/users/match")
 public class MatchController {
 
     private final MatchService matchService;
@@ -26,20 +30,22 @@ public class MatchController {
     /**
      * Получить следующего кандидата для свайпа
      */
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/next-candidate/users")
     public ResponseEntity<?> getNextCandidate(
-            @RequestParam Long userId,
             @RequestParam(defaultValue = "40.0") double distance,
             @PageableDefault(page = 0, size = 1) Pageable pageable) {
-        return ResponseEntity.ok(matchService.getNextCandidate(userId, distance, pageable));
+        return ResponseEntity.ok(matchService.getNextCandidate(distance, pageable));
     }
 
     /**
      * Выразить симпатию пользователю
      */
-    @PostMapping("/like/{firstUser}/users/{secondUser}")
-    public ResponseEntity<?> likeUser(@PathVariable Long firstUser, @PathVariable Long secondUser) {
-        return ResponseEntity.ok(Match.toMatchDto(Match.toUserMatchDto(matchService.likeUser(firstUser, secondUser))));
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/like/users/{secondUser}")
+    public ResponseEntity<?> likeUser(@PathVariable Long secondUser,  @CurrentSecurityContext SecurityContext context) {
+
+        return ResponseEntity.ok(Match.toMatchDto(Match.toUserMatchDto(matchService.likeUser(secondUser))));
     }
 
     /**

@@ -3,19 +3,25 @@ package com.example.sparkle.sparkle.controller;
 import com.example.sparkle.sparkle.dto.LocationRequestDto;
 import com.example.sparkle.sparkle.dto.user.UserDtoRegister;
 import com.example.sparkle.sparkle.dto.user.UserDtoUpdate;
-import com.example.sparkle.sparkle.model.City;
+import com.example.sparkle.sparkle.dto.user.UserMapper;
+import com.example.sparkle.sparkle.exception.NotFound;
 import com.example.sparkle.sparkle.model.User;
 import com.example.sparkle.sparkle.service.GeocodingService;
 import com.example.sparkle.sparkle.service.UserService;
-import com.example.sparkle.sparkle.validator.ValidatorUser;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Map;
+
 /**
  * Класс-контроллер для работы с пользователями
  */
@@ -26,13 +32,13 @@ public class UserController {
 
     private final UserService userService;
     private final GeocodingService geocodingService;
-    private final ValidatorUser validatorUser;
+
 
     @Autowired
-    public UserController(UserService userService, GeocodingService geocodingService, ValidatorUser validatorUser) {
+    public UserController(UserService userService, GeocodingService geocodingService) {
         this.userService = userService;
         this.geocodingService = geocodingService;
-        this.validatorUser = validatorUser;
+
     }
 
     /**
@@ -41,8 +47,8 @@ public class UserController {
      */
     @PostMapping("/register/next-page")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserDtoRegister userDtoRegister) {
-        User user = userService.registerUser(UserDtoRegister.toUser(userDtoRegister)).orElseThrow();
-        return ResponseEntity.ok(User.toUserDtoRegister(user));
+        User user = userService.registerUser(UserMapper.toUser(userDtoRegister)).orElseThrow();
+        return ResponseEntity.ok(UserMapper.toUserDtoRegister(user));
 
     }
 
@@ -50,11 +56,20 @@ public class UserController {
      * Редактирование профиля пользователя
      */
     @PatchMapping("/update-profile/{userId}")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> updateUserProfile(
             @PathVariable @Min(1) Long userId,
             @Valid @RequestBody UserDtoUpdate userDtoUpdate) {
-        return ResponseEntity.ok(User.toUserDtoBuilder(userService.updateUserProfile(userId, userDtoUpdate)
-                .orElseThrow()));
+
+        return ResponseEntity.ok(userService.updateUserProfile(userId, userDtoUpdate)
+                .orElseThrow());
+    }
+
+    @PatchMapping("/setup-profile")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<?> setupUserProfile(@Valid @RequestBody UserDtoUpdate userDtoUpdate) {
+
+        return ResponseEntity.ok(UserMapper.toUserDto(userService.setupUserProfile(userDtoUpdate).orElseThrow()));
     }
 
     /**
@@ -62,8 +77,7 @@ public class UserController {
      */
     @GetMapping
     public ResponseEntity<?> getUserAll() {
-        List<User> users = userService.getUserAll();
-        return ResponseEntity.ok(users.stream().map(User::toUserDtoBuilder));
+        return ResponseEntity.ok(userService.getUserAll());
     }
 
     /**
@@ -71,8 +85,8 @@ public class UserController {
      */
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUserById(@PathVariable @Min(1) Long userId) {
-        User user = userService.getUserById(userId).orElseThrow();
-        return ResponseEntity.ok(User.toUserDtoBuilder(user));
+
+        return ResponseEntity.ok(userService.getUserById(userId));
 
     }
 
@@ -85,6 +99,33 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/update-email")
+    public String updateEmail(@RequestParam String email, Authentication auth) {
+        OAuth2User oauth2User = (OAuth2User) auth.getPrincipal();
+        User user = userService.getUserByExternalId(oauth2User.getAttribute("externalId").toString()).orElseThrow(() -> new NotFound("Пользователь не найден"));
+        user.setEmail(email);
+        user.setEmailPending(false);
+        userService.updateUserProfile(user.getId(), UserMapper.toUserDtoUpdate(user));
+        return ResponseEntity.ok("redirect:/main").getBody();
+    }
+
+
+    //@GetMapping("/main")
+    //public String showMainPage(Model model, Authentication authentication) {
+    //    // Получаем текущего пользователя из SecurityContext
+    //    User user = (User) authentication.getPrincipal();
+//
+    //    if (user.getStatus() == Status.DRAFT) {
+    //        return "redirect:/profile/setup";  // обратно к заполнению профиля
+    //    }
+//
+    //    // Добавляем в модель
+    //    model.addAttribute("user", user);
+//
+    //    return "index2"; // имя вашего шаблона
+    //}
+
+
     /**
      * Сохранение локации
      */
@@ -93,7 +134,14 @@ public class UserController {
     public ResponseEntity<?> saveUserLocation(@RequestBody LocationRequestDto location, @PathVariable Long userId
             /*@AuthenticationPrincipal UserDetails userDetails*/) {
 
-        return ResponseEntity.ok(User.toUserDtoBuilder(userService.saveUserLocation(location, userId).orElseThrow()));
+        return ResponseEntity.ok(UserMapper.toUserDto(userService.saveUserLocation(location, userId).orElseThrow()));
+    }
+
+
+    @GetMapping("/csrf-token")
+    public Map<String, String> getCsrfToken(HttpServletRequest request) {
+        CsrfToken csrf = (CsrfToken) request.getAttribute("_csrf");
+        return Map.of("token", csrf.getToken());
     }
 
 

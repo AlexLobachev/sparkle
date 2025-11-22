@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -23,5 +24,5 @@ public class UserDtoGetAllInterest {
     private String email;
     private LocalDate birthDate;
     private String aboutMe;
-    private List<UserInterest> interests;
+    private List<UserInterest> interests = new ArrayList<>();
 }

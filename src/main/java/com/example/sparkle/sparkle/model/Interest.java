@@ -1,15 +1,13 @@
 package com.example.sparkle.sparkle.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-
-import java.util.Arrays;
+import lombok.AllArgsConstructor;
 
 
 public enum Interest {
-
     // Спортивные интересы
     FOOTBALL("Футбол"),
+    LITRBALL("Пьянство"),
     BASKETBALL("Баскетбол"),
     TENNIS("Теннис"),
     SWIMMING("Плавание"),
@@ -41,37 +39,28 @@ public enum Interest {
     // Другое
     OTHER("Другое");
 
+    private final String interests;
+
+    Interest(String interests) {
+        this.interests = interests;
+    }
+
+    //@JsonValue  // ← ВАЖНО: указываем, что это поле будет в JSON
+    public String getLabel() {
+        return interests;
+    }
+
+
+
+}
+
+
+/*
+
+
     private final String interestName;
 
     Interest(String interestName) {
         this.interestName = interestName;
     }
-
-    @JsonValue
-    public String getInterestName() {
-        return interestName;
-    }
-
-    @JsonCreator
-    public static Interest fromString(String interestName) {
-        return Arrays.stream(Interest.values())
-                .filter(i -> i.interestName.equals(interestName))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Неверный интерес: " + interestName));
-    }
-
-    //@JsonCreator
-    //public static Interest fromString(String interestName) {
-    //    return Arrays.stream(Interest.values())
-    //            .filter(i -> i.interestName.equals(interestName))
-    //            .findFirst()
-    //            .orElseThrow(() -> new IllegalArgumentException("Неверный интерес: " + interestName));
-    //}
-//
-    //// Метод для получения всех значений в виде списка строк
-    //public static List<String> getAllInterests() {
-    //    return Arrays.stream(Interest.values())
-    //            .map(Interest::getInterestName)
-    //            .collect(Collectors.toList());
-    //}
-}
+ */
