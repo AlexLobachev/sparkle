@@ -193,17 +193,25 @@
 --        FALSE);
 
 
-DELETE
-from matches
-where first_user_id = 10;
-DELETE
-from candidate_batch
-where user_id = 10;
-DELETE
-from candidate_batch_candidates
-where candidate_id = 1 and candidate_id = 2;
+--DELETE
+--from matches
+--where first_user_id = 10;
+--
+--DELETE
+--from candidate_batch
+--where user_id = 10;
+--DELETE
+--from candidate_batch_candidates
+--where candidate_id = 1
+--  and candidate_id = 2;
+--
+--insert into matches (first_user_id, second_user_id, match_status) values (10, 2, false);
 
 
+--update matches
+--set match_status = true
+--where first_user_id = 1
+--  and second_user_id = 10;
 
 
 

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Профиль пользователя — Sparkle</title>
+    <link rel="stylesheet" th:href="@{/css/profile-user.css}" media="screen"/>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const userProfileId = /*[[${profileId}]]*/ null;
+        /*]]>*/
+    </script>
+</head>
+<body>
+<div class="page-wrapper">
+
+    <header class="header">
+        <h1>Профиль пользователя</h1>
+        <button id="backBtn" class="action-btn back">← Назад</button>
+    </header>
+
+    <main class="main-content">
+
+        <!-- Фото -->
+        <section class="photo-section">
+            <div class="photo-slider" id="photoSlider">
+                <div class="photo" id="currentPhoto"></div>
+                <button class="slide-btn prev" id="prevPhoto">‹</button>
+                <button class="slide-btn next" id="nextPhoto">›</button>
+            </div>
+            <div class="photo-indicator" id="photoIndicator"></div>
+        </section>
+
+        <!-- Информация -->
+        <section class="info-section">
+            <h2 id="username">Имя пользователя</h2>
+            <p><strong>Возраст:</strong> <span id="age">—</span></p>
+            <p><strong>Пол:</strong> <span id="gender">—</span></p>
+            <p><strong>Город:</strong> <span id="city">—</span></p>
+
+            <div id="aboutMe" class="about-me">
+                <strong>О себе:</strong>
+                <p>Пользователь пока ничего о себе не рассказал.</p>
+            </div>
+
+            <div id="interests" class="interests">
+                <strong>Интересы:</strong>
+                <ul></ul>
+            </div>
+
+            <button id="sendMessageBtn" class="action-btn primary full-width">Написать</button>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <p>© <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy')}">2025</span> Sparkle. Все права защищены.</p>
+    </footer>
+
+</div>
+
+<script th:src="@{/js/profile-user.js}" defer></script>
+</body>
+</html>

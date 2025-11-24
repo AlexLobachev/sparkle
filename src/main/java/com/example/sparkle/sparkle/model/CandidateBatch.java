@@ -4,6 +4,7 @@ package com.example.sparkle.sparkle.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "candidate_batch")
+@ToString
 public class CandidateBatch {
 
     @Id

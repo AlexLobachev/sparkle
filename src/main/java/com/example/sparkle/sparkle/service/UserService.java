@@ -3,6 +3,7 @@ package com.example.sparkle.sparkle.service;
 import com.example.sparkle.sparkle.dto.LocationRequestDto;
 import com.example.sparkle.sparkle.dto.user.UserDto;
 import com.example.sparkle.sparkle.dto.user.UserDtoUpdate;
+import com.example.sparkle.sparkle.dto.user.UserMatchDto;
 import com.example.sparkle.sparkle.exception.NotFound;
 import com.example.sparkle.sparkle.model.User;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -33,7 +34,7 @@ public interface UserService {
      * Редактирование профиля пользователя
      */
 
-    Optional<UserDtoUpdate> updateUserProfile(Long userId, UserDtoUpdate userDtoUpdate);
+    Optional<UserDtoUpdate> updateUserProfile(UserDtoUpdate userDtoUpdate);
 
     /**
      * Ввод параметров при регистрации пользователя (интересы, пол и пр.)

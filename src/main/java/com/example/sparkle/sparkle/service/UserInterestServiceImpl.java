@@ -113,7 +113,7 @@ public class UserInterestServiceImpl implements UserInterestService {
     public List<UserDto> getAllUsersWithTheSameInterests() {
         List<UserDto> usersInterest = userInterestRepository.getUsersWithTheSameInterests()
                 .stream()
-                .map(UserMapper::toUserDto).toList();
+                .map(UserDto::toUserDto).toList();
 
 
         validatorUser.userNoContent(usersInterest);

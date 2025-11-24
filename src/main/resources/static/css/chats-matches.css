@@ -1,0 +1,233 @@
+/**
+ * Глобальные стили
+ */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #4a6fa5;
+    --primary-hover: #3a5a8c;
+    --gray-100: #f5f7fa;
+    --gray-200: #e0e0e0;
+    --gray-300: #ccc;
+    --gray-400: #666;
+    --white: #fff;
+    --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --radius-md: 12px;
+    --radius-lg: 50%;
+    --transition: 0.3s ease;
+}
+
+body {
+    font-family: 'Segoe UI', 'Roboto', sans-serif;
+    background-color: var(--gray-100);
+    color: #333;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/**
+ * Хедер
+ */
+.header {
+    background-color: var(--primary);
+    color: var(--white);
+    text-align: center;
+    padding: 1rem 0;
+    position: relative;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+#backBtn {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--white);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+#backBtn:hover {
+    text-decoration: underline;
+}
+
+/**
+ * Основное содержимое
+ */
+.main-content {
+    flex: 1;
+    padding: 1.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/**
+ * Вкладки
+ */
+.tabs {
+    display: flex;
+    border-bottom: 1px solid var(--gray-300);
+    margin-bottom: 1rem;
+    overflow-x: auto;
+    gap: 10px;
+    padding-bottom: 4px;
+}
+
+.tab {
+    padding: 10px 16px;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--gray-400);
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: var(--transition);
+}
+
+.tab:hover {
+    color: var(--primary);
+}
+
+.tab.active {
+    color: var(--primary);
+    border-bottom: 3px solid var(--primary);
+}
+
+/**
+ * Контент вкладок
+ */
+.tab-content {
+    min-height: 300px;
+    position: relative;
+}
+
+.tab-pane {
+    display: none;
+    padding: 0.5rem 0;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+/**
+ * Список пользователей
+ */
+.user-list {
+    list-style: none;
+}
+
+.user-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--white);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 0.8rem;
+    transition: transform 0.2s ease;
+}
+
+.user-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.user-photo {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-lg);
+    object-fit: cover;
+    background-color: #eee;
+    flex-shrink: 0;
+}
+
+.user-info {
+    flex: 1;
+}
+
+.user-info h3 {
+    margin: 0 0 0.3rem;
+    font-size: 1.2rem;
+    color: var(--primary);
+}
+
+.user-info p {
+    margin: 0;
+    color: var(--gray-400);
+    font-size: 0.95rem;
+}
+
+/**
+ * Загрузка и пустые состояния
+ */
+.loader,
+.no-data {
+    text-align: center;
+    padding: 2rem;
+    color: var(--gray-400);
+    font-style: italic;
+}
+
+.no-data {
+    display: none;
+}
+
+/**
+ * Футер
+ */
+.footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: var(--primary);
+    color: var(--white);
+    margin-top: auto;
+}
+
+/**
+ * Адаптивность
+ */
+@media (max-width: 600px) {
+    .main-content {
+        padding: 1rem;
+    }
+
+    .user-item {
+        gap: 0.8rem;
+        padding: 0.8rem;
+    }
+
+    .user-photo {
+        width: 50px;
+        height: 50px;
+    }
+
+    .user-info h3 {
+        font-size: 1.1rem;
+    }
+}
