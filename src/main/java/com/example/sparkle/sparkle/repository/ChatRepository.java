@@ -13,17 +13,13 @@ import java.util.List;
 public interface ChatRepository extends JpaRepository<Chat, Long> {
     // List<Chat> findAllBySenderIdOrReceiverId(Long senderId, Long receiverId);
 
-    @Query(value = """
+    @Query(value = """            
             SELECT *
-            FROM chats c
+            FROM chats
             WHERE
-                (c.sender_id = :senderId OR c.receiver_id = :receiverId)
-              AND NOT EXISTS (
-                    SELECT 1
-                    FROM deleted_chats dc
-                    WHERE dc.chat_id = c.id
-                      AND dc.user_id = :senderId
-                );
+                (sender_id = :senderId AND receiver_id != :receiverId)   
+                OR
+                (receiver_id = :senderId AND sender_id != :receiverId);  
             """, nativeQuery = true)
     List<Chat> findAllBySenderIdOrReceiverId(@Param("senderId") Long senderId, @Param("receiverId") Long receiverId);
 
@@ -43,4 +39,8 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     Chat findBySenderIdOrReceiverIdAndChatId(
             @Param("senderId") Long senderId,
             @Param("chatId") Long chatId);
+
+
+
 }
+

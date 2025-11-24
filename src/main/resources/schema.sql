@@ -176,7 +176,7 @@ SELECT * FROM messages;
 --insert into matches (first_user_id, second_user_id, match_status) values (1, 10, true);
 --delete from matches where first_user_id = 1;
 --insert into user_interests (user_id, interest)
---VALUES (2,'FOOTBALL');
+--VALUES (4,'FOOTBALL');
 --insert into user_interests (user_id, interest)
 --VALUES (2,'LITRBALL');
 --insert into user_interests (user_id, interest)

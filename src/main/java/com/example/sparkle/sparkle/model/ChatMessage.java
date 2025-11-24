@@ -1,11 +1,12 @@
 package com.example.sparkle.sparkle.model;
 
-import com.example.sparkle.sparkle.dto.MessageDtoHistory;
+import com.example.sparkle.sparkle.dto.chat.MessageDtoHistory;
 import com.example.sparkle.sparkle.dto.user.UserMessageDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -33,26 +34,12 @@ public class ChatMessage {
 
     @Column(name = "message_status")
     private Boolean messageStatus;
-    @JsonIgnore
+    //@JsonIgnore
     @ManyToOne
     @JoinColumn(name = "chat_id")
     private Chat chat;
 
 
-    public static MessageDtoHistory toMessageDtoHistory(ChatMessage chatMessage){
-        MessageDtoHistory messageDtoHistory = new MessageDtoHistory();
-        messageDtoHistory.setIdMessage(chatMessage.getId());
-        messageDtoHistory.setContent(chatMessage.getContent());
-        messageDtoHistory.setSentAt(chatMessage.getSentAt());
-        messageDtoHistory.setSender(toUserMessageDto(chatMessage));
-        return messageDtoHistory;
-    }
-    public static UserMessageDto toUserMessageDto(ChatMessage chatMessage){
-        UserMessageDto userMessageDto = new UserMessageDto();
-        userMessageDto.setUserName(chatMessage.getSender().getUsername());
-        userMessageDto.setUserId(chatMessage.getSender().getId());
-        return userMessageDto;
-    }
 
     @Override
     public boolean equals(Object o) {

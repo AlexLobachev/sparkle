@@ -213,6 +213,17 @@
 --where first_user_id = 1
 --  and second_user_id = 10;
 
+SELECT *
+FROM chats
+WHERE (sender_id = 10 OR receiver_id = 10)
+  AND NOT (sender_id = 10 AND receiver_id = 10);
+
+SELECT chats.id
+FROM chats
+WHERE
+    (sender_id = 10 AND receiver_id != 10)   /* вы — отправитель, не чат с собой */
+   OR
+    (receiver_id = 10 AND sender_id != 10);  /* вы — получатель, не чат с собой */
 
 
 SELECT *
