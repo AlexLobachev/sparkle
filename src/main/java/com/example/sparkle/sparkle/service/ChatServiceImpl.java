@@ -11,6 +11,7 @@ import com.example.sparkle.sparkle.model.User;
 import com.example.sparkle.sparkle.repository.ChatRepository;
 import com.example.sparkle.sparkle.repository.DeletedChatsRepository;
 import com.example.sparkle.sparkle.repository.MessageRepository;
+import com.example.sparkle.sparkle.repository.UserRepository;
 import com.example.sparkle.sparkle.validator.ValidatorChatAndMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ public class ChatServiceImpl implements ChatService {
     private final MessageRepository messageRepository;
     private final ValidatorChatAndMessage validatorChatAndMessage;
     private final DeletedChatsRepository deletedChatsRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public ChatServiceImpl(SimpMessagingTemplate messagingTemplate,
@@ -41,7 +43,8 @@ public class ChatServiceImpl implements ChatService {
                            MessageRepository messageRepository,
                            ValidatorChatAndMessage validatorChatAndMessage,
                            ChatRepository chatRepository,
-                           DeletedChatsRepository deletedChatsRepository) {
+                           DeletedChatsRepository deletedChatsRepository,
+                           UserRepository userRepository) {
         this.messagingTemplate = messagingTemplate;
         this.userService = userService;
         this.matchService = matchService;
@@ -49,6 +52,7 @@ public class ChatServiceImpl implements ChatService {
         this.validatorChatAndMessage = validatorChatAndMessage;
         this.chatRepository = chatRepository;
         this.deletedChatsRepository = deletedChatsRepository;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -57,15 +61,15 @@ public class ChatServiceImpl implements ChatService {
     @Transactional
     public Chat createChat(Long senderId, Long receiverId) {
         Chat chat = new Chat();
-        matchService.getCurrentMatches(senderId)
-                .stream()
-                .filter(f -> f.getSecondUser().getId().equals(receiverId))
-                .findFirst()
-                .orElseThrow(() -> new NotFound("Метч еще не создан"));
+        //matchService.getCurrentMatches(senderId)
+        //        .stream()
+        //        .filter(f -> f.getSecondUser().getId().equals(receiverId))
+        //        .findFirst()
+        //        .orElseThrow(() -> new NotFound("Метч еще не создан"));
 
-        User sender = UserMapper.toUser(userService.getUserById(senderId).orElseThrow(() -> new NotFound("Пользователь не найден")));
-        User receiver = UserMapper.toUser(userService.getUserById(receiverId)
-                .orElseThrow(() -> new NotFound("Пользователь не найден")));
+        User sender = userRepository.findById(senderId).orElseThrow(() -> new NotFound("Пользователь не найден"));
+        User receiver = userRepository.findById(receiverId)
+                .orElseThrow(() -> new NotFound("Пользователь не найден"));
         ChatDelete chatDelete = deletedChatsRepository.findByUserId(senderId);
         if (chatDelete != null) {
             deletedChatsRepository.deleteByUserIdAndChatId(chatDelete.getUserId(), chatDelete.getChatId());
@@ -90,14 +94,14 @@ public class ChatServiceImpl implements ChatService {
     public ChatMessage sendMessage(Long senderId, Long chatId, ChatMessage savedMessage) {
         Chat chat = chatRepository.findBySenderIdOrReceiverIdAndChatId(senderId, chatId);
         validatorChatAndMessage.chatNotFound(chat);
-        User sender = UserMapper.toUser(userService.getUserById(senderId)
-                .orElseThrow(() -> new NotFound("Пользователь не найден")));
+        User sender = userRepository.findById(senderId)
+                .orElseThrow(() -> new NotFound("Пользователь не найден"));
 
-        matchService.getCurrentMatches(chat.getSender().getId())
-                .stream()
-                .filter(f -> f.getSecondUser().getId().equals(chat.getReceiver().getId()))
-                .findFirst()
-                .orElseThrow(() -> new NotFound("Метч еще не создан"));
+        //matchService.getCurrentMatches(chat.getSender().getId())
+        //        .stream()
+        //        .filter(f -> f.getSecondUser().getId().equals(chat.getReceiver().getId()))
+        //        .findFirst()
+        //        .orElseThrow(() -> new NotFound("Метч еще не создан"));
         validatorChatAndMessage.chatNotFound(chat);
         validatorChatAndMessage.chatForbidden(chat, senderId);
 
@@ -149,8 +153,8 @@ public class ChatServiceImpl implements ChatService {
      */
     public ChatDelete deleteChat(Long userId, Long chatId) {
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new NotFound("Чат не найден"));
-        User user = UserMapper.toUser(userService.getUserById(userId)
-                .orElseThrow(() -> new NotFound("Пользователь не найден")));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFound("Пользователь не найден"));
         validatorChatAndMessage.chatNotFound(chat);
         validatorChatAndMessage.chatForbidden(chat, userId);
         ChatDelete chatDelete = new ChatDelete();

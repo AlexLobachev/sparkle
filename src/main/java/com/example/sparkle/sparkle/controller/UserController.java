@@ -1,6 +1,7 @@
 package com.example.sparkle.sparkle.controller;
 
 import com.example.sparkle.sparkle.dto.LocationRequestDto;
+import com.example.sparkle.sparkle.dto.user.UserDto;
 import com.example.sparkle.sparkle.dto.user.UserDtoRegister;
 import com.example.sparkle.sparkle.dto.user.UserDtoUpdate;
 import com.example.sparkle.sparkle.dto.user.UserMapper;
@@ -55,13 +56,12 @@ public class UserController {
     /**
      * Редактирование профиля пользователя
      */
-    @PatchMapping("/update-profile/{userId}")
+    @PatchMapping("/update-profile")
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> updateUserProfile(
-            @PathVariable @Min(1) Long userId,
             @Valid @RequestBody UserDtoUpdate userDtoUpdate) {
 
-        return ResponseEntity.ok(userService.updateUserProfile(userId, userDtoUpdate)
+        return ResponseEntity.ok(userService.updateUserProfile(userDtoUpdate)
                 .orElseThrow());
     }
 
@@ -69,7 +69,7 @@ public class UserController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> setupUserProfile(@Valid @RequestBody UserDtoUpdate userDtoUpdate) {
 
-        return ResponseEntity.ok(UserMapper.toUserDto(userService.setupUserProfile(userDtoUpdate).orElseThrow()));
+        return ResponseEntity.ok(UserDto.toUserDto(userService.setupUserProfile(userDtoUpdate).orElseThrow()));
     }
 
     /**
@@ -105,7 +105,7 @@ public class UserController {
         User user = userService.getUserByExternalId(oauth2User.getAttribute("externalId").toString()).orElseThrow(() -> new NotFound("Пользователь не найден"));
         user.setEmail(email);
         user.setEmailPending(false);
-        userService.updateUserProfile(user.getId(), UserMapper.toUserDtoUpdate(user));
+        userService.updateUserProfile(UserMapper.toUserDtoUpdate(user));
         return ResponseEntity.ok("redirect:/main").getBody();
     }
 
@@ -134,7 +134,7 @@ public class UserController {
     public ResponseEntity<?> saveUserLocation(@RequestBody LocationRequestDto location, @PathVariable Long userId
             /*@AuthenticationPrincipal UserDetails userDetails*/) {
 
-        return ResponseEntity.ok(UserMapper.toUserDto(userService.saveUserLocation(location, userId).orElseThrow()));
+        return ResponseEntity.ok(UserDto.toUserDto(userService.saveUserLocation(location, userId).orElseThrow()));
     }
 
 

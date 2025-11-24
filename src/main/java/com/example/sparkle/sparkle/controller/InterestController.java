@@ -1,5 +1,6 @@
 package com.example.sparkle.sparkle.controller;
 
+import com.example.sparkle.sparkle.dto.user.UserDto;
 import com.example.sparkle.sparkle.dto.user.UserMapper;
 import com.example.sparkle.sparkle.model.Interest;
 import com.example.sparkle.sparkle.model.UserInterest;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -65,7 +67,7 @@ public class InterestController {
         return ResponseEntity.ok(userInterestService.getUsersWithTheSameInterests(userId)
                 .stream()
                 .filter(user -> !user.getId().equals(userId))
-                .map(UserMapper::toUserDto));
+                .map(UserDto::toUserDto));
     }
 
     /**
@@ -91,15 +93,15 @@ public class InterestController {
      */
    @PreAuthorize("hasRole('ROLE_USER')")
    @GetMapping("/all")
-   ResponseEntity<?> getListInterest() {
-       List<Interest> interestList = Arrays.asList(Interest.values());
-
-       // Преобразуем в список строк (названий интересов)
-       List<String> labels = interestList.stream()
-               .map(Interest::getLabel).toList();
-       return ResponseEntity.ok().body(labels);
-
+   public ResponseEntity<Map<String, String>> getInterestLabels() {
+       return ResponseEntity.ok(
+               Arrays.stream(Interest.values())
+                       .collect(Collectors.toMap(Enum::name, Interest::getLabel))
+       );
    }
+
+
+
 
 
 }

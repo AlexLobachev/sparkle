@@ -1,78 +1,99 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns:th="https://thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="https://thymeleaf.org ">
-<script th:inline="javascript">
-  /*<![CDATA[*/
-  window.currentUserId = [[${userId}]];
-  /*]]>*/
-</script>
-
-
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.thymeleaf.org ">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Сайт знакомств</title>
-  <!-- Корректное подключение CSS -->
-  <link rel="stylesheet" th:href="@{/css/styles.css}">
-  <!-- CSRF-токен -->
-  <meta name="csrf-token" th:content="${_csrf.token}"/>
+  <meta name="robots" content="noindex, nofollow">
+  <title>Знакомьтесь с новыми людьми — Sparkle</title>
 
+  <!-- Предзагрузка критических ресурсов -->
+  <link rel="preload" href="/css/styles.css" as="style">
+  <link rel="preload" href="/js/script.js" as="script">
+
+  <link rel="stylesheet" th:href="@{/css/styles.css}" media="screen">
+  <meta name="csrf-token" th:content="${_csrf.token}"/>
 </head>
 <body>
 
-<header>
-  <h1>Знакомьтесь с новыми людьми</h1>
-  <div class="auth-controls">
-    <button id="profileBtn" class="action-btn profile">Мой профиль</button>
-    <button id="logoutBtn" class="action-btn logout">Выход</button>
-    <button id="editProfileBtn" class="action-btn edit-profile">Настроить профиль</button>
-  </div>
-</header>
+<!-- Обертка для контента, помогает при анимациях -->
+<div class="page-wrapper">
 
-<main>
+  <header>
+    <h1>Знакомьтесь с новыми людьми</h1>
+    <nav class="auth-controls" aria-label="Основные действия">
+      <!-- Кнопки навигации -->
+      <button id="profileBtn" class="action-btn profile" aria-label="Перейти в мой профиль">Мой профиль</button>
+      <button id="editProfileBtn" class="action-btn edit-profile" aria-label="Настроить профиль">Настроить профиль</button>
+      <button id="chatsMatchesBtn" class="action-btn chats-matches" aria-label="Перейти к чатам и мэтчам">Чаты и Мэтчи</button>
+      <button id="logoutBtn" class="action-btn logout" aria-label="Выйти из аккаунта">Выход</button>
+    </nav>
+  </header>
 
-  <!-- Блок запроса email -->
-  <th:block th:if="${user != null and user.emailPending}">
-    <div class="alert">
-      <p>Пожалуйста, укажите email для улучшения безопасности вашего аккаунта:</p>
-      <form method="post" th:action="@{/update-email}">
-        <label>
-          <input type="email" name="email" placeholder="example@domain.com" required>
-        </label>
-        <button type="submit" class="action-btn">Сохранить</button>
-        <small>Мы не будем передавать ваш email третьим лицам</small>
-      </form>
+  <main>
+    <!-- Уведомление о необходимости указать email -->
+    <th:block th:if="${user != null and user.emailPending}">
+      <div class="alert" role="alert" aria-live="polite">
+        <p>Пожалуйста, укажите email для улучшения безопасности вашего аккаунта:</p>
+        <form method="post" th:action="@{/update-email}" novalidate>
+          <label for="email-input" class="sr-only">Email</label>
+          <input type="email"
+                 id="email-input"
+                 name="email"
+                 class="email-input"
+                 placeholder="example@domain.com"
+                 required
+                 aria-required="true">
+          <button type="submit" class="action-btn">Сохранить</button>
+          <small>Мы не будем передавать ваш email третьим лицам</small>
+        </form>
+      </div>
+    </th:block>
 
-    </div>
-  </th:block>
+    <!-- Блок просмотра профилей -->
+    <section class="profile-viewer" id="profileViewer" aria-label="Просмотр профилей пользователей">
+      <div class="photo-slider" id="photoSlider" role="group" aria-label="Фото профиля">
+        <div class="photo" id="currentPhoto" aria-live="polite"></div>
+        <button class="slide-btn prev-photo"
+                id="prevPhoto"
+                type="button"
+                aria-label="Предыдущее фото"
+                aria-disabled="false">‹</button>
+        <button class="slide-btn next-photo"
+                id="nextPhoto"
+                type="button"
+                aria-label="Следующее фото"
+                aria-disabled="false">›</button>
+      </div>
 
-  <section class="profile-viewer" id="profileViewer">
-    <div class="photo-slider" id="photoSlider">
-      <div class="photo" id="currentPhoto"></div>
-      <button class="slide-btn prev-photo" id="prevPhoto">‹</button>
-      <button class="slide-btn next-photo" id="nextPhoto">›</button>
-    </div>
+      <div class="profile-info" id="profileInfo" aria-live="polite"></div>
 
-    <div class="profile-info" id="profileInfo"></div>
+      <div class="controls" id="controls" role="group" aria-label="Действия с профилем">
+        <button class="action-btn dislike" id="dislikeBtn" type="button" aria-label="Пропустить профиль">Дизлайк</button>
+        <button class="action-btn like" id="likeBtn" type="button" aria-label="Поставить лайк">Лайк</button>
+      </div>
 
-    <!-- Исправленный блок controls (добавлен id="controls") -->
-    <div class="controls" id="controls">
+      <!-- Индикаторы -->
+      <div class="indicator" id="indicator" role="tablist" aria-label="Индикатор профилей"></div>
+      <div class="photo-indicator" id="photoIndicator" role="tablist" aria-label="Индикатор фото"></div>
+    </section>
+  </main>
 
-      <button class="action-btn dislike" id="dislikeBtn">Дизлайк</button>
-      <button class="action-btn like" id="likeBtn">Лайк</button>
-    </div>
+  <footer>
+    <p>© <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy')}">2025</span> Sparkle. Все права защищены.</p>
+  </footer>
 
-    <div class="indicator" id="indicator"></div>
-    <div class="photo-indicator" id="photoIndicator"></div>
-  </section>
-</main>
+</div>
 
-<footer>
-  <p>© 2025 Сайт знакомств. Все права защищены.</p>
-</footer>
+<!-- Асинхронная загрузка скрипта -->
+<script th:src="@{/js/script.js}" defer></script>
 
-<!-- Корректное подключение JS -->
-<script th:src="@{/js/script.js}"></script> <!-- Должно быть только один раз -->
+<!-- Глобальные переменные для JavaScript -->
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  window.currentUserId = /*[[${userId}]]*/ null;
+  /*]]>*/
+</script>
 
 </body>
 </html>

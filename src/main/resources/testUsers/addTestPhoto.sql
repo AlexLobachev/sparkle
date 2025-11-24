@@ -6,7 +6,7 @@
 --
 --INSERT INTO photos (file_path, file_name, file_size, file_type)
 --VALUES ('/images/testuserAlena.jpeg',
---        'testuserAlena.jpeg',
+--        'testuserAlena1.jpeg',
 --        153248,
 --        'image/jpeg');
 --

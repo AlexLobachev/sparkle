@@ -1,247 +1,136 @@
-// Единый обработчик DOMContentLoaded
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        // 1. Валидация userId
-        const userId = window.currentUserId;
-        if (typeof userId !== 'number' || isNaN(userId) || userId <= 0) {
-            throw new Error('Некорректный ID пользователя');
-        }
-
-        // 2. Получение CSRF-токена
-        const csrfToken = getCsrfToken();
-        if (!csrfToken) {
-            throw new Error('CSRF-токен не найден');
-        }
-
-        // 3. Загрузка данных профиля
-        await loadProfileData(userId, csrfToken);
-
-        // 4. Настройка обработчиков
-        setupEventListeners(userId, csrfToken);
-
-    } catch (error) {
-        console.error('Инициализация профиля не удалась:', error);
-        showError(error.message || 'Произошла ошибка при загрузке профиля');
-    }
-});
-
-// Получение CSRF-токена с проверкой
-function getCsrfToken() {
-    const meta = document.querySelector('meta[name="csrf-token"]');
-    if (!meta) return null;
-    const token = meta.getAttribute('content');
-    return token && token.trim().length > 0 ? token.trim() : null;
-}
-
-// Загрузка данных профиля
-async function loadProfileData(userId, csrfToken) {
-    showLoading(true);
-
-    try {
-        const response = await fetch(`/sparkle/users/${userId}`, {
-            method: 'GET',
-            headers: {
-                'X-XSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            },
-            credentials: 'same-origin'
-        });
-
-        if (!response.ok) {
-            const text = await response.text();
-            throw new Error(`HTTP ${response.status}: ${text}`);
-        }
-
-        const user = await response.json();
-        populateForm(user);
-
-    } catch (error) {
-        throw error; // Передаём дальше для обработки в верхнем блоке
-    } finally {
-        showLoading(false);
-    }
-}
-
-// Заполнение формы
-function populateForm(user) {
-    const fields = {
-        'username': 'username',
-        'gender': 'gender',
-        'preferredGender': 'preferredGender',
-        'email': 'email',
-        'birthDate': 'birthDate'
-    };
-
-    for (const [key, id] of Object.entries(fields)) {
-        const el = document.getElementById(id);
-        if (!el) {
-            console.warn(`Поле ${id} не найдено в DOM`);
-            continue;
-        }
-
-        if (key === 'birthDate' && user[key]) {
-            // Безопасное преобразование даты
-            const date = new Date(user[key]);
-            if (!isNaN(date.getTime())) {
-                el.value = date.toISOString().split('T')[0];
-            }
-        } else {
-            // Для email: если значение null, оставляем поле пустым
-            el.value = (key === 'email' && user[key] === null) ? '' : (user[key] || '');
-        }
-    }
-}
-
-// Настройка обработчиков
-function setupEventListeners(userId, csrfToken) {
+/**
+ * Скрипт для формы настроек профиля
+ */
+document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('profileForm');
-    if (form) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await saveProfile(userId, csrfToken, form);
-        });
-    }
-
     const deleteBtn = document.getElementById('deleteProfileBtn');
-    if (deleteBtn) {
-        deleteBtn.addEventListener('click', async () => {
-            if (confirm('Вы уверены, что хотите удалить профиль? Это действие необратимо!')) {
-                await deleteProfile(userId, csrfToken);
-            }
-        });
-    }
-
     const backBtn = document.getElementById('backBtn');
+    const messages = document.getElementById('messages');
+
+    // Кнопка "Назад"
     if (backBtn) {
         backBtn.addEventListener('click', () => {
             window.location.href = '/main';
         });
     }
-}
 
-// Сохранение профиля
-async function saveProfile(userId, csrfToken, form) {
-    showLoading(true);
+    // CSRF токен
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-    try {
-        // Валидация и фильтрация данных
-        const validData = validateFormData(new FormData(form));
-        if (!validData) {
-            showError('Проверьте заполненные данные');
+    // Загрузка текущих данных
+    loadProfileData();
+
+    async function loadProfileData() {
+        try {
+            const response = await fetch(`/sparkle/users/${window.currentUserId}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-XSRF-TOKEN': csrfToken
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) throw new Error('Не удалось загрузить данные');
+
+            const user = await response.json();
+            fillForm(user);
+        } catch (error) {
+            console.error('Ошибка при загрузке профиля:', error);
+            showMessage('Не удалось загрузить данные профиля', 'error');
+        }
+    }
+
+    function fillForm(user) {
+        document.getElementById('gender').value = user.gender || '';
+        document.getElementById('preferredGender').value = user.preferredGender || '';
+        document.getElementById('email').value = user.email || '';
+        if (user.birthDate) {
+            document.getElementById('birthDate').value = user.birthDate.split('T')[0];
+        }
+    }
+
+
+    // Сохранение формы
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const data = {};
+
+        // Обрабатываем каждое поле вручную, чтобы контролировать null
+        for (let [key, value] of formData.entries()) {
+            // Если значение — строка и состоит только из пробелов — отправляем null
+            if (typeof value === 'string') {
+                value = value.trim();
+            }
+
+            data[key] = value === '' ? null : value;
+        }
+
+        data.userId = window.currentUserId;
+
+        try {
+            const response = await fetch('/sparkle/users/update-profile', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-XSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify(data),
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                showMessage('Данные успешно обновлены', 'success');
+            } else {
+                const error = await response.text();
+                throw new Error(error);
+            }
+        } catch (error) {
+            console.error('Ошибка при сохранении:', error);
+            showMessage('Не удалось сохранить изменения', 'error');
+        }
+    });
+
+    // Удаление профиля
+    deleteBtn?.addEventListener('click', async () => {
+        if (!confirm('Вы уверены, что хотите удалить профиль? Это действие нельзя отменить.')) {
             return;
         }
 
-        const response = await fetch(`/sparkle/users/update-profile/${userId}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': csrfToken
-            },
-            body: JSON.stringify(validData),
-            credentials: 'same-origin'
-        });
+        try {
+            const response = await fetch(`/sparkle/users/delete/${window.currentUserId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-XSRF-TOKEN': csrfToken
+                },
+                credentials: 'include'
+            });
 
-        if (!response.ok) {
-            const text = await response.text();
-            throw new Error(`HTTP ${response.status}: ${text}`);
+            if (response.ok) {
+                alert('Профиль удалён');
+                window.location.href = '/logout';
+            } else {
+                throw new Error('Не удалось удалить профиль');
+            }
+        } catch (error) {
+            console.error('Ошибка при удалении:', error);
+            showMessage('Не удалось удалить профиль', 'error');
         }
-
-        showSuccess('Профиль успешно обновлён!');
-        setTimeout(() => window.location.href = '/main', 1500);
-
-    } catch (error) {
-        console.error('Ошибка сохранения:', error);
-        showError(error.message || 'Не удалось сохранить изменения');
-    } finally {
-        showLoading(false);
-    }
-}
-
-// Удаление профиля
-async function deleteProfile(userId, csrfToken) {
-    showLoading(true);
-
-    try {
-        const response = await fetch(`/sparkle/users/${userId}`, {
-            method: 'DELETE',
-            headers: { 'X-XSRF-TOKEN': csrfToken },
-            credentials: 'same-origin'
-        });
-
-        if (!response.ok) {
-            const text = await response.text();
-            throw new Error(`HTTP ${response.status}: ${text}`);
-        }
-
-        showSuccess('Профиль удалён!');
-        setTimeout(() => window.location.href = '/logout', 1500);
-
-    } catch (error) {
-        console.error('Ошибка удаления:', error);
-        showError(error.message || 'Не удалось удалить профиль');
-    } finally {
-        showLoading(false);
-    }
-}
-
-// Валидация данных формы
-function validateFormData(formData) {
-    const data = Object.fromEntries(formData.entries());
-
-    // Обработка email
-    if (data.email && data.email.trim() !== '') {
-        // Если email заполнен — проверяем корректность
-        if (!data.email.includes('@')) {
-            return null; // Некорректный email
-        }
-        data.email = data.email.trim(); // Очищаем от лишних пробелов
-    } else {
-        // Если email пуст или не заполнен — устанавливаем null
-        data.email = null;
-    }
-
-    return data;
-}
-
-// Индикация загрузки
-function showLoading(isLoading) {
-    const spinner = document.getElementById('loadingSpinner');
-    if (spinner) {
-        spinner.style.display = isLoading ? 'block' : 'none';
-    }
-}
-
-// Сообщения
-function showError(message) {
-    const alertBox = createAlert('error', message);
-    document.querySelector('.profile-form').prepend(alertBox);
-}
-
-function showSuccess(message) {
-    const alertBox = createAlert('success', message);
-    document.querySelector('.profile-form').prepend(alertBox);
-}
-
-function createAlert(type, message) {
-    const alertBox = document.createElement('div');
-    alertBox.className = `alert alert-${type}`;
-    alertBox.textContent = message;
-
-    // Добавляем кнопку закрытия
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'alert-close';
-    closeBtn.textContent = '×';
-    closeBtn.addEventListener('click', () => {
-        alertBox.remove();
     });
-    alertBox.appendChild(closeBtn);
 
-    // Автоматическое скрытие через время
-    setTimeout(() => {
-        if (document.body.contains(alertBox)) {
-            alertBox.remove();
-        }
-    }, type === 'success' ? 3000 : 5000);
+    function showMessage(text, type) {
+        messages.innerHTML = '';
+        const msg = document.createElement('div');
+        msg.className = `alert alert-${type}`;
+        msg.textContent = text;
+        messages.appendChild(msg);
 
-    return alertBox;
-}
+        setTimeout(() => {
+            if (msg.parentNode === messages) {
+                msg.remove();
+            }
+        }, 3000);
+    }
+});

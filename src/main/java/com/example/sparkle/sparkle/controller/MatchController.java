@@ -31,7 +31,7 @@ public class MatchController {
      * Получить следующего кандидата для свайпа
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("/next-candidate/users")
+    @GetMapping("/next-candidate")
     public ResponseEntity<?> getNextCandidate(
             @RequestParam(defaultValue = "40.0") double distance,
             @PageableDefault(page = 0, size = 1) Pageable pageable) {
@@ -42,34 +42,35 @@ public class MatchController {
      * Выразить симпатию пользователю
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping("/like/users/{secondUser}")
-    public ResponseEntity<?> likeUser(@PathVariable Long secondUser,  @CurrentSecurityContext SecurityContext context) {
-
-        return ResponseEntity.ok(Match.toMatchDto(Match.toUserMatchDto(matchService.likeUser(secondUser))));
+    @PostMapping("/like/{secondUser}")
+    public ResponseEntity<?> likeUser(@PathVariable Long secondUser) {
+        return ResponseEntity.ok(matchService.likeUser(secondUser));
     }
 
     /**
      * Посмотреть список текущих matches
      */
-    @GetMapping("/current-matches/{userId}")
-    public ResponseEntity<?> getCurrentMatches(@PathVariable Long userId) {
-        return ResponseEntity.ok(matchService.getCurrentMatches(userId).stream().map(Match::toMatchDto));
+    @GetMapping("/current-matches")
+    public ResponseEntity<?> getCurrentMatches() {
+        return ResponseEntity.ok(matchService.getCurrentMatches());
     }
 
     /**
      * Посмотреть список кому поставил лайк
      */
-    @GetMapping("/current-lake-your/{userId}")
-    public ResponseEntity<?> getYourLikesUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(matchService.getYourLikesUser(userId).stream().map(Match::toMatchDto));
+    @GetMapping("/like/current-lake-your")
+    public ResponseEntity<?> getYourLikesUser() {
+        return ResponseEntity.ok(matchService.getYourLikesUser());
     }
 
     /**
      * Посмотреть кому я понравился
      */
-    @GetMapping("/current-lake-who/{userId}")
-    public ResponseEntity<?> getWhoLikedIt(@PathVariable Long userId) {
-        return ResponseEntity.ok(matchService.getWhoLikedIt(userId).stream().map(user -> Match.toMatchDto(Match.toUserMatchDto(user.getFirstUser()))));
+    @GetMapping("/like/current-lake-who")
+    public ResponseEntity<?> getWhoLikedIt() {
+        //return ResponseEntity.ok(matchService.getWhoLikedIt().stream().map(user -> Match.toMatchDto(Match.toUserMatchDto(user.getFirstUser()))));
+        return ResponseEntity.ok(matchService.getWhoLikedIt());
+
     }
 
     /**

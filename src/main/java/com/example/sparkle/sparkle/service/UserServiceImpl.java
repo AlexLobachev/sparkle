@@ -4,6 +4,7 @@ import com.example.sparkle.sparkle.dto.LocationRequestDto;
 import com.example.sparkle.sparkle.dto.user.UserDto;
 import com.example.sparkle.sparkle.dto.user.UserDtoUpdate;
 import com.example.sparkle.sparkle.dto.user.UserMapper;
+import com.example.sparkle.sparkle.dto.user.UserMatchDto;
 import com.example.sparkle.sparkle.exception.BadRequest;
 import com.example.sparkle.sparkle.exception.NotFound;
 import com.example.sparkle.sparkle.model.AuthProvider;
@@ -93,13 +94,13 @@ public class UserServiceImpl implements UserService {
      */
     @Transactional
     @PreAuthorize("hasRole('ROLE_USER')")
-    public Optional<UserDtoUpdate> updateUserProfile(Long userId, UserDtoUpdate userDtoUpdate) {
+    public Optional<UserDtoUpdate> updateUserProfile( UserDtoUpdate userDtoUpdate) {
         // Проверка: может ли текущий пользователь обновлять этого юзера?
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetails currentUser = (UserDetails) auth.getPrincipal();
         User currentUserEntity = getUserByUserName(currentUser.getUsername())
                 .orElseThrow(() -> new NotFound("Пользователь не найден"));
-        validatorUser.userForbidden(currentUserEntity, userId);
+
 
 
         userDtoUpdate.setId(currentUserEntity.getId());
@@ -116,11 +117,10 @@ public class UserServiceImpl implements UserService {
         entityManager.refresh(userRepository.findById(userDtoUpdate.getId()).orElseThrow());
 
         if (affectedRows == 0) {
-            log.warn("Обновление пользователя с ID = {} не выполнено - запись не найдена", userId);
             throw new NotFound("Пользователь не найден");
         }
         log.info("Обновление пользователя с ID = {} прошло успешно", userDtoUpdate.getId());
-        currentUserEntity = userRepository.findById(userId).orElse(null);
+        currentUserEntity = userRepository.findById(currentUserEntity.getId()).orElse(null);
         validatorUser.userNotFound(currentUserEntity);
         return Optional.of(UserMapper.toUserDtoUpdate(Objects.requireNonNull(currentUserEntity)));
     }
@@ -172,7 +172,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId).orElse(null);
         validatorUser.userNotFound(user);
         validatorUser.userForbidden(user, userId);
-        return Optional.of(UserMapper.toUserDto(user));
+        return Optional.of(UserDto.toUserDto(user));
     }
 
     /**
@@ -204,7 +204,7 @@ public class UserServiceImpl implements UserService {
         Sort sort = Sort.by("id").ascending();
         List<UserDto> usersDto = userRepository.findAll(sort)
                 .stream()
-                .map(UserMapper::toUserDto).toList();
+                .map(UserDto::toUserDto).toList();
         validatorUser.userNoContent(usersDto);
         return usersDto;
     }

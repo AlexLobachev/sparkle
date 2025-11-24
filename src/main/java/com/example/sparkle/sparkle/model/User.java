@@ -66,7 +66,8 @@ public class User implements UserDetails {
     @Column(name = "email_pending")
     private boolean emailPending = true;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private Set<UserRoles> roles; // например, ["USER", "ADMIN"]
+    private Set<UserRoles> roles = new HashSet<>();
+
 
     @Enumerated(EnumType.STRING)
     private Status status = Status.DRAFT;
