@@ -93,6 +93,7 @@ public class HomePage {
         return settings(userDetails, request, model, "profile-user", id);
     }
 
+
     /**
      * Просмотр собственного профиля
      */
@@ -107,10 +108,10 @@ public class HomePage {
      * Единый метод для настройки модели и возврата страницы.
      *
      * @param userDetails текущий пользователь
-     * @param request HTTP-запрос (для CSRF)
-     * @param model модель для передачи данных в шаблон
-     * @param page имя Thymeleaf-шаблона
-     * @param profileId ID пользователя, чей профиль просматривается (если есть)
+     * @param request     HTTP-запрос (для CSRF)
+     * @param model       модель для передачи данных в шаблон
+     * @param page        имя Thymeleaf-шаблона
+     * @param profileId   ID пользователя, чей профиль просматривается (если есть)
      * @return имя шаблона для отображения
      */
     private String settings(UserDetails userDetails,
@@ -134,11 +135,16 @@ public class HomePage {
             throw new NotFound("ID пользователя не найден");
         }
 
+        String currentUsername = userDetails.getUsername();
+        if (currentUsername == null) {
+            throw new NotFound("Имя пользователя не найдено");
+        }
         // Передача данных в модель
         model.addAttribute("_csrf", csrfToken);
         model.addAttribute("csrfToken", csrfToken.getToken());
         model.addAttribute("user", authenticatedUser);
         model.addAttribute("userId", currentUserId);
+        model.addAttribute("username", currentUsername);
 
         // Передача ID профиля, если это страница просмотра профиля и ID другого пользователя
         if (page.equals("profile-user") && profileId != null && !profileId.equals(currentUserId)) {

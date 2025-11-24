@@ -1,7 +1,8 @@
 package com.example.sparkle.sparkle.service;
 
-import com.example.sparkle.sparkle.dto.ChatDtoList;
-import com.example.sparkle.sparkle.dto.user.UserMapper;
+import com.example.sparkle.sparkle.dto.chat.ChatDtoGet;
+import com.example.sparkle.sparkle.dto.chat.ChatMessageDtoSent;
+import com.example.sparkle.sparkle.dto.chat.MessageDtoHistory;
 import com.example.sparkle.sparkle.exception.BadRequest;
 import com.example.sparkle.sparkle.exception.NotFound;
 import com.example.sparkle.sparkle.model.Chat;
@@ -17,6 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,8 +84,7 @@ public class ChatServiceImpl implements ChatService {
         chat.setSentAt(LocalDateTime.now());
         try {
             chat = chatRepository.save(chat);
-        }
-        catch (DataIntegrityViolationException e){
+        } catch (DataIntegrityViolationException e) {
             throw new BadRequest("Чат уже создан ранее");
         }
         return chat;
@@ -91,33 +94,26 @@ public class ChatServiceImpl implements ChatService {
      * Отправка сообщения другому пользователю
      */
     @Transactional
-    public ChatMessage sendMessage(Long senderId, Long chatId, ChatMessage savedMessage) {
-        Chat chat = chatRepository.findBySenderIdOrReceiverIdAndChatId(senderId, chatId);
-        validatorChatAndMessage.chatNotFound(chat);
-        User sender = userRepository.findById(senderId)
-                .orElseThrow(() -> new NotFound("Пользователь не найден"));
+    public MessageDtoHistory sendMessage(ChatMessage savedMessage) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails currentUser = (UserDetails) auth.getPrincipal();
+        User user = userRepository.findByUsername(
+                currentUser.getUsername()).orElseThrow(() -> new NotFound("Пользователь не найден"));
+        Chat chat = chatRepository.findById(savedMessage.getChat().getId()).orElseThrow(() -> new NotFound("Чат не найден"));
 
-        //matchService.getCurrentMatches(chat.getSender().getId())
-        //        .stream()
-        //        .filter(f -> f.getSecondUser().getId().equals(chat.getReceiver().getId()))
-        //        .findFirst()
-        //        .orElseThrow(() -> new NotFound("Метч еще не создан"));
-        validatorChatAndMessage.chatNotFound(chat);
-        validatorChatAndMessage.chatForbidden(chat, senderId);
-
+        validatorChatAndMessage.chatForbidden(chat, user.getId());
 
         savedMessage.setSentAt(LocalDateTime.now());
-        savedMessage.setSender(sender);
+        savedMessage.setSender(user);
         savedMessage.setChat(chat);
 
 
         messagingTemplate.convertAndSend(
                 "/topic/public/" + chat.getReceiver().getId(),
-                savedMessage
+                ChatMessageDtoSent.toCatMessageDtoSent(savedMessage)
         );
         messageRepository.save(savedMessage);
-
-        return savedMessage;
+        return MessageDtoHistory.toMessageDto(savedMessage);
     }
 
 
@@ -125,13 +121,16 @@ public class ChatServiceImpl implements ChatService {
      * Отображение списка чатов текущего пользователя
      */
 
-    public List<ChatDtoList> listChatsForCurrentUser(Long userId) {
-        userService.getUserById(userId)
-                .orElseThrow(() -> new NotFound("Пользователь не найден"));
-        List<Chat> chats = chatRepository.findAllBySenderIdOrReceiverId(userId, userId);
+    public List<ChatDtoGet> listChatsForCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails currentUser = (UserDetails) auth.getPrincipal();
+        User user = userRepository.findByUsername(
+                currentUser.getUsername()).orElseThrow(() -> new NotFound("Пользователь не найден"));
+        log.debug("чаты пользователя {}", chatRepository.findAllBySenderIdOrReceiverId(user.getId(), user.getId()));
+        List<Chat> chats = chatRepository.findAllBySenderIdOrReceiverId(user.getId(), user.getId());
         validatorChatAndMessage.chatNoContent(chats);
 
-        return chats.stream().map(Chat::toChatDtoList).toList();
+        return chatRepository.findAllBySenderIdOrReceiverId(user.getId(), user.getId()).stream().map(ChatDtoGet::toChatDtoList).toList();
     }
 
 
@@ -139,10 +138,14 @@ public class ChatServiceImpl implements ChatService {
      * История сообщений для определенного чата
      */
 
-    public List<ChatMessage> getChatHistory(Long userId, Long chatId) {
+    public List<ChatMessage> getChatHistory(Long chatId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails currentUser = (UserDetails) auth.getPrincipal();
+        User user = userRepository.findByUsername(
+                currentUser.getUsername()).orElseThrow(() -> new NotFound("Пользователь не найден"));
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new NotFound("Чат не найден"));
         validatorChatAndMessage.chatNotFound(chat);
-        validatorChatAndMessage.chatForbidden(chat, userId);
+        validatorChatAndMessage.chatForbidden(chat, user.getId());
         List<ChatMessage> chatMessagesHistory = messageRepository.findAllByChatId(chatId);
         validatorChatAndMessage.messageNoContent(chatMessagesHistory);
         return chatMessagesHistory;
@@ -162,6 +165,7 @@ public class ChatServiceImpl implements ChatService {
         chatDelete.setUserId(userId);
         return deletedChatsRepository.save(chatDelete);
     }
+
     /**
      * Удаление чата для обоих пользователей
      * Когда пользователь удаляет метч, считается за блокировку, и чаты удаляются

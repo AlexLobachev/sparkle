@@ -1,14 +1,17 @@
 package com.example.sparkle.sparkle.controller;
 
+import com.example.sparkle.sparkle.dto.chat.MessageDtoHistory;
 import com.example.sparkle.sparkle.model.ChatMessage;
 import com.example.sparkle.sparkle.service.ChatService;
 import jakarta.validation.constraints.Min;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/sparkle/chat")
+@RequestMapping("/sparkle/chats")
+@Slf4j
 public class ChatController {
 
     private final ChatService chatService;
@@ -23,9 +26,9 @@ public class ChatController {
     /**
      * Отображение списка чатов текущего пользователя
      */
-    @GetMapping("/chats/users/{userId}")
-    public ResponseEntity<?> listChatsForCurrentUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(chatService.listChatsForCurrentUser(userId));
+    @GetMapping("/users")
+    public ResponseEntity<?> listChatsForCurrentUser() {
+        return ResponseEntity.ok(chatService.listChatsForCurrentUser());
     }
 
     /**
@@ -42,20 +45,17 @@ public class ChatController {
      * Отправка сообщения другому пользователю
      */
     @PostMapping("/message")
-    public ResponseEntity<?> sendMessage(@RequestParam @Min(1) Long chatId,
-                                         @RequestParam @Min(1) Long senderId,
-                                         @RequestBody ChatMessage chatMessage) {
-        return ResponseEntity.created(null).body(chatService.sendMessage(senderId, chatId, chatMessage));
+    public ResponseEntity<?> sendMessage(@RequestBody ChatMessage savedMessage) {
+        return ResponseEntity.created(null).body(chatService.sendMessage(savedMessage));
     }
-
-    /**
+        /**
      * История сообщений для определенного чата
      */
-    @GetMapping("/history/{chatId}/users/{userId}")
-    public ResponseEntity<?> getChatHistory(@PathVariable Long userId, @PathVariable Long chatId) {
-        return ResponseEntity.ok().body(chatService.getChatHistory(userId, chatId)
+    @GetMapping("{chatId}/history")
+    public ResponseEntity<?> getChatHistory(@PathVariable Long chatId) {
+        return ResponseEntity.ok().body(chatService.getChatHistory(chatId)
                 .stream()
-                .map(ChatMessage::toMessageDtoHistory));
+                .map(MessageDtoHistory::toMessageDto));
     }
 
     /**
