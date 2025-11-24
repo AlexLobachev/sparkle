@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Чаты и Мэтчи — Sparkle</title>
+    <link rel="preload" href="/css/chats-matches.css" as="style">
+    <link rel="stylesheet" th:href="@{/css/chats-matches.css}" media="screen">
+</head>
+<body>
+
+<div class="page-wrapper">
+
+    <header class="header">
+        <h1>Чаты и Мэтчи</h1>
+        <button id="backBtn" class="action-btn back">← Назад</button>
+    </header>
+
+    <main class="main-content">
+
+        <!-- Вкладки -->
+        <nav class="tabs" role="tablist">
+            <button class="tab active" data-tab="matches" type="button" role="tab" aria-selected="true">Мои Мэтчи</button>
+            <button class="tab" data-tab="chats" type="button" role="tab" aria-selected="false">Мои чаты</button>
+            <button class="tab" data-tab="my-likes" type="button" role="tab" aria-selected="false">Кому я понравился</button>
+            <button class="tab" data-tab="who-liked-me" type="button" role="tab" aria-selected="false">Кто мне понравился</button>
+        </nav>
+
+        <!-- Контент вкладок -->
+        <div class="tab-content">
+
+            <!-- Мэтчи -->
+            <div id="matches" class="tab-pane active">
+                <div class="loader" id="matchesLoader">Загрузка мэтчей...</div>
+                <ul class="user-list" id="matchesList"></ul>
+                <div class="no-data" id="noMatches">Нет мэтчей</div>
+            </div>
+
+            <!-- Чаты -->
+            <div id="chats" class="tab-pane">
+                <div class="loader" id="chatsLoader">Загрузка чатов...</div>
+                <ul class="user-list" id="chatsList"></ul>
+                <div class="no-data" id="noChats">Нет чатов</div>
+            </div>
+
+            <!-- Мои лайки -->
+            <div id="my-likes" class="tab-pane">
+                <div class="loader" id="likesLoader">Загрузка лайков...</div>
+                <ul class="user-list" id="likesList"></ul>
+                <div class="no-data" id="noLikes">Вам никто не поставил лайк</div>
+            </div>
+
+            <!-- Кто лайкнул меня -->
+            <div id="who-liked-me" class="tab-pane">
+                <div class="loader" id="whoLikedLoader">Загрузка...</div>
+                <ul class="user-list" id="whoLikedList"></ul>
+                <div class="no-data" id="noWhoLiked">Вам еще никто не понравился</div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>© <span id="year"></span> Sparkle. Все права защищены.</p>
+    </footer>
+
+</div>
+<script th:src="@{js/chats-matches.js}" defer></script>
+
+</body>
+</html>

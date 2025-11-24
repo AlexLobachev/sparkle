@@ -1,269 +1,176 @@
+/**
+ * Скрипт управления профилем пользователя
+ * Полная версия с исправлением ошибок и единым стилем
+ */
 
+// Глобальные переменные
+window.currentPhotoIndex = 0;
+window.photos = [];
+window.interests = [];
 
+// Словарь переводов интересов
 const INTERESTS_TRANSLATIONS = {
-    "FOOTBALL": {
-        en: "Football",
-        ru: "Футбол"
-    },
-    "LITRBALL": {
-        en: "drunkenness",
-        ru: "Пьянство"
-    },
-    "BASKETBALL": {
-        en: "Basketball",
-        ru: "Баскетбол"
-    },
-    "TENNIS": {
-        en: "Tennis",
-        ru: "Теннис"
-    },
-    "SWIMMING": {
-        en: "Swimming",
-        ru: "Плавание"
-    },
-    "GYM": {
-        en: "Gym",
-        ru: "Тренажёрный зал"
-    },
-    "PAINTING": {
-        en: "Painting",
-        ru: "Рисование"
-    },
-    "MUSIC": {  // Вероятно, опечатка: должно быть "MUSIC" → "MUSIC"?
-        en: "Music",
-        ru: "Музыка"
-    },
-    "DANCE": {
-        en: "Dance",
-        ru: "Танцы"
-    },
-    "WRITING": {
-        en: "Writing",
-        ru: "Писательство"
-    },
-    "COOKING": {
-        en: "Cooking",
-        ru: "Кулинария"
-    },
-    "PHOTOGRAPHY": {
-        en: "Photography",
-        ru: "Фотография"
-    },
-    "READING": {
-        en: "Reading",
-        ru: "Чтение"
-    },
-    "TRAVEL": {
-        en: "Travel",
-        ru: "Путешествия"
-    },
-    "PROGRAMMING": {  // Опечатка: "PROGRAMMING" → "PROGRAMMING"?
-        en: "Programming",
-        ru: "Программирование"
-    },
-    "LANGUAGES": {
-        en: "Languages",
-        ru: "Языки"
-    },
-    "SCIENCE": {
-        en: "Science",
-        ru: "Наука"
-    },
-    "BUSINESS": {
-        en: "Business",
-        ru: "Бизнес"
-    },
-    "MOVIES": {
-        en: "Movies",
-        ru: "Фильмы"
-    },
-    "GAMING": {
-        en: "Gaming",
-        ru: "Гейминг"
-    },
-    "SOCIAL_MEDIA": {
-        en: "Social Media",
-        ru: "Соцсети"
-    },
-    "OTHER": {
-        en: "Other",
-        ru: "Другое"
-    }
+    "FOOTBALL": { ru: "Футбол", en: "Football" },
+    "LITRBALL": { ru: "Пьянство", en: "drunkenness" },
+    "BASKETBALL": { ru: "Баскетбол", en: "Basketball" },
+    "TENNIS": { ru: "Теннис", en: "Tennis" },
+    "SWIMMING": { ru: "Плавание", en: "Swimming" },
+    "GYM": { ru: "Тренажёрный зал", en: "Gym" },
+    "PAINTING": { ru: "Рисование", en: "Painting" },
+    "MUSIC": { ru: "Музыка", en: "Music" },
+    "DANCE": { ru: "Танцы", en: "Dance" },
+    "WRITING": { ru: "Писательство", en: "Writing" },
+    "COOKING": { ru: "Кулинария", en: "Cooking" },
+    "PHOTOGRAPHY": { ru: "Фотография", en: "Photography" },
+    "READING": { ru: "Чтение", en: "Reading" },
+    "TRAVEL": { ru: "Путешествия", en: "Travel" },
+    "PROGRAMMING": { ru: "Программирование", en: "Programming" },
+    "LANGUAGES": { ru: "Языки", en: "Languages" },
+    "SCIENCE": { ru: "Наука", en: "Science" },
+    "BUSINESS": { ru: "Бизнес", en: "Business" },
+    "MOVIES": { ru: "Фильмы", en: "Movies" },
+    "GAMING": { ru: "Гейминг", en: "Gaming" },
+    "SOCIAL_MEDIA": { ru: "Соцсети", en: "Social Media" },
+    "OTHER": { ru: "Другое", en: "Other" }
 };
 
-// Далее идут функции...
-
-
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        // 1. Валидация userId
-        const userId = window.currentUserId;
-        if (typeof userId !== 'number' || isNaN(userId) || userId <= 0) {
-            throw new Error('Некорректный ID пользователя ' + userId);
-        }
-
-        // 2. Получение CSRF-токена
-        const csrfToken = getCsrfToken();
-        if (!csrfToken) {
-            throw new Error('CSRF-токен не найден');
-        }
-
-        // 3. Загрузка ВСЕХ данных пользователя одним запросом
-        const user = await loadProfileData(userId, csrfToken);
-
-        // 4. Заполнение интерфейса данными из user
-        populateProfile(user);
-
-        // 5. Настройка обработчиков событий
-        setupEventListeners(userId, csrfToken);
-
-    } catch (error) {
-        console.error('Инициализация профиля не удалась:', error);
-        showError(error.message || 'Произошла ошибка при загрузке профиля');
-    }
-});
-
-// Получение CSRF-токена
-function getCsrfToken() {
-    const meta = document.querySelector('meta[name="csrf-token"]');
-    if (!meta) return null;
-    const token = meta.getAttribute('content');
-    return token && token.trim().length > 0 ? token.trim() : null;
+/**
+ * Резервный список интересов, если сервер не ответил
+ */
+function fallbackToHardcodedLabels() {
+    window.interestLabels = Object.values(INTERESTS_TRANSLATIONS).map(t => t.ru);
 }
 
-// Загрузка данных профиля (один запрос)
-async function loadProfileData(userId, csrfToken) {
-    showLoading(true);
+/**
+ * Загрузка меток интересов с сервера
+ */
+async function loadInterestLabels() {
     try {
-        const response = await fetch(`/sparkle/users/${userId}`, {
+        const response = await fetch('/sparkle/users/interests/all', {
             method: 'GET',
-            headers: {
-                'X-XSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            },
-            credentials: 'same-origin'
+            headers: { 'Accept': 'application/json' }
         });
 
-        if (!response.ok) {
-            const text = await response.text();
-            throw new Error(`HTTP ${response.status}: ${text}`);
+        if (response.ok) {
+            window.interestLabels = await response.json();
+            console.log('✅ Метки интересов загружены:', window.interestLabels);
+        } else {
+            console.warn('⚠️ Не удалось загрузить метки интересов:', response.status);
+            fallbackToHardcodedLabels();
         }
-
-        const user = await response.json();
-        return user;
-
     } catch (error) {
-        throw error;
-    } finally {
-        showLoading(false);
+        console.error('❌ Ошибка при загрузке меток интересов:', error);
+        fallbackToHardcodedLabels();
     }
 }
 
-// Заполнение интерфейса данными пользователя
-function populateProfile(user, language = 'ru') {
-    console.log('Полученные интересы:', user.interests);
+/**
+ * Инициализация при загрузке страницы
+ */
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!currentUserId) {
+        showError('Пользователь не авторизован');
+        return;
+    }
 
-    // Гарантируем, что interests — массив
-    const rawInterests = Array.isArray(user.interests) ? user.interests : [];
-    window.interests = normalizeInterests(rawInterests, language);
+    // Сохраняем CSRF-токен в глобальной переменной
+    window.csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-    console.log('Инициализированные интересы:', window.interests);
-
-
-    renderInterests();
-    populateInterestOptions(language);
-    // 1. Фото
-    window.photos = user.photos || [];
     window.currentPhotoIndex = 0;
+    window.interests = [];
 
+    // Загружаем метки интересов
+    await loadInterestLabels();
+
+    // Загружаем данные профиля
+    await loadUserData();
+
+    // Настраиваем обработчики событий
+    setupEventListeners();
+});
+
+/**
+ * Загрузка данных пользователя с сервера
+ */
+async function loadUserData() {
+    try {
+        const response = await fetch(`/sparkle/users/${currentUserId}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-XSRF-TOKEN': window.csrfToken
+            },
+            credentials: 'include'
+        });
+
+        if (!response.ok) throw new Error('Не удалось загрузить данные');
+        const user = await response.json();
+        renderProfile(user);
+    } catch (error) {
+        console.error('Ошибка при загрузке профиля:', error);
+        showError('Не удалось загрузить профиль');
+    }
+}
+
+/**
+ * Отображение данных профиля
+ */
+function renderProfile(user) {
+    window.photos = user.photos || [];
+    window.interests = Array.from(new Set(user.interests || [])); // Уникальные интересы
+    const aboutMe = document.getElementById('aboutMe');
+
+    // Фото
     if (window.photos.length > 0) {
         showCurrentPhoto();
         renderThumbnails();
+        updatePhotoIndicator();
     } else {
         resetPhotoDisplay();
     }
 
-    // 2. Интересы
-    window.interests = normalizeInterests(user.interests || [], language);
-    renderInterests();
-    populateInterestOptions(language); // Обновляем список доступных интересов
+    // Интересы
+    renderInterestList();
+    populateInterestSelect();
 
-    // 3. «О себе»
-    const aboutMe = document.getElementById('aboutMe');
+    // О себе
     if (aboutMe) {
         aboutMe.value = user.aboutMe || '';
     }
-
-    // 4. Дополнительно: можно заполнить другие поля (имя, email и т.п.)
-    // Например:
-    // document.getElementById('username').textContent = user.username;
-    // document.getElementById('email').textContent = user.email;
 }
 
-// Остальные функции (без изменений)
-function showLoading(isLoading) {
-    const spinner = document.getElementById('loadingSpinner');
-    if (spinner) {
-        spinner.style.display = isLoading ? 'block' : 'none';
-    }
-}
-
-function showError(message) {
-    const messages = document.getElementById('messages');
-    messages.innerHTML = `
-        <div class="alert alert-error">${message}</div>
-    `;
-}
-
-function showMessage(text, type) {
-    const messages = document.getElementById('messages');
-    messages.innerHTML = '';
-    const msg = document.createElement('div');
-    msg.className = `alert alert-${type}`;
-    msg.textContent = text;
-    messages.appendChild(msg);
-
-    setTimeout(() => {
-        msg.remove();
-    }, 3000);
-}
-
-// Функции для работы с фото (без изменений)
+/**
+ * Сброс отображения фото
+ */
 function resetPhotoDisplay() {
     const currentPhoto = document.getElementById('currentPhoto');
-    const likesCount = document.querySelector('.likes-count');
-    const thumbnails = document.querySelector('.thumbnails');
-    const deleteBtn = document.getElementById('deleteBtn');
-
-    currentPhoto.src = '';
-    currentPhoto.alt = 'Фото не загружено';
-    likesCount.textContent = '0 лайков';
-    thumbnails.innerHTML = '';
-    deleteBtn.disabled = true;
+    currentPhoto.style.backgroundImage = 'url(https://placehold.co/400x400/CCCCCC/FFFFFF?text=Нет+фото)';
+    document.getElementById('deleteBtn').disabled = true;
+    document.getElementById('thumbnails').innerHTML = '';
+    document.getElementById('photoIndicator').innerHTML = '';
 }
 
+/**
+ * Показ текущего фото
+ */
 function showCurrentPhoto() {
     if (window.photos.length === 0) return;
-
     const photo = window.photos[window.currentPhotoIndex];
     const currentPhoto = document.getElementById('currentPhoto');
-    const likesCount = document.querySelector('.likes-count');
-
-    currentPhoto.src = photo.url;
-    currentPhoto.alt = photo.fileName || 'Фото';
-    likesCount.textContent = `${photo.likes || 0} лайков`;
-
+    currentPhoto.style.backgroundImage = `url('${photo.url}')`;
     document.getElementById('deleteBtn').disabled = false;
 }
 
+/**
+ * Рендер миниатюр
+ */
 function renderThumbnails() {
-    const thumbnails = document.querySelector('.thumbnails');
+    const thumbnails = document.getElementById('thumbnails');
     thumbnails.innerHTML = '';
-
     window.photos.forEach((photo, index) => {
         const img = document.createElement('img');
         img.src = photo.url;
-        img.alt = photo.fileName || 'Миниатюра';
+        img.alt = 'Миниатюра';
         img.className = 'thumbnail';
         img.dataset.index = index;
         img.addEventListener('click', () => {
@@ -274,433 +181,304 @@ function renderThumbnails() {
     });
 }
 
-// Функции для работы с интересами (без изменений)
-// В функции renderInterests()
-function renderInterests() {
-    const interestList = document.querySelector('.interest-list');
-    interestList.innerHTML = '';
-
-    window.interests.forEach(interest => {
-        const div = document.createElement('div');
-        div.className = 'interest-tag';
-        div.textContent = interest.name;
-
-        // Передаём interest.key (например, "FOOTBALL")
-        const removeBtn = document.createElement('span');
-        removeBtn.className = 'remove-interest';
-        removeBtn.textContent = '×';
-        removeBtn.addEventListener('click', () => removeInterest(interest.key));
-
-        div.appendChild(removeBtn);
-        interestList.appendChild(div);
+/**
+ * Обновление индикатора слайдера
+ */
+function updatePhotoIndicator() {
+    const indicator = document.getElementById('photoIndicator');
+    if (!indicator) return;
+    indicator.innerHTML = '';
+    window.photos.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = i === window.currentPhotoIndex ? 'photo-dot active' : 'photo-dot';
+        indicator.appendChild(dot);
     });
 }
 
+/**
+ * Рендер списка интересов с крестиками
+ */
+function renderInterestList() {
+    const container = document.getElementById('interestList');
 
+    // ✅ Очищаем контейнер — это важно
+    container.innerHTML = '';
 
-async function populateInterestOptions() {
-    const interestSelect = document.getElementById('interestSelect');
-
-    try {
-        const response = await fetch('/sparkle/users/interests/all', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': getCsrfToken()
-            }
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP ${response.status}: ${errorText}`);
-        }
-
-        // Получаем массив строк ["Футбол", "Баскетбол", ...]
-        const allInterests = await response.json();
-
-        if (!Array.isArray(allInterests)) {
-            throw new Error('Сервер вернул не массив');
-        }
-
-        interestSelect.innerHTML = '<option value="">Выбрать интересы (можно несколько)</option>';
-
-        allInterests.forEach(interestLabel => {
-            // Находим ключ enum по названию интереса
-            const interestKey = Object.keys(INTERESTS_TRANSLATIONS)
-                .find(key => INTERESTS_TRANSLATIONS[key].ru === interestLabel);
-
-            // Проверяем, есть ли интерес уже у пользователя
-            const isAlreadyAdded = window.interests.some(userInterest =>
-                userInterest.key === interestKey
-            );
-
-            if (!isAlreadyAdded && interestKey) {
-                const option = document.createElement('option');
-                option.value = interestKey;
-                option.textContent = interestLabel;
-                interestSelect.appendChild(option);
-            }
-        });
-
-    } catch (error) {
-        console.error('Ошибка при загрузке списка интересов:', error);
-        showMessage(`Не удалось загрузить список интересов: ${error.message}`, 'error');
+    if (!window.interests.length) {
+        const span = document.createElement('span');
+        span.textContent = 'Нет интересов';
+        span.style.color = '#999';
+        container.appendChild(span);
+        return;
     }
+
+    // Убираем дубликаты на всякий случай (хотя не должны быть)
+    const uniqueInterests = [...new Set(window.interests)];
+
+    uniqueInterests.forEach(interestKey => {
+        const label = window.interestLabels?.[interestKey] ||
+            INTERESTS_TRANSLATIONS[interestKey]?.ru ||
+            interestKey;
+
+        const tag = document.createElement('div');
+        tag.className = 'interest-tag';
+        tag.textContent = label;
+
+        const remove = document.createElement('span');
+        remove.className = 'remove-interest';
+        remove.textContent = '×';
+        remove.onclick = () => removeInterest(interestKey);
+        tag.appendChild(remove);
+
+        container.appendChild(tag);
+    });
 }
 
-function updateInterestSelect(normalizedInterests) {
-    const interestSelect = document.getElementById('interestSelect');
-    interestSelect.innerHTML = '<option value="">Выбрать интерес</option>';
+/**
+ * Заполнение выпадающего списка интересов
+ */
+function populateInterestSelect() {
+    const select = document.getElementById('interestSelect');
 
-    normalizedInterests.forEach(interest => {
-        const isAlreadyAdded = window.interests.some(userInterest =>
-            userInterest.normalized === interest.normalized
-        );
+    // ✅ Очищаем выпадающий список
+    select.innerHTML = '<option value="">Выбрать интересы</option>';
 
-        if (!isAlreadyAdded) {
+    if (!window.interestLabels || typeof window.interestLabels !== 'object' || Array.isArray(window.interestLabels)) {
+        console.warn('window.interestLabels не является объектом');
+        return;
+    }
+
+    // Фильтруем только те, которых ещё нет
+    Object.keys(window.interestLabels).forEach(key => {
+        if (!window.interests.includes(key)) {
             const option = document.createElement('option');
-            option.value = interest.key;
-            option.textContent = interest.name;
-            interestSelect.appendChild(option);
+            option.value = key;
+            option.textContent = window.interestLabels[key];
+            select.appendChild(option);
         }
     });
 }
 
 
-
-function normalizeInterests(rawInterests, language = 'ru') {
-    if (!Array.isArray(rawInterests)) return [];
-
-
-    return rawInterests.map((interestKey, index) => {
-        const translation = INTERESTS_TRANSLATIONS[interestKey] || {en: interestKey, ru: interestKey};
-        return {
-            id: index,
-            key: interestKey,
-            originalId: interestKey, // Сохраняем исходный идентификатор
-            name: translation[language] || translation.en,
-            normalized: interestKey.toLowerCase()
-        };
-    });
-}
-
-
-// Обработчики событий (без изменений)
-async function setupEventListeners(userId, csrfToken) {
-    const uploadBtn = document.getElementById('uploadBtn');
-    const deleteBtn = document.getElementById('deleteBtn');
-    const addInterestBtn = document.getElementById('addInterestBtn');
-    const saveAboutBtn = document.getElementById('saveAboutBtn');
-    const backBtn = document.getElementById('backBtn');
-    const interestSelect = document.getElementById('interestSelect');
-
-    // Загрузка нового фото
-    uploadBtn.addEventListener('click', () => {
-        const photoInput = document.getElementById('photoInput');
-        photoInput.click();
-    });
-
-    // Обработка выбора файла
-    document.getElementById('photoInput').addEventListener('change', async (e) => {
-        await handlePhotoUpload(e, userId, csrfToken);
-    });
-
-    // Удаление фото
-    deleteBtn.addEventListener('click', async () => {
-        await removePhoto(userId, csrfToken);
-    });
-
-    // Добавление интереса
-
-    addInterestBtn.addEventListener('click', async () => {
-        const selectedOptions = document.querySelectorAll('#interestSelect option:checked');
-
-        if (selectedOptions.length === 0) {
-            showMessage('Выберите хотя бы один интерес', 'error');
-            return;
-        }
-
-        const interestKeys = Array.from(selectedOptions).map(opt => opt.value);
-        await addInterests(userId, interestKeys, csrfToken);
-    });
-
-
-
-    async function addInterests(userId, interestKeys, csrfToken) {
-        try {
-            const requestBody = interestKeys.map(key => ({
-                interest: key,
-                userId: userId
-            }));
-
-            const response = await fetch('/sparkle/users/interests/create-all', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-XSRF-TOKEN': csrfToken
-                },
-                body: JSON.stringify(requestBody)
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP ${response.status}: ${errorText}`);
-            }
-
-            const newInterests = await response.json();
-
-            // 1. Нормализуем ответ сервера (в зависимости от формата)
-            let interestNames = [];
-            if (Array.isArray(newInterests)) {
-                if (typeof newInterests[0] === 'string') {
-                    interestNames = newInterests; // ["Футбол", "Баскетбол"]
-                } else if (newInterests[0].name) {
-                    interestNames = newInterests.map(item => item.name); // из объектов
-                }
-            } else if (newInterests?.interests) {
-                interestNames = newInterests.interests; // из объекта { interests: [...] }
-            }
-
-            if (!interestNames.length) {
-                throw new Error('Сервер не вернул интересы');
-            }
-
-            // 2. Добавляем только уникальные интересы
-            interestNames.forEach(interestName => {
-                // Проверяем, есть ли уже такой интерес
-                const isDuplicate = window.interests.some(existing =>
-                    existing.name === interestName
-                );
-
-                if (!isDuplicate) {
-                    const interestKey = Object.keys(INTERESTS_TRANSLATIONS)
-                        .find(key => INTERESTS_TRANSLATIONS[key].ru === interestName);
-
-                    window.interests.push({
-                        key: interestKey || interestName,
-                        name: interestName,
-                        normalized: interestName.toLowerCase()
-                    });
-                }
-            });
-
-            renderInterests();
-            populateInterestOptions();
-            showMessage(`Добавлено ${interestNames.length} новых интересов`, 'success');
-
-        } catch (error) {
-            console.error('Ошибка при добавлении интересов:', error);
-            showMessage(`Не удалось добавить интересы: ${error.message}`, 'error');
-        }
-    }
-
-
-
-
-
-
-
-    // Сохранение информации «О себе»
-    saveAboutBtn.addEventListener('click', async () => {
-        const aboutText = document.getElementById('aboutMe').value.trim();
-        await updateAboutMe(userId, aboutText, csrfToken);
-    });
-
-    // Кнопка «Назад»
-    if (backBtn) {
-        backBtn.addEventListener('click', () => {
-            window.location.href = '/main';
-        });
-    }
-}
-
-// Обработка загрузки фото
-async function handlePhotoUpload(event, userId, csrfToken) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Проверка размера (5 МБ)
-    if (file.size > 5 * 1024 * 1024) {
-        showMessage('Файл слишком большой (максимум 5 МБ)', 'error');
-        return;
-    }
-
-    // Проверка количества фото (максимум 5)
-    if (window.photos.length >= 5) {
-        showMessage('Можно загрузить не более 5 фотографий', 'error');
-        return;
-    }
-
-    try {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const response = await fetch('/sparkle/users/photo/upload-photo', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-XSRF-TOKEN': csrfToken
-            }
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP ${response.status}: ${errorText}`);
-        }
-
-        const newPhoto = await response.json();
-        window.photos.push(newPhoto);
-        showCurrentPhoto();
-        renderThumbnails();
-        showMessage('Фото загружено успешно', 'success');
-    } catch (error) {
-        console.error('Ошибка при загрузке фото:', error);
-        showMessage(`Не удалось загрузить фото: ${error.message}`, 'error');
-    }
-}
-
-// Удаление фото
-
-async function removePhoto(userId, csrfToken) {
-    if (window.currentPhotoIndex >= window.photos.length) return;
-
-    const photoId = window.photos[window.currentPhotoIndex].id;
-
-    try {
-        const response = await fetch(`/sparkle/users/photo/remove-photo/photos/${photoId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': csrfToken
-            },
-            body: JSON.stringify({
-                userId: userId  // Добавляем userId в тело запроса
-            })
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP ${response.status}: ${errorText}`);
-        }
-
-        window.photos.splice(window.currentPhotoIndex, 1);
-        if (window.photos.length > 0) {
-            window.currentPhotoIndex = Math.max(0, window.currentPhotoIndex - 1);
-            showCurrentPhoto();
-        } else {
-            resetPhotoDisplay();
-        }
-        renderThumbnails();
-        showMessage('Фото удалено', 'success');
-    } catch (error) {
-        console.error('Ошибка при удалении фото:', error);
-        showMessage(`Не удалось удалить фото: ${error.message}`, 'error');
-    }
-}
-
-// Добавление интереса
-async function addInterest(userId, interestId, csrfToken) {
-    try {
-        const response = await fetch('/sparkle/users/interests/create-all', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': csrfToken
-            },
-            body: JSON.stringify({
-                userId: userId,
-                interestId: interestId
-            })
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP ${response.status}: ${errorText}`);
-        }
-
-        const newInterest = await response.json();
-        window.interests.push(newInterest);
-        renderInterests();
-        populateInterestOptions();
-        showMessage('Интерес добавлен успешно', 'success');
-    } catch (error) {
-        console.error('Ошибка при добавлении интереса:', error);
-        showMessage(`Не удалось добавить интерес: ${error.message}`, 'error');
-    }
-}
-
-// Удаление интереса
-
-async function removeInterest(interestKey) { // Изменили имя параметра на interestKey
-    const csrfToken = getCsrfToken();
-
+/**
+ * Удаление интереса — без confirm()
+ */
+async function removeInterest(interestKey) {
+    // Удаляем без подтверждения
     try {
         const response = await fetch(`/sparkle/users/interests/delete/${interestKey}`, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': csrfToken
-            }
+                'Accept': 'application/json',
+                'X-XSRF-TOKEN': window.csrfToken
+            },
+            credentials: 'include'
         });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP ${response.status}: ${errorText}`);
+        if (response.ok) {
+            window.interests = window.interests.filter(i => i !== interestKey);
+            renderInterestList();
+            populateInterestSelect();
+            showMessage('Интерес удалён', 'success');
+        } else {
+            throw new Error('Не удалось удалить');
         }
-
-        // Удаляем интерес из локального массива по ключу
-        window.interests = window.interests.filter(interest => interest.key !== interestKey);
-
-        renderInterests();
-        populateInterestOptions();
-        showMessage('Интерес удалён успешно', 'success');
-
     } catch (error) {
-        console.error('Ошибка при удалении интереса:', error);
-        showMessage(`Не удалось удалить интерес: ${error.message}`, 'error');
+        showMessage('Ошибка при удалении', 'error');
     }
 }
-function setLanguage(lang) {
-    const currentUserId = window.currentUserId;
-    const csrfToken = getCsrfToken();
 
-    // Перезагружаем профиль с новым языком
-    populateProfile(window.userProfileData, lang);
+/**
+ * Настройка обработчиков событий
+ */
+function setupEventListeners() {
+    document.getElementById('backBtn')?.addEventListener('click', () => {
+        window.location.href = '/main';
+    });
 
-    // Обновляем список выбора
-    populateInterestOptions(lang);
+    document.getElementById('prevPhoto')?.addEventListener('click', () => {
+        if (window.photos.length <= 1) return;
+        window.currentPhotoIndex = (window.currentPhotoIndex - 1 + window.photos.length) % window.photos.length;
+        showCurrentPhoto();
+        updatePhotoIndicator();
+    });
+
+    document.getElementById('nextPhoto')?.addEventListener('click', () => {
+        if (window.photos.length <= 1) return;
+        window.currentPhotoIndex = (window.currentPhotoIndex + 1) % window.photos.length;
+        showCurrentPhoto();
+        updatePhotoIndicator();
+    });
+
+    document.getElementById('uploadBtn')?.addEventListener('click', () => {
+        document.getElementById('photoInput').click();
+    });
+
+    document.getElementById('photoInput')?.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        await handlePhotoUpload(file);
+    });
+
+    document.getElementById('deleteBtn')?.addEventListener('click', async () => {
+        await removePhoto();
+    });
+
+    document.getElementById('addInterestBtn')?.addEventListener('click', async () => {
+        const selected = Array.from(document.getElementById('interestSelect').selectedOptions)
+            .map(o => o.value);
+        if (selected.length === 0) {
+            showMessage('Выберите интересы', 'error');
+            return;
+        }
+        await addInterests(selected);
+    });
+
+    document.getElementById('saveAboutBtn')?.addEventListener('click', async () => {
+        const text = document.getElementById('aboutMe').value.trim();
+        const data = text === '' ? null : text;
+        await updateAboutMe(data);
+    });
 }
 
-// Обработчик кнопки смены языка
-document.getElementById('lang-toggle').addEventListener('click', () => {
-    const currentLang = document.documentElement.lang || 'en';
-    const newLang = currentLang === 'ru' ? 'en' : 'ru';
+/**
+ * Загрузка фото
+ */
+async function handlePhotoUpload(file) {
+    if (file.size > 5 * 1024 * 1024) {
+        return showMessage('Файл слишком большой (макс 5 МБ)', 'error');
+    }
+    if (window.photos.length >= 5) {
+        return showMessage('Можно загрузить не более 5 фото', 'error');
+    }
 
-    document.documentElement.lang = newLang;
-    setLanguage(newLang);
-});
+    const fd = new FormData();
+    fd.append('file', file);
 
-
-// Обновление информации «О себе»
-async function updateAboutMe(userId, aboutText, csrfToken) {
     try {
-        const response = await fetch(`/sparkle/users/update-profile/${userId}`, {
+        const res = await fetch('/sparkle/users/photo/upload-photo', {
+            method: 'POST',
+            body: fd,
+            headers: { 'X-XSRF-TOKEN': window.csrfToken }
+        });
+
+        if (res.ok) {
+            const photo = await res.json();
+            window.photos.push(photo);
+            showCurrentPhoto();
+            renderThumbnails();
+            updatePhotoIndicator();
+            showMessage('Фото загружено', 'success');
+        } else {
+            throw new Error();
+        }
+    } catch (e) {
+        showMessage('Ошибка загрузки фото', 'error');
+    }
+}
+
+/**
+ * Удаление фото
+ */
+async function removePhoto() {
+    const photoId = window.photos[window.currentPhotoIndex].id;
+    try {
+        const res = await fetch(`/sparkle/users/photo/remove-photo/photos/${photoId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': window.csrfToken
+            },
+            body: JSON.stringify({ userId: currentUserId })
+        });
+
+        if (res.ok) {
+            window.photos.splice(window.currentPhotoIndex, 1);
+            if (window.photos.length === 0) {
+                resetPhotoDisplay();
+            } else {
+                window.currentPhotoIndex = Math.max(0, window.currentPhotoIndex - 1);
+                showCurrentPhoto();
+                updatePhotoIndicator();
+            }
+            renderThumbnails();
+            showMessage('Фото удалено', 'success');
+        } else {
+            throw new Error();
+        }
+    } catch (e) {
+        showMessage('Ошибка удаления', 'error');
+    }
+}
+
+/**
+ * Добавление интересов — правильная версия
+ */
+async function addInterests(keys) {
+    try {
+        const res = await fetch('/sparkle/users/interests/create-all', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': window.csrfToken
+            },
+            body: JSON.stringify(keys.map(key => ({ interest: key, userId: currentUserId })))
+        });
+
+        if (res.ok) {
+            // ✅ Перезагружаем весь профиль — это безопасно и надёжно
+            await loadUserData();
+            showMessage('Интересы добавлены', 'success');
+        } else {
+            throw new Error('Сервер вернул ошибку');
+        }
+    } catch (e) {
+        console.error('Ошибка при добавлении интересов:', e);
+        showMessage('Не удалось добавить интересы', 'error');
+    }
+}
+
+/**
+ * Обновление "О себе"
+ */
+async function updateAboutMe(text) {
+    try {
+        const res = await fetch(`/sparkle/users/update-profile`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': csrfToken
+                'X-XSRF-TOKEN': window.csrfToken
             },
-            body: JSON.stringify({aboutMe: aboutText})
+            body: JSON.stringify({ aboutMe: text })
         });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP ${response.status}: ${errorText}`);
+        if (res.ok) {
+            showMessage('Обновлено', 'success');
+        } else {
+            throw new Error();
         }
-
-        showMessage('Информация обновлена успешно', 'success');
-    } catch (error) {
-        console.error('Ошибка при сохранении информации о себе:', error);
-        showMessage(`Не удалось сохранить информацию: ${error.message}`, 'error');
+    } catch (e) {
+        showMessage('Ошибка сохранения', 'error');
     }
+}
+
+/**
+ * Показ сообщений
+ */
+function showMessage(text, type) {
+    const el = document.getElementById('messages');
+    el.innerHTML = `<div class="alert alert-${type}">${text}</div>`;
+    setTimeout(() => el.innerHTML = '', 3000);
+}
+
+/**
+ * Показ ошибки
+ */
+function showError(message) {
+    document.querySelector('.main-content').innerHTML = `
+        <div class="error" style="text-align:center; padding:2rem;">
+            <p>${message}</p>
+            <button onclick="window.location.href='/main'" class="action-btn">На главную</button>
+        </div>
+    `;
 }

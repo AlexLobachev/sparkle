@@ -5,126 +5,149 @@ import com.example.sparkle.sparkle.model.Status;
 import com.example.sparkle.sparkle.model.User;
 import com.example.sparkle.sparkle.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.csrf.CsrfToken;
-import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
+/**
+ * Главный контроллер для отображения страниц приложения.
+ * Объединяет маршруты для /main, /settings, /chats-matches и других.
+ * Использует единый шаблонизатор через метод settings(...).
+ */
 @Controller
 @Slf4j
-@Service
+@RequiredArgsConstructor // Убираем @Autowired с конструктором — более современный подход
 public class HomePage {
 
     private final UserService userService;
 
-
-    @Autowired
-    public HomePage(UserService userService) {
-        this.userService = userService;
-    }
-
-
+    /**
+     * Главная страница (до входа)
+     */
     @GetMapping("/")
     public String home() {
         return "entrance";
     }
 
-
+    /**
+     * Основная страница приложения после входа.
+     * Проверяет статус пользователя: если DRAFT — отправляет на донастройку профиля.
+     */
     @GetMapping("/main")
-    public String main(
-            @AuthenticationPrincipal UserDetails userDetails,
-            HttpServletRequest request,
-            Model model
-    )throws InterruptedException {
-
-        User user = userService.getUserByUserName(userDetails.getUsername()).orElseThrow(() -> new NotFound("Пользователь не найден"));
+    public String main(@AuthenticationPrincipal UserDetails userDetails,
+                       HttpServletRequest request,
+                       Model model) {
+        User user = userService.getUserByUserName(userDetails.getUsername())
+                .orElseThrow(() -> new NotFound("Пользователь не найден"));
 
         if (user.getStatus() == Status.DRAFT) {
-            return "registration";  // обратно к заполнению профиля
+            return settings(userDetails, request, model, "registration", null);
         }
 
-        return settings(userDetails, request, model, "main");
+        return settings(userDetails, request, model, "main", null);
     }
 
-
+    /**
+     * Настройка профиля во время регистрации
+     */
     @GetMapping("/settings/profile")
     public String profileSettingsDuringRegistration(@AuthenticationPrincipal UserDetails userDetails,
                                                     HttpServletRequest request,
-                                                    Model model
-    ) {
-        return settings(userDetails, request, model, "registration");
+                                                    Model model) {
+        return settings(userDetails, request, model, "registration", null);
     }
 
+    /**
+     * Настройка профиля после регистрации
+     */
     @GetMapping("/main/settings/profile")
     public String profileSettingsAfterRegistration(@AuthenticationPrincipal UserDetails userDetails,
                                                    HttpServletRequest request,
-                                                   Model model
-    ) {
-
-        return settings(userDetails, request, model, "settings");
+                                                   Model model) {
+        return settings(userDetails, request, model, "settings", null);
     }
 
+    /**
+     * Страница чатов и мэтчей
+     */
+    @GetMapping("/chats-matches")
+    public String chatsMatches(@AuthenticationPrincipal UserDetails userDetails,
+                               HttpServletRequest request,
+                               Model model) {
+        return settings(userDetails, request, model, "chats-matches", null);
+    }
+
+    /**
+     * Просмотр профиля другого пользователя
+     */
+    @GetMapping("/profile-user/{id}")
+    public String userProfile(@PathVariable Long id,
+                              @AuthenticationPrincipal UserDetails userDetails,
+                              HttpServletRequest request,
+                              Model model) {
+        return settings(userDetails, request, model, "profile-user", id);
+    }
+
+    /**
+     * Просмотр собственного профиля
+     */
     @GetMapping("/main/profile")
     public String profileUser(@AuthenticationPrincipal UserDetails userDetails,
                               HttpServletRequest request,
                               Model model) {
-        return settings(userDetails, request, model, "profile");
+        return settings(userDetails, request, model, "profile", null);
     }
 
+    /**
+     * Единый метод для настройки модели и возврата страницы.
+     *
+     * @param userDetails текущий пользователь
+     * @param request HTTP-запрос (для CSRF)
+     * @param model модель для передачи данных в шаблон
+     * @param page имя Thymeleaf-шаблона
+     * @param profileId ID пользователя, чей профиль просматривается (если есть)
+     * @return имя шаблона для отображения
+     */
     private String settings(UserDetails userDetails,
                             HttpServletRequest request,
                             Model model,
-                            String page) {
-        if (userDetails instanceof User) {
-            // Принудительно получаем CSRF-токен (если его нет — создаём)
-            CsrfToken csrfToken = (CsrfToken) request.getAttribute("_csrf");
-
-
-            if (csrfToken != null) {
-                model.addAttribute("_csrf", csrfToken);
-                // Явно передаём токен в шаблон
-                model.addAttribute("csrfToken", csrfToken.getToken());
-            }
-
-            if (csrfToken != null) {
-                model.addAttribute("_csrf", csrfToken);
-            } else {
-                return "redirect:/";
-            }
-
-            model.addAttribute("user", userDetails);
-
-            Long userId = ((User) userDetails).getId();
-            if (userId == null) {
-                throw new NotFound("ID пользователя не найден");
-            }
-            model.addAttribute("userId", userId);
-        } else {
-            throw new NotFound("Пользователь не авторизован");
+                            String page,
+                            Long profileId) {
+        // Извлечение CSRF-токена
+        Object csrfAttribute = request.getAttribute("_csrf");
+        if (!(csrfAttribute instanceof org.springframework.security.web.csrf.CsrfToken csrfToken)) {
+            log.warn("CSRF токен не найден в запросе: {}", request.getRequestURI());
+            return "redirect:/";
         }
+
+        // Проверка и извлечение ID текущего пользователя
+        if (!(userDetails instanceof User authenticatedUser)) {
+            throw new NotFound("Пользователь не авторизован или не является экземпляром User");
+        }
+        Long currentUserId = authenticatedUser.getId();
+        if (currentUserId == null) {
+            throw new NotFound("ID пользователя не найден");
+        }
+
+        // Передача данных в модель
+        model.addAttribute("_csrf", csrfToken);
+        model.addAttribute("csrfToken", csrfToken.getToken());
+        model.addAttribute("user", authenticatedUser);
+        model.addAttribute("userId", currentUserId);
+
+        // Передача ID профиля, если это страница просмотра профиля и ID другого пользователя
+        if (page.equals("profile-user") && profileId != null && !profileId.equals(currentUserId)) {
+            model.addAttribute("profileId", profileId);
+        }
+
         return page;
     }
 
-
-    @GetMapping("/refresh-csrf")
-    public String refreshCsrf(HttpServletRequest request) {
-        // Получаем CSRF-токен из атрибутов запроса
-        CsrfToken csrfToken = (CsrfToken) request.getAttribute("_csrf");
-
-        // Если токена нет — Spring Security сгенерирует его при следующем запросе,
-        // но для текущего ответа возвращаем пустую строку или дефолтное значение
-        if (csrfToken == null) {
-            return ""; // или можно вернуть дефолтный токен для клиента
-        }
-
-        return csrfToken.getToken();
-    }
-
-
+    // Удалён /refresh-csrf — он не нужен в обычном сценарии с Thymeleaf.
+    // CSRF-токен автоматически доступен в шаблонах через ${_csrf}.
 }

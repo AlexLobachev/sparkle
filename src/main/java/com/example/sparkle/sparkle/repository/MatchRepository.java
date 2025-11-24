@@ -1,7 +1,6 @@
 package com.example.sparkle.sparkle.repository;
 
 import com.example.sparkle.sparkle.model.Match;
-import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -26,13 +25,22 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     Set<Match> findLike(@Param("firstUser") Long firstUser, @Param("secondUser") Long secondUser);
 
 
+
     Match findByFirstUserIdAndSecondUserId(@Param("firstUser") Long firstUser, @Param("secondUser") Long secondUser);
 
     Match findBySecondUserIdAndFirstUserId(@Param("firstUser") Long firstUser, @Param("secondUser") Long secondUser);
 
     List<Match> findByFirstUserIdAndMatchStatus(Long userId, Boolean match);
 
-    List<Match> findBySecondUserIdAndMatchStatus(Long userId, Boolean match);
+    @Query(value = """
+            SELECT m.first_user_id
+                                         FROM matches m
+                                         JOIN users u on u.id = m.second_user_id
+                                         WHERE m.second_user_id = :userId AND m.match_status = :match;
+            """, nativeQuery = true)
+    List<Long> findSecondUsersByFirstUserIdAndMatchStatus(
+            Long userId, Boolean match
+    );
 
 
     void deleteByFirstUserIdAndSecondUserId(@Param("firstUser") Long firstUser, @Param("secondUser") Long secondUser);

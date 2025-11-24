@@ -4,20 +4,11 @@ import com.example.sparkle.sparkle.dto.CityDto;
 import com.example.sparkle.sparkle.model.City;
 import com.example.sparkle.sparkle.model.Interest;
 import com.example.sparkle.sparkle.model.User;
-import com.example.sparkle.sparkle.model.UserPhoto;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserMapper {
-    public static User toUser(User user, UserDtoUpdate userDtoUpdate) {
-        user.setGender(userDtoUpdate.getGender());
-        user.setPreferredGender(userDtoUpdate.getPreferredGender());
-        user.setEmail(userDtoUpdate.getEmail());
-        user.setBirthDate(userDtoUpdate.getBirthDate());
-        user.setAboutMe(userDtoUpdate.getAboutMe());
-        return user;
-    }
 
     public static User toUser(UserDtoRegister userDtoRegister) {
         User user = new User();
@@ -67,26 +58,7 @@ public class UserMapper {
         return userDtoUpdate;
     }
 
-    public static UserDto toUserDto(User user) {
-        List<Interest> interestList = new ArrayList<>();
-        List<UserPhotoDto> photoList = new ArrayList<>();
-        user.getInterests().forEach(interest -> interestList.add(interest.getInterest()));
-        UserDto userDto = new UserDto();
-        userDto.setId(user.getId());
-        userDto.setEmail(user.getEmail());
-        userDto.setUsername(user.getUsername());
-        userDto.setGender(user.getGender());
-        userDto.setPreferredGender(user.getPreferredGender());
-        userDto.setBirthDate(user.getBirthDate());
-        userDto.setAboutMe(user.getAboutMe());
-        userDto.setInterests(interestList);
-        user.getPhotos().forEach(photo -> photoList.add(toUserPhotoDto(photo)));
-        userDto.setPhotos(photoList);
-        if (user.getCity() != null)
-            userDto.setCity(toCityDto(user));
 
-        return userDto;
-    }
 
     public static UserDtoUpdate toUserDtoUpdate(User user) {
         UserDtoUpdate userDtoUpdate = new UserDtoUpdate();
@@ -102,34 +74,10 @@ public class UserMapper {
         return userDtoUpdate;
     }
 
-    public static UserPhotoDto toUserPhotoDto(UserPhoto userPhoto) {
-        UserPhotoDto userPhotoDto = new UserPhotoDto();
-        userPhotoDto.setId(userPhoto.getPhoto().getId());
-        userPhotoDto.setUrl("/images/" + userPhoto.getPhoto().getFileName());
-        userPhotoDto.setFileName(userPhoto.getPhoto().getFileName());
-        return userPhotoDto;
-    }
 
-    public static User toUser(UserDto userDto) {
-        User user = new User();
-        City city = new City();
-        if (userDto.getCity() != null) {
-            city.setId(userDto.getCity().getCityId());
-        }
-        user.setId(userDto.getId());
-        user.setUsername(user.getUsername());
-        user.setGender(userDto.getGender());
-        user.setPreferredGender(userDto.getPreferredGender());
-        user.setBirthDate(userDto.getBirthDate());
-        user.setAboutMe(user.getAboutMe());
-        user.setCity(city);
-        return user;
-    }
 
-    public static CityDto toCityDto(User user) {
-        CityDto cityDto = new CityDto();
-        cityDto.setCityName(user.getCity().getName());
-        return cityDto;
-    }
+
+
+
 
 }

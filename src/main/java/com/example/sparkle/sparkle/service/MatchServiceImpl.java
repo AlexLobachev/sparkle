@@ -1,7 +1,8 @@
 package com.example.sparkle.sparkle.service;
 
-import com.example.sparkle.sparkle.dto.user.UserDto;
-import com.example.sparkle.sparkle.dto.user.UserMapper;
+import com.example.sparkle.sparkle.dto.match.MatchDto;
+import com.example.sparkle.sparkle.dto.match.MatchMapper;
+import com.example.sparkle.sparkle.dto.user.UserMatchDto;
 import com.example.sparkle.sparkle.exception.BadRequest;
 import com.example.sparkle.sparkle.exception.Conflict;
 import com.example.sparkle.sparkle.exception.NoContent;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -52,7 +54,7 @@ public class MatchServiceImpl implements MatchService {
      * Получить следующий кандидат для свайпа
      */
 
-    public UserDto getNextCandidate(double distance, Pageable pageable) {
+    public UserMatchDto getNextCandidate(double distance, Pageable pageable) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetails currentUser = (UserDetails) auth.getPrincipal();
         User user = userService.getUserByUserName(currentUser.getUsername())
@@ -61,9 +63,9 @@ public class MatchServiceImpl implements MatchService {
 
         distance = distance / 100;
 
-        if (user.getCity() == null) {
-            return getNextCandidateOffCity(user, pageable);
-        }
+        //if (user.getCity() == null) {
+        //    return getNextCandidateOffCity(user, pageable);
+        //}
 
         double x = user.getCity().getLocation().getCoordinate().x;
         double y = user.getCity().getLocation().getCoordinate().y;
@@ -76,8 +78,9 @@ public class MatchServiceImpl implements MatchService {
         CandidateBatch batch = candidateBatchRepository.findByUserIdAndExpiresAtAfter(
                 user.getId(), LocalDateTime.now()
         ).orElseGet(() -> {
-            List<Long> newBatch = fetchNewCandidateBatch(x, y, finalDistance, user, interests);
 
+            List<Long> newBatch = fetchNewCandidateBatch(x, y, finalDistance, user, interests);
+            log.debug(">>>>>>>>>>>"+newBatch.toString());
             if (newBatch.isEmpty()) {
                 throw new NoContent("Нет кандидатов для формирования пачки");
             }
@@ -110,20 +113,20 @@ public class MatchServiceImpl implements MatchService {
 
         // Возвращаем DTO кандидата
         return userRepository.findById(candidateId)
-                .map(UserMapper::toUserDto)
+                .map(UserMatchDto::toUserMatchDto)
                 .orElseThrow(() -> new NoContent("Кандидат не найден"));
     }
-
 
 
     /**
      * Получить следующий кандидат для свайпа (если пользователь не указывал город, гендер, интересы)
      */
-    private UserDto getNextCandidateOffCity(User user, Pageable pageable) {
+    private UserMatchDto getNextCandidateOffCity(User user, Pageable pageable) {
         List<String> interests = new ArrayList<>();
         user.getInterests().forEach(e -> interests.add(e.getInterest().toString()));
         Page<User> candidates = userRepository.findUsersOffLocation(user.getPreferredGender().toString(), interests, user.getId(), pageable);
-        return candidates.get().map(UserMapper::toUserDto).findFirst().orElseThrow(() -> new NoContent("Нет доступных кандидатов"));
+        //return candidates.get().map(MatchMapper::toMathDto).findFirst().orElseThrow(() -> new NoContent("Нет доступных кандидатов"));
+        return candidates.get().map(UserMatchDto::toUserMatchDto).findFirst().orElseThrow(() -> new NoContent("Нет доступных кандидатов"));
 
     }
 
@@ -131,8 +134,9 @@ public class MatchServiceImpl implements MatchService {
     /**
      * Выразить симпатию пользователю
      */
+    @PreAuthorize("hasRole('ROLE_USER')")
     @Transactional
-    public User likeUser(Long secondUser) {
+    public UserMatchDto likeUser(Long secondUser) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetails currentUser = (UserDetails) auth.getPrincipal();
         User user1 = userService.getUserByUserName(currentUser.getUsername())
@@ -142,8 +146,8 @@ public class MatchServiceImpl implements MatchService {
             throw new BadRequest("Первый пользователь равен второму");
         }
 
-        User user2 = UserMapper.toUser(userService.getUserById(secondUser)
-                .orElseThrow(() -> new NotFound("User " + secondUser + " not found")));
+        User user2 = userRepository.findById(secondUser)
+                .orElseThrow(() -> new NotFound("User " + secondUser + " not found"));
 
 
         Optional<Match> existingMatch = Optional.ofNullable(matchRepository
@@ -171,7 +175,7 @@ public class MatchServiceImpl implements MatchService {
             matchRepository.update(user1.getId(), secondUser);
         }
 
-        return user2;
+        return UserMatchDto.toUserMatchDto(user2);
 
     }
 
@@ -180,36 +184,48 @@ public class MatchServiceImpl implements MatchService {
      * Посмотреть список текущих matches
      */
 
-    public List<Match> getCurrentMatches(Long userId) {
-        userService.getUserById(userId);
-        List<Match> matches = matchRepository.findByFirstUserIdAndMatchStatus(userId, true);
+    public List<MatchDto> getCurrentMatches() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails currentUser = (UserDetails) auth.getPrincipal();
+        User user = userService.getUserByUserName(currentUser.getUsername())
+                .orElseThrow(() -> new NotFound("Пользователь не найден"));
+
+        List<Match> matches = matchRepository.findByFirstUserIdAndMatchStatus(user.getId(), true);
+
         if (matches.isEmpty())
             throw new NoContent();
-        return matches;
+        return matches.stream().map(MatchMapper::toMathDto).toList();
     }
 
     /**
      * Посмотреть список кому поставил лайк
      */
 
-    public List<Match> getYourLikesUser(Long userId) {
-        userService.getUserById(userId);
-        List<Match> matches = matchRepository.findByFirstUserIdAndMatchStatus(userId, false);
+    public List<MatchDto> getYourLikesUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails currentUser = (UserDetails) auth.getPrincipal();
+        User user = userService.getUserByUserName(currentUser.getUsername())
+                .orElseThrow(() -> new NotFound("Пользователь не найден"));
+        List<Long> matches = matchRepository.findSecondUsersByFirstUserIdAndMatchStatus(user.getId(), false);
         if (matches.isEmpty())
             throw new NoContent();
-        return matches;
+        return userRepository.findAllById(matches).stream().map(MatchMapper::toMathDto).toList();
     }
 
     /**
      * Посмотреть кому я понравился
      */
 
-    public List<Match> getWhoLikedIt(Long userId) {
-        userService.getUserById(userId);
-        List<Match> matches = matchRepository.findBySecondUserIdAndMatchStatus(userId, false);
+    public List<MatchDto> getWhoLikedIt() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails currentUser = (UserDetails) auth.getPrincipal();
+        User user = userService.getUserByUserName(currentUser.getUsername())
+                .orElseThrow(() -> new NotFound("Пользователь не найден"));
+
+        List<Match> matches = matchRepository.findByFirstUserIdAndMatchStatus(user.getId(), false);
         if (matches.isEmpty())
             throw new NoContent();
-        return matches;
+        return matches.stream().map(MatchMapper::toMathDto).toList();
     }
 
     /**
@@ -231,11 +247,16 @@ public class MatchServiceImpl implements MatchService {
 
     private List<Long> fetchNewCandidateBatch(
             double x, double y, double distance, User user, List<String> interests) {
-
+        log.debug(">>>>>>>>>>>"+x);
+        log.debug(">>>>>>>>>>>"+y);
+        log.debug(">>>>>>>>>>>"+distance);
+        log.debug(">>>>>>>>>>>"+user.getId());
+        log.debug(">>>>>>>>>>>"+interests);
         Set<Long> excludedIds = new HashSet<>(
                 candidateBatchRepository.findAllCandidateIdsByUserId(user.getId())
         );
         excludedIds.add(user.getId());
+        log.debug(">>>>>>>>>>>excludedIds"+excludedIds.toString());
 
         // Дополнительно исключаем кандидатов из текущей активной пачки
         Optional<CandidateBatch> currentBatch = candidateBatchRepository
@@ -250,6 +271,7 @@ public class MatchServiceImpl implements MatchService {
                 excludedIds.stream().toList()
         );
     }
+
     private void saveBatch(CandidateBatch batch) {
         // Удаляем дубликаты из списка
         Set<Long> uniqueIds = new LinkedHashSet<>(batch.getCandidateIds());
@@ -257,7 +279,6 @@ public class MatchServiceImpl implements MatchService {
 
         candidateBatchRepository.save(batch);
     }
-
 
 
 }
