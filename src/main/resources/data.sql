@@ -60,9 +60,10 @@
 --    created_at     date,
 --    first_user_id  INTEGER REFERENCES users (id),
 --    second_user_id INTEGER REFERENCES users (id),
---    match_status   boolean DEFAULT FALSE
+--    match_status   varchar(10)
 --
 --);
+
 --CREATE UNIQUE INDEX idx_unique_match
 --    ON matches (first_user_id, second_user_id);
 --
@@ -158,6 +159,10 @@
 --CREATE INDEX idx_candidate_batch_candidates_id ON candidate_batch_candidates (candidate_id);
 
 
+
+
+--ALTER TABLE candidate_batch ADD COLUMN create_at TIMESTAMP DEFAULT NOW();
+
 --
 --INSERT INTO users (username,
 --                   email,
@@ -199,13 +204,7 @@
 --from matches
 --where first_user_id = 10;
 --
-DELETE
-from candidate_batch
-where user_id = 10;
-DELETE
-from candidate_batch_candidates
-where candidate_id = 1
-  and candidate_id = 2;
+
 --
 --insert into matches (first_user_id, second_user_id, match_status) values (10, 2, false);
 
@@ -267,13 +266,25 @@ WHERE (sender_id = 1 AND receiver_id = 10)
 --FROM matches
 --WHERE (first_user_id = 1 AND second_user_id = 10)
 --   OR (first_user_id = 10 AND second_user_id = 1);
---TRUNCATE  TABLE  messages cascade;
+
+--TRUNCATE  TABLE  matches cascade;
 --delete  from deleted_chats where user_id = 10;
 --delete  from chats where sender_id = 10;
 --delete from matches where second_user_id = 2;
+--delete from matches where second_user_id = 2;
+--delete from matches where second_user_id = 3;
+--delete from matches where second_user_id = 4;
+delete from matches where first_user_id = 3 and second_user_id = 10 and match_status = 'LIKE';
+
 SELECT *
 FROM chats
 WHERE (
               (sender_id = 10 AND receiver_id != 10)
               OR
               (receiver_id = 10 AND sender_id != 10));
+
+
+SELECT second_user_id, match_status, first_user_id
+FROM matches
+WHERE match_status IN ('LIKE', 'MATCHED')
+  AND first_user_id = 10;  -- замените 123 на реальный ID пользователя

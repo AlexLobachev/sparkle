@@ -31,16 +31,19 @@ public class Match {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     @Column(name = "match_status")
-    private Boolean matchStatus = false;
+    @Enumerated(EnumType.STRING)
+    private MatchStatus matchStatus;
 
-
+    public enum MatchStatus {
+        LIKE, DISLIKE, MATCHED
+    }
 
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Match match1)) return false;
-        return getId().equals(match1.getId()) && getFirstUser().equals(match1.getFirstUser()) && getSecondUser().equals(match1.getSecondUser()) && getCreatedAt().equals(match1.getCreatedAt()) && getMatchStatus().equals(match1.getMatchStatus());
+        if (!(o instanceof Match match)) return false;
+        return Objects.equals(getId(), match.getId()) && Objects.equals(getFirstUser(), match.getFirstUser()) && Objects.equals(getSecondUser(), match.getSecondUser()) && Objects.equals(getCreatedAt(), match.getCreatedAt()) && getMatchStatus() == match.getMatchStatus();
     }
 
     @Override
