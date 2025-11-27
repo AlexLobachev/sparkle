@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="csrf-token" th:content="${_csrf.token}"/>
+    <meta name="csrf-header" th:content="${_csrf.headerName}"/>
     <title>Мой профиль — Sparkle</title>
     <link rel="stylesheet" th:href="@{/css/profile-user.css}" media="screen"/>
-    <meta name="csrf-token" th:content="${_csrf.token}"/>
     <script th:inline="javascript">
         /*<![CDATA[*/
         const currentUserId = /*[[${userId}]]*/ null;

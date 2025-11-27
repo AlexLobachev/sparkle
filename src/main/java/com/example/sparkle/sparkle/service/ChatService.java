@@ -3,7 +3,6 @@ package com.example.sparkle.sparkle.service;
 import com.example.sparkle.sparkle.dto.chat.ChatDtoGet;
 import com.example.sparkle.sparkle.dto.chat.MessageDtoHistory;
 import com.example.sparkle.sparkle.model.Chat;
-import com.example.sparkle.sparkle.model.ChatDelete;
 import com.example.sparkle.sparkle.model.ChatMessage;
 
 import java.util.List;
@@ -25,17 +24,26 @@ public interface ChatService {
      * История сообщений для определенного чата
      */
 
-    List<ChatMessage> getChatHistory(Long chatId);
+    List<MessageDtoHistory> getChatHistory(Long chatId);
 
     /**
      * Создание нового чата
      */
 
-    Chat createChat(Long senderId, Long receiverId);
+    ChatDtoGet createChat(Long receiverId);
 
     /**
      * Удаление чата для одного пользователя
      */
 
-    public ChatDelete deleteChat(Long userId, Long chatId);
+    void deleteChat(Long chatId);
+
+    void deleteMessage(Long messageId);
+
+    /**
+     * Получение чата по id и id пользователя (для удаления)
+     */
+
+    Chat getChatByReceiverIdAndSenderId(Long userId1, Long userId2);
+
 }

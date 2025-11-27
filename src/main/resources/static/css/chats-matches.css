@@ -344,3 +344,125 @@ body {
 .chat-input button:hover {
     background-color: var(--primary-hover);
 }
+/* Время сообщения */
+.message-time {
+    font-size: 0.7rem;
+    color: #d32f2f; /* Светло-серый — хорошо виден на синем фоне */
+    text-align: right;
+    margin-top: 4px;
+    opacity: 0.8;
+}
+
+/* Кнопка удаления сообщения */
+.delete-message {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    font-size: 0.9rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.message:hover .delete-message {
+    opacity: 1;
+}
+
+/* Кнопки действий в списке пользователей */
+.user-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 4px;
+}
+
+.user-action-btn {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    color: #666;
+    padding: 4px;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-action-btn.delete-match { color: #e74c3c; }
+.user-action-btn.delete-like { color: #8e44ad; }
+.user-action-btn.delete-chat { color: #c0392b; }
+
+.user-action-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #000;
+}
+
+/* Удаление сообщения */
+
+.message-time {
+    font-weight: bold;
+    font-size: 0.8rem;
+    color: #999; /* Светло-серый — хорошо виден на синем фоне */
+    text-align: right;
+    margin-top: 4px;
+    opacity: 0.8;
+}
+
+.delete-message {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    font-size: 1rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.message:hover .delete-message {
+    opacity: 1;
+}
+
+/* Кнопки действий в списке */
+.user-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 4px;
+    z-index: 10;
+}
+
+.user-action-btn {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: #666;
+    padding: 4px;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.2s;
+}
+
+.user-item:hover .user-action-btn {
+    opacity: 1;
+}
+
+.user-action-btn.delete-match { color: #e74c3c; }
+.user-action-btn.delete-like { color: #8e44ad; }
+.user-action-btn.delete-chat { color: #c0392b; }
+
+.user-action-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    transform: scale(1.1);
+    color: #000;
+}

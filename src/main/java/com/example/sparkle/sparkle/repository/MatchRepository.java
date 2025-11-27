@@ -25,7 +25,6 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     Set<Match> findLike(@Param("firstUser") Long firstUser, @Param("secondUser") Long secondUser);
 
 
-
     Match findByFirstUserIdAndSecondUserId(@Param("firstUser") Long firstUser, @Param("secondUser") Long secondUser);
 
     Match findBySecondUserIdAndFirstUserId(@Param("firstUser") Long firstUser, @Param("secondUser") Long secondUser);
@@ -42,7 +41,15 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             Long userId, Boolean match
     );
 
-
+    @Modifying
+    @Query(
+            value = """
+                    DELETE
+                    FROM matches
+                    WHERE (first_user_id = :firstUser AND second_user_id = :secondUser)
+                       OR (first_user_id = :secondUser AND second_user_id = :firstUser);
+                    """
+            , nativeQuery = true)
     void deleteByFirstUserIdAndSecondUserId(@Param("firstUser") Long firstUser, @Param("secondUser") Long secondUser);
 
     @Modifying
@@ -55,4 +62,12 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
                     """
             , nativeQuery = true)
     void update(@Param("firstUser") Long firstUser, @Param("secondUser") Long secondUser);
+
+    @Modifying
+    @Query("""
+            UPDATE Match m
+            SET m.matchStatus = false 
+            WHERE m.firstUser = :firstUserId AND m.secondUser = :secondUserId
+            """)
+    int updateMatchStatus(Long firstUserId, Long secondUserId);
 }

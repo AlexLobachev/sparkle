@@ -52,7 +52,6 @@
                 <div class="no-data" id="noLikes">Вам никто не поставил лайк</div>
             </div>
 
-            <!-- Кто лайкнул меня -->
             <div id="who-liked-me" class="tab-pane">
                 <div class="loader" id="whoLikedLoader">Загрузка...</div>
                 <ul class="user-list" id="whoLikedList"></ul>
@@ -72,6 +71,7 @@
                 <input type="text" id="chatInput" placeholder="Введите сообщение...">
                 <button id="chatSendBtn">Отправить</button>
             </div>
+
         </div>
     </div>
 
@@ -82,7 +82,7 @@
 </div>
 <script th:inline="javascript">
     /*<![CDATA[*/
-    window.currentUserId = localStorage.getItem('userId');
+    window.currentUserId = [[${#authentication.principal.id}]];
     /*]]>*/
 </script>
 

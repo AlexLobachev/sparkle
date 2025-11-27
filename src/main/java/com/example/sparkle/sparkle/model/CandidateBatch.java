@@ -13,7 +13,7 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "candidate_batch")
-@ToString
+
 public class CandidateBatch {
 
     @Id
@@ -27,17 +27,14 @@ public class CandidateBatch {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "candidate_batch_candidates", joinColumns = @JoinColumn(name = "batch_id"))
     @Column(name = "candidate_id")
-    @org.hibernate.annotations.Cascade(org.hibernate.annotations.CascadeType.ALL)
     private List<Long> candidateIds = new ArrayList<>();
-
 
     private int currentIndex = 0;
     private LocalDateTime expiresAt;
 
-    // Метод для безопасного обновления списка
+    // Публичный сеттер
     public void setCandidateIds(List<Long> candidateIds) {
-        this.candidateIds.clear();
-        this.candidateIds.addAll(candidateIds);
+        this.candidateIds = candidateIds;
     }
 }
 

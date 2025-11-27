@@ -6,7 +6,10 @@ import com.example.sparkle.sparkle.service.ChatService;
 import jakarta.validation.constraints.Min;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Role;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,10 +37,12 @@ public class ChatController {
     /**
      * Создание нового чата
      */
-    @PostMapping()
-    public ResponseEntity<?> createChat(@RequestParam @Min(1) Long senderId,
-                                        @RequestParam @Min(1) Long receiverId) {
-        return ResponseEntity.created(null).body(chatService.createChat(senderId, receiverId));
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("/{receiverId}")
+    public ResponseEntity<?> createChat(@PathVariable @Min(1) Long receiverId
+                                        ) {
+        System.out.println("🔹 Запрос на создание чата с " + receiverId);
+        return ResponseEntity.created(null).body(chatService.createChat(receiverId));
     }
 
 
@@ -46,6 +51,7 @@ public class ChatController {
      */
     @PostMapping("/message")
     public ResponseEntity<?> sendMessage(@RequestBody ChatMessage savedMessage) {
+
         return ResponseEntity.created(null).body(chatService.sendMessage(savedMessage));
     }
         /**
@@ -53,17 +59,23 @@ public class ChatController {
      */
     @GetMapping("{chatId}/history")
     public ResponseEntity<?> getChatHistory(@PathVariable Long chatId) {
-        return ResponseEntity.ok().body(chatService.getChatHistory(chatId)
-                .stream()
-                .map(MessageDtoHistory::toMessageDto));
+        return ResponseEntity.ok().body(chatService.getChatHistory(chatId));
     }
 
     /**
      * Удаление чата для одного пользователя
      */
-    @DeleteMapping()
-    public ResponseEntity<?> deleteChat(@RequestParam Long userId, @RequestParam Long chatId) {
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteChat(@RequestParam Long chatId) {
+        chatService.deleteChat(chatId);
+        return ResponseEntity.ok().build();
+    }
 
-        return ResponseEntity.ok().body(chatService.deleteChat(userId, chatId));
+    /**
+     * Удаление сообщения, сообщение удаляется у всех пользователей
+     */
+    @DeleteMapping("/message/{messageId}")
+    public void deleteMessage(@PathVariable Long messageId) {
+        chatService.deleteMessage(messageId);
     }
 }
