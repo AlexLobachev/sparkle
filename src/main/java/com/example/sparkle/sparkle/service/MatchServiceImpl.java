@@ -8,6 +8,7 @@ import com.example.sparkle.sparkle.exception.Conflict;
 import com.example.sparkle.sparkle.exception.NoContent;
 import com.example.sparkle.sparkle.exception.NotFound;
 import com.example.sparkle.sparkle.model.CandidateBatch;
+import com.example.sparkle.sparkle.model.Chat;
 import com.example.sparkle.sparkle.model.Match;
 import com.example.sparkle.sparkle.model.User;
 import com.example.sparkle.sparkle.repository.CandidateBatchRepository;
@@ -38,16 +39,19 @@ public class MatchServiceImpl implements MatchService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final CandidateBatchRepository candidateBatchRepository;
+    private final ChatServiceImpl chatServiceimpl;
 
     @Autowired
     public MatchServiceImpl(MatchRepository matchRepository,
                             UserRepository userRepository,
                             UserService userService,
-                            CandidateBatchRepository candidateBatchRepository) {
+                            CandidateBatchRepository candidateBatchRepository,
+                            ChatServiceImpl chatServiceimpl) {
         this.matchRepository = matchRepository;
         this.userRepository = userRepository;
         this.userService = userService;
         this.candidateBatchRepository = candidateBatchRepository;
+        this.chatServiceimpl = chatServiceimpl;
     }
 
     /**
@@ -247,11 +251,7 @@ public class MatchServiceImpl implements MatchService {
 
     private List<Long> fetchNewCandidateBatch(
             double x, double y, double distance, User user, List<String> interests) {
-        log.debug(">>>>>>>>>>>"+x);
-        log.debug(">>>>>>>>>>>"+y);
-        log.debug(">>>>>>>>>>>"+distance);
-        log.debug(">>>>>>>>>>>"+user.getId());
-        log.debug(">>>>>>>>>>>"+interests);
+
         Set<Long> excludedIds = new HashSet<>(
                 candidateBatchRepository.findAllCandidateIdsByUserId(user.getId())
         );
@@ -278,6 +278,43 @@ public class MatchServiceImpl implements MatchService {
         batch.setCandidateIds(new ArrayList<>(uniqueIds));
 
         candidateBatchRepository.save(batch);
+    }
+    /**
+     * Удалить лайк у пользователя
+     */
+    @Override
+    @Transactional
+    public void deleteLike(Long secondUser) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails currentUser = (UserDetails) auth.getPrincipal();
+        User user = userService.getUserByUserName(currentUser.getUsername())
+                .orElseThrow(() -> new NotFound("Пользователь не найден"));
+        matchRepository.deleteByFirstUserIdAndSecondUserId(user.getId(), secondUser);
+    }
+    /**
+     * Удалить метч
+     */
+    @Override
+    @Transactional
+    public void deleteMatch(Long secondUser) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails currentUser = (UserDetails) auth.getPrincipal();
+        User user = userService.getUserByUserName(currentUser.getUsername()).orElseThrow(() -> new NotFound("Пользователь не найден"));
+        matchRepository.deleteByFirstUserIdAndSecondUserId(user.getId(), secondUser);
+        //ДОДЕЛАТЬ ЧАТЫ УДАЛЕНИЕ
+        Chat chat = chatServiceimpl.getChatByReceiverIdAndSenderId(user.getId(), secondUser);
+        chatServiceimpl.deleteChat(chat.getId());
+
+    }
+
+    @Override
+    public void dislike(Long secondUser) {
+
+    }
+
+    @Override
+    public void reloadCandidate() {
+
     }
 
 

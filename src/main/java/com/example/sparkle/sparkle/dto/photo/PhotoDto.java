@@ -1,4 +1,4 @@
-package com.example.sparkle.sparkle.dto.user;
+package com.example.sparkle.sparkle.dto.photo;
 
 import com.example.sparkle.sparkle.model.UserPhoto;
 import lombok.Builder;

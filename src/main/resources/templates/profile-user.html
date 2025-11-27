@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <title>Профиль пользователя — Sparkle</title>
     <link rel="stylesheet" th:href="@{/css/profile-user.css}" media="screen"/>
     <script th:inline="javascript">
         /*<![CDATA[*/
+        window.currentUserId = [[${#authentication.principal.id}]];
         const userProfileId = /*[[${profileId}]]*/ null;
         /*]]>*/
     </script>
@@ -53,12 +56,28 @@
 
     </main>
 
+    <!-- ✅ Модальное окно чата — ВНЕ <main> -->
+    <div class="chat-modal" id="chatModal">
+        <div class="chat-container" id="chatContainer">
+            <div class="chat-header">
+                <h3 id="chatHeader">Чат</h3>
+                <button class="chat-close" id="chatCloseBtn">&times;</button>
+            </div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Введите сообщение...">
+                <button id="chatSendBtn">Отправить</button>
+            </div>
+        </div>
+    </div>
+
     <footer class="footer">
         <p>© <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy')}">2025</span> Sparkle. Все права защищены.</p>
     </footer>
 
 </div>
 
+</script>
 <script th:src="@{/js/profile-user.js}" defer></script>
 </body>
 </html>

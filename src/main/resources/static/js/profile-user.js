@@ -5,6 +5,10 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('✅ DOM загружен, инициализация профиля');
 
+
+
+
+
     // Кнопка "Назад"
     const backBtn = document.getElementById('backBtn');
     if (backBtn) {
@@ -25,6 +29,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     const prevBtn = document.getElementById('prevPhoto');
     const nextBtn = document.getElementById('nextPhoto');
     const sendMessageBtn = document.getElementById('sendMessageBtn');
+
+    const chatModal = document.getElementById('chatModal');
+    const chatCloseBtn = document.getElementById('chatCloseBtn');
+    const chatSendBtn = document.getElementById('chatSendBtn');
+    const chatInput = document.getElementById('chatInput');
+
+    // Закрытие по кнопке
+    chatCloseBtn?.addEventListener('click', closeChatModal);
+    chatModal?.addEventListener('click', (e) => {
+        if (e.target === chatModal) closeChatModal();
+    });
+
+    // Отправка сообщения
+    chatSendBtn?.addEventListener('click', sendMessage);
+    chatInput?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
 
     let photos = [];
     let currentPhotoIndex = 0;
@@ -164,7 +185,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Кнопка "Написать"
         sendMessageBtn.onclick = () => {
-            alert(`Переход к диалогу с ${user.username}`);
+            console.log(`📩 Пытаемся начать чат с ${user.username}`);
+            openChatWithUser(user);
         };
     }
 
@@ -198,6 +220,204 @@ document.addEventListener('DOMContentLoaded', async () => {
         updatePhotoIndicator();
     });
 
+
+
+    /**
+     * Открывает чат с пользователем прямо на странице профиля
+     */
+    async function openChatWithUser(user) {
+        if (!user?.userId) {
+            console.warn('❌ Не указан userId пользователя');
+            return;
+        }
+
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+        console.log('🔐 CSRF Token:', csrfToken);
+        console.log('📤 Пытаемся создать чат с:', user.userId);
+
+        try {
+            // Создаём чат
+            const response = await fetch(`/sparkle/chats/${user.userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-XSRF-TOKEN': csrfToken
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                if (response.status === 403) {
+                    alert('Ошибка доступа. Попробуйте перезагрузить страницу.');
+                } else if (response.status === 404) {
+                    alert('Пользователь не существует.');
+                } else {
+                    const text = await response.text();
+                    console.error('❌ Ошибка:', response.status, text);
+                    alert('Не удалось начать чат.');
+                }
+                return;
+            }
+
+            const chatData = await response.json();
+            console.log('✅ Чат успешно создан:', chatData);
+
+            // Открываем модальное окно чата
+            openChatModal(chatData.chatId, user.username);
+        } catch (error) {
+            console.error('❌ Ошибка сети:', error);
+            alert('Не удалось подключиться к серверу');
+        }
+    }
+    /**
+     * Открывает модальное окно чата и загружает переписку
+     */
+    async function openChatModal(chatId, username) {
+        currentChatId = chatId;
+        const chatHeader = document.getElementById('chatHeader');
+        const chatMessages = document.getElementById('chatMessages');
+
+        if (chatHeader) chatHeader.textContent = `Чат с ${username}`;
+        if (chatMessages) chatMessages.innerHTML = '';
+
+        document.getElementById('chatModal').style.display = 'flex';
+
+        try {
+            const response = await fetch(`/sparkle/chats/${chatId}/history`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            if (response.status === 204) {
+                const placeholder = document.createElement('div');
+                placeholder.textContent = 'Переписка ещё не началась';
+                placeholder.style.color = '#666';
+                placeholder.style.textAlign = 'center';
+                placeholder.style.marginTop = '1rem';
+                chatMessages.appendChild(placeholder);
+                return;
+            }
+
+            if (!response.ok) throw new Error('Не удалось загрузить историю');
+
+            const messages = await response.json();
+            messages.forEach(msg => {
+                // ✅ Определяем отправителя
+                const isSent = msg.sender.userId === window.currentUserId;
+                appendMessage(msg.id, msg.sender.username, msg.content, isSent, msg.sentAt);
+            });
+        } catch (err) {
+            console.error('❌ Ошибка загрузки истории:', err);
+            chatMessages.innerHTML = '<div class="error">Не удалось загрузить сообщения</div>';
+        }
+    }
+    /**
+     * Добавляет сообщение в окно чата
+     */
+    function appendMessage(id, sender, content, isSent, sentAt) {
+        const chatMessages = document.getElementById('chatMessages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+        messageDiv.dataset.messageId = id;
+
+        let timeString = 'Недавно';
+        if (sentAt) {
+            const dateStr = sentAt.split('.')[0];
+            const date = new Date(dateStr);
+            timeString = isNaN(date.getTime())
+                ? 'Недавно'
+                : date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        messageDiv.innerHTML = `
+        <strong>${sender}:</strong> ${content}
+        <div class="message-time">
+            ${timeString}
+            ${isSent ? `<button class="delete-message" onclick="window.deleteMessage(${id})">×</button>` : ''}
+        </div>
+    `;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    /**
+     * Закрывает модальное окно чата
+     */
+    function closeChatModal() {
+        document.getElementById('chatModal').style.display = 'none';
+        currentChatId = null;
+    }
+
+    /**
+     * Отправляет сообщение
+     */
+    async function sendMessage() {
+        const content = chatInput.value.trim();
+        if (!content || !currentChatId) return;
+
+        const message = {
+            content: content,
+            chat: { id: currentChatId }
+        };
+
+        const blob = new Blob([JSON.stringify(message)], {
+            type: 'application/json'
+        });
+
+        try {
+            const response = await fetch('/sparkle/chats/message', {
+                method: 'POST',
+                body: blob,
+                headers: {
+                    'X-XSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.getAttribute('content')
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                console.error('❌ Ошибка сервера:', text);
+                throw new Error('Не удалось отправить сообщение');
+            }
+
+            const data = await response.json();
+            appendMessage(data.id, data.sender.username, data.content, true, data.sentAt);
+            chatInput.value = '';
+        } catch (err) {
+            console.error('❌ Ошибка отправки:', err);
+            alert('Не удалось отправить сообщение');
+        }
+    }
+
+
+
+
+    /**
+     * Удаляет сообщение
+     */
+    window.deleteMessage = async function (messageId) {
+        if (!confirm('Удалить сообщение?')) return;
+
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+        try {
+            const response = await fetch(`/sparkle/chats/message/${messageId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-XSRF-TOKEN': csrfToken
+                },
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                document.querySelector(`.message[data-message-id="${messageId}"]`)?.remove();
+            } else {
+                alert('Не удалось удалить сообщение');
+            }
+        } catch (err) {
+            console.error('❌ Ошибка при удалении:', err);
+            alert('Ошибка при удалении');
+        }
+    };
     // Вспомогательные функции
     function calculateAge(birthDate) {
         if (!birthDate) return null;
