@@ -1,7 +1,6 @@
 package com.example.sparkle.sparkle.repository;
 
 import com.example.sparkle.sparkle.model.ChatDelete;
-import com.example.sparkle.sparkle.model.UserChatKey;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

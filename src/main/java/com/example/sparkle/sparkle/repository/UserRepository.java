@@ -71,32 +71,43 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String name);
 
 
-
     @Query(value = """
-    SELECT u.id
-    FROM users u
-    JOIN cities c ON u.city_id = c.id
-    JOIN user_interests i ON u.id = i.user_id
-    WHERE
-        ST_DWithin(c.location, ST_SetSRID(ST_MakePoint(:x, :y), 4326), :distance)
-        AND u.gender = :gender
-        AND i.interest IN :interests
-        AND u.id != :currentUserId
-        AND u.id NOT IN (:seenIds)
-    ORDER BY RANDOM()
-    LIMIT 10
-    """, nativeQuery = true)
+                SELECT u.id
+                FROM users u
+                JOIN cities c ON u.city_id = c.id
+                JOIN user_interests i ON u.id = i.user_id
+                WHERE
+                    ST_DWithin(c.location, ST_SetSRID(ST_MakePoint(:x, :y), 4326), :distance)
+                    AND u.gender = :gender
+                    AND i.interest IN :interests
+                    AND u.id != :currentUserId
+                    -- Исключаем тех, кому уже ставили LIKE/MATCHED
+
+            AND NOT EXISTS (
+                 SELECT 1
+                 FROM matches m
+                 WHERE m.first_user_id = :currentUserId
+                   AND m.second_user_id = u.id
+                   AND m.match_status IN ('LIKE', 'DISLIKE', 'MATCHED')
+             )
+             
+                    -- Дополнительно: можно исключить DISLIKE, если нужно
+                    -- AND u.id NOT IN (
+                    --     SELECT second_user_id
+                    --     FROM matches
+                    --     WHERE first_user_id = :currentUserId AND match_status = 'DISLIKE'
+                    -- )
+                ORDER BY RANDOM()
+                LIMIT 15
+                """, nativeQuery = true)
     List<Long> findCandidateIdsNearLocation(
             @Param("x") double x,
             @Param("y") double y,
             @Param("distance") double distance,
             @Param("gender") String gender,
             @Param("interests") List<String> interests,
-            @Param("currentUserId") Long currentUserId,
-            @Param("seenIds") List<Long> seenIds
+            @Param("currentUserId") Long currentUserId
     );
-
-
 
 
     @Query(value = """

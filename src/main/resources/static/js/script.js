@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.warn('❌ Лайк не удался:', text);
                 return;
             }
+
             console.log('✅ Лайк отправлен:', userId);
         } catch (error) {
             console.error('❌ Ошибка лайка:', error);

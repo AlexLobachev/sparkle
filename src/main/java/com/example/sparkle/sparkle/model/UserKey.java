@@ -8,14 +8,14 @@ import java.util.Objects;
 
 @Getter
 @Setter
-public class UserChatKey implements Serializable {
+public class UserKey implements Serializable {
     public Long userId;
     public Long chatId;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof UserChatKey that)) return false;
+        if (!(o instanceof UserKey that)) return false;
         return Objects.equals(getUserId(), that.getUserId()) && Objects.equals(getChatId(), that.getChatId());
     }
 

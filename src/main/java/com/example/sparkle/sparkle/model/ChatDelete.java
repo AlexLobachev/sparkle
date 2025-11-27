@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "deleted_chats")
-@IdClass(UserChatKey.class)
+@IdClass(UserKey.class)
 @Getter
 @Setter
 public class ChatDelete {

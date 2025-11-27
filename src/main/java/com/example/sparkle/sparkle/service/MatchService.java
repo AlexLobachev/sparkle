@@ -67,7 +67,7 @@ public interface MatchService {
     /**
      * Поставить дизлайк пользователю
      */
-    public void dislike(Long secondUser);
+     UserMatchDto dislike(Long secondUser);
 
 
 }
