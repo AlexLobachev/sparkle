@@ -173,7 +173,7 @@ public class ChatServiceImpl implements ChatService {
      */
     @Override
     public Chat getChatByReceiverIdAndSenderId(Long userId1, Long userId2) {
-        return chatRepository.getChatByReceiverIdAndSenderId(userId1, userId2).orElseThrow(() -> new NotFound("Чат не найден"));
+        return chatRepository.getChatByReceiverIdAndSenderId(userId1, userId2).orElse(null);
     }
 
     /**
