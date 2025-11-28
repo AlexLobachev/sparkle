@@ -4,14 +4,12 @@
 --DROP TABLE IF EXISTS messages CASCADE;
 --DROP TABLE IF EXISTS photos CASCADE;
 --DROP TABLE IF EXISTS user_photo CASCADE;
-
 --DROP TABLE IF EXISTS chats CASCADE;
 --DROP TABLE IF EXISTS deleted_chats CASCADE;
 --DROP TABLE IF EXISTS user_interests CASCADE;
 --DROP TABLE IF EXISTS user_roles CASCADE;
---DROP TABLE IF EXISTS candidate_batch CASCADE;
---DROP TABLE IF EXISTS candidate_batch_candidates CASCADE;
---
+
+
 --CREATE EXTENSION IF NOT EXISTS postgis;
 --CREATE TABLE cities
 --(
@@ -63,6 +61,9 @@
 --    match_status   varchar(10)
 --
 --);
+--CREATE UNIQUE INDEX idx_unique_match
+--    ON matches (first_user_id, second_user_id);
+
 
 --CREATE UNIQUE INDEX idx_unique_match
 --    ON matches (first_user_id, second_user_id);
@@ -127,41 +128,6 @@
 --    PRIMARY KEY (user_id, chat_id)
 --);
 
--- Основная таблица пачек
---CREATE TABLE candidate_batch
---(
---    id            BIGSERIAL PRIMARY KEY,
---    user_id       BIGINT                      NOT NULL,
---    current_index INT                         NOT NULL DEFAULT 0,
---    expires_at    TIMESTAMP WITHOUT TIME ZONE NOT NULL,
---    CONSTRAINT fk_candidate_batch_user
---        FOREIGN KEY (user_id)
---            REFERENCES users (id)
---            ON DELETE RESTRICT
---);
---
----- Вспомогательная таблица для списка кандидатов в пачке
---CREATE TABLE candidate_batch_candidates
---(
---    batch_id     BIGINT NOT NULL,
---    candidate_id BIGINT NOT NULL,
---    liked BOOLEAN DEFAULT FALSE,
---    PRIMARY KEY (batch_id, candidate_id),
---    CONSTRAINT fk_batch_candidates_batch
---        FOREIGN KEY (batch_id)
---            REFERENCES candidate_batch (id)
---            ON DELETE CASCADE
---);
---
----- Индексы для ускорения запросов
---CREATE INDEX idx_candidate_batch_user ON candidate_batch (user_id);
---CREATE INDEX idx_candidate_batch_expires ON candidate_batch (expires_at);
---CREATE INDEX idx_candidate_batch_candidates_id ON candidate_batch_candidates (candidate_id);
-
-
-
-
---ALTER TABLE candidate_batch ADD COLUMN create_at TIMESTAMP DEFAULT NOW();
 
 --
 --INSERT INTO users (username,
@@ -267,14 +233,14 @@ WHERE (sender_id = 1 AND receiver_id = 10)
 --WHERE (first_user_id = 1 AND second_user_id = 10)
 --   OR (first_user_id = 10 AND second_user_id = 1);
 
---TRUNCATE  TABLE  matches cascade;
+--TRUNCATE  TABLE  chats cascade;
 --delete  from deleted_chats where user_id = 10;
 --delete  from chats where sender_id = 10;
 --delete from matches where second_user_id = 2;
 --delete from matches where second_user_id = 2;
 --delete from matches where second_user_id = 3;
 --delete from matches where second_user_id = 4;
-delete from matches where first_user_id = 3 and second_user_id = 10 and match_status = 'LIKE';
+--delete from matches where first_user_id = 3 and second_user_id = 10 and match_status = 'LIKE';
 
 SELECT *
 FROM chats
@@ -288,3 +254,10 @@ SELECT second_user_id, match_status, first_user_id
 FROM matches
 WHERE match_status IN ('LIKE', 'MATCHED')
   AND first_user_id = 10;  -- замените 123 на реальный ID пользователя
+
+
+delete from matches where first_user_id = 10 and second_user_id = 3;
+--TRUNCATE  TABLE  matches cascade;
+INSERT INTO matches (created_at,first_user_id, second_user_id, match_status)
+VALUES (now(),3, 10, 'LIKE');
+
