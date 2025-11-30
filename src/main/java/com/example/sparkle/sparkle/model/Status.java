@@ -1,7 +1,10 @@
 package com.example.sparkle.sparkle.model;
 
-    public enum Status {
-        DRAFT,      // Создан, но профиль не заполнен
-        COMPLETE    // Профиль заполнен полностью
-    }
-
+/**
+ * Статус пользователя в системе.
+ * DRAFT — незавершённый профиль; COMPLETE — профиль заполнен.
+ */
+public enum Status {
+    DRAFT,      // Создан, но профиль не заполнен
+    COMPLETE    // Профиль заполнен полностью
+}

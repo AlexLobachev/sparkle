@@ -264,7 +264,9 @@ public class MatchServiceImpl implements MatchService {
         matchRepository.deleteByFirstUserIdAndSecondUserId(user.getId(), secondUser);
         //ДОДЕЛАТЬ ЧАТЫ УДАЛЕНИЕ
         Chat chat = chatServiceimpl.getChatByReceiverIdAndSenderId(user.getId(), secondUser);
+        if (chat !=null) {
         chatServiceimpl.deleteChat(chat.getId());
+        }
 
     }
 

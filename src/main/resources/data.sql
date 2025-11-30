@@ -4,13 +4,12 @@
 --DROP TABLE IF EXISTS messages CASCADE;
 --DROP TABLE IF EXISTS photos CASCADE;
 --DROP TABLE IF EXISTS user_photo CASCADE;
-
 --DROP TABLE IF EXISTS chats CASCADE;
 --DROP TABLE IF EXISTS deleted_chats CASCADE;
 --DROP TABLE IF EXISTS user_interests CASCADE;
 --DROP TABLE IF EXISTS user_roles CASCADE;
 
---
+
 --CREATE EXTENSION IF NOT EXISTS postgis;
 
 -- 0. Таблица города
@@ -61,6 +60,10 @@
 --);
 --
 ---- Уникальный индекс на пару пользователей в матче
+
+--CREATE UNIQUE INDEX idx_unique_match
+--    ON matches (first_user_id, second_user_id);
+
 --CREATE UNIQUE INDEX idx_unique_match
 --    ON matches (first_user_id, second_user_id);
 --
@@ -119,6 +122,7 @@
 --                               deleted_at TIMESTAMP DEFAULT NOW(),
 --                               PRIMARY KEY (user_id, chat_id)
 --);
+
 
 
 --INSERT INTO users (username,
@@ -240,6 +244,7 @@ WHERE (sender_id = 1 AND receiver_id = 10)
 --WHERE (first_user_id = 1 AND second_user_id = 10)
 --   OR (first_user_id = 10 AND second_user_id = 1);
 
+
 --ТЕСТЫ
 
 TRUNCATE  TABLE  matches cascade;
@@ -258,6 +263,9 @@ insert into matches (first_user_id, second_user_id, match_status) values (2, 9, 
 --VALUES (now(), 1, 10, 'LIKE');
 
 --insert into chats (sender_id, receiver_id, sent_at) values (3, 10, now());
+
+
+--TRUNCATE  TABLE  chats cascade;
 
 --delete  from deleted_chats where user_id = 10;
 --delete  from chats where sender_id = 10;
@@ -281,6 +289,7 @@ WHERE match_status IN ('LIKE', 'MATCHED')
   AND first_user_id = 10;  -- замените 123 на реальный ID пользователя
 
 
+
 SELECT
     c.id AS chat_id,
     c.sent_at AS sent_at,
@@ -300,4 +309,10 @@ WHERE (
         (c.receiver_id = 10 AND c.sender_id != 10)
     );
   --AND (:excludedChatIds IS NULL OR c.id NOT IN (:excludedChatIds))
+
+delete from matches where first_user_id = 10 and second_user_id = 3;
+--TRUNCATE  TABLE  matches cascade;
+INSERT INTO matches (created_at,first_user_id, second_user_id, match_status)
+VALUES (now(),3, 10, 'LIKE');
+
 

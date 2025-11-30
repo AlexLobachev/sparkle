@@ -5,13 +5,18 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
-
+/**
+ * Перечисление провайдеров аутентификации.
+ * Поддерживает сериализацию/десериализацию через Jackson.
+ */
+@Getter
 public enum AuthProvider {
-    GITHUB ("github"),
-    GOOGLE ("google"),
-    VKONTAKTE ("vkontakte"),
-    VK ("vk");
+    GITHUB("github"),
+    GOOGLE("google"),
+    VKONTAKTE("vkontakte"),
+    VK("vk");
 
     private final String provider;
 
@@ -19,16 +24,30 @@ public enum AuthProvider {
         this.provider = provider;
     }
 
+    /**
+     * Сериализация в JSON
+     */
     @JsonValue
     public String getProvider() {
         return provider;
     }
 
+    /**
+     * Десериализация из строки
+     */
     @JsonCreator
     public static AuthProvider fromString(String provider) {
-        return Arrays.stream(AuthProvider.values())
-                .filter(p -> p.provider.equals(provider))
+        if (provider == null || provider.trim().isEmpty()) {
+            throw new IllegalArgumentException("Провайдер не может быть null или пустым");
+        }
+        return Arrays.stream(values())
+                .filter(p -> p.provider.equalsIgnoreCase(provider.trim()))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Неверный провайдер: " + provider));
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Неверный провайдер: " + provider + ". Допустимые значения: " +
+                                Arrays.stream(values())
+                                        .map(AuthProvider::getProvider)
+                                        .collect(Collectors.joining(", "))
+                ));
     }
 }

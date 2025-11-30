@@ -3,51 +3,58 @@ package com.example.sparkle.sparkle.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+/**
+ * Сущность матча между двумя пользователями.
+ * Отслеживает статус взаимодействия: лайк, дизлайк, совпадение.
+ */
 @Entity
-@Table(name = "matches")
+@Table(name = "matches", indexes = {
+        @Index(name = "idx_match_first_user_status", columnList = "first_user_id, match_status"),
+        @Index(name = "idx_match_second_user", columnList = "second_user_id")
+})
 @Getter
 @Setter
-@Slf4j
 public class Match {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "first_user_id")
+    @JoinColumn(name = "first_user_id", nullable = false)
     private User firstUser;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "second_user_id")
+    @JoinColumn(name = "second_user_id", nullable = false)
     private User secondUser;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-    @Column(name = "match_status")
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
     @Enumerated(EnumType.STRING)
+    @Column(name = "match_status", nullable = false)
     private MatchStatus matchStatus;
 
     public enum MatchStatus {
         LIKE, DISLIKE, MATCHED
     }
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Match match)) return false;
-        return Objects.equals(getId(), match.getId()) && Objects.equals(getFirstUser(), match.getFirstUser()) && Objects.equals(getSecondUser(), match.getSecondUser()) && Objects.equals(getCreatedAt(), match.getCreatedAt()) && getMatchStatus() == match.getMatchStatus();
+        return Objects.equals(id, match.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getFirstUser(), getSecondUser(), getCreatedAt(), getMatchStatus());
+        return Objects.hash(id);
     }
 }
