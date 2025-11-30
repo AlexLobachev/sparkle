@@ -4,7 +4,6 @@ import com.example.sparkle.sparkle.dto.LocationRequestDto;
 import com.example.sparkle.sparkle.dto.user.UserDto;
 import com.example.sparkle.sparkle.dto.user.UserDtoUpdate;
 import com.example.sparkle.sparkle.dto.user.UserMapper;
-import com.example.sparkle.sparkle.dto.user.UserMatchDto;
 import com.example.sparkle.sparkle.exception.BadRequest;
 import com.example.sparkle.sparkle.exception.NotFound;
 import com.example.sparkle.sparkle.model.AuthProvider;
@@ -94,18 +93,25 @@ public class UserServiceImpl implements UserService {
      */
     @Transactional
     @PreAuthorize("hasRole('ROLE_USER')")
-    public Optional<UserDtoUpdate> updateUserProfile( UserDtoUpdate userDtoUpdate) {
-        // Проверка: может ли текущий пользователь обновлять этого юзера?
+    @Override
+    public Optional<UserDtoUpdate> updateUserProfile(UserDtoUpdate userDtoUpdate) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetails currentUser = (UserDetails) auth.getPrincipal();
         User currentUserEntity = getUserByUserName(currentUser.getUsername())
                 .orElseThrow(() -> new NotFound("Пользователь не найден"));
-
-
-
         userDtoUpdate.setId(currentUserEntity.getId());
+
         userDtoUpdate = validatorUser.invalidRequest(currentUserEntity, userDtoUpdate);
 
+        if (userDtoUpdate.getCity() == null) {
+            if (currentUserEntity.getCity() != null) {
+                userDtoUpdate.setCity(currentUserEntity.getCity().getName());
+            } else {
+                throw new BadRequest("Город не указан");
+            }
+
+        }
+        City city = geocodingService.getCityByName(userDtoUpdate.getCity());
         int affectedRows =
                 userRepository.userUpdate(
                         userDtoUpdate.getGender().toString(),
@@ -113,13 +119,17 @@ public class UserServiceImpl implements UserService {
                         userDtoUpdate.getEmail(),
                         userDtoUpdate.getBirthDate(),
                         userDtoUpdate.getAboutMe(),
-                        userDtoUpdate.getId());
+                        userDtoUpdate.getId(),
+                        city.getId());
+
         entityManager.refresh(userRepository.findById(userDtoUpdate.getId()).orElseThrow());
 
         if (affectedRows == 0) {
             throw new NotFound("Пользователь не найден");
         }
         log.info("Обновление пользователя с ID = {} прошло успешно", userDtoUpdate.getId());
+        if (userDtoUpdate.getEmail() != null)
+            userRepository.updateEmailStatus(userDtoUpdate.getId());
         currentUserEntity = userRepository.findById(currentUserEntity.getId()).orElse(null);
         validatorUser.userNotFound(currentUserEntity);
         return Optional.of(UserMapper.toUserDtoUpdate(Objects.requireNonNull(currentUserEntity)));
@@ -133,16 +143,18 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasRole('ROLE_USER')")
     @Override
     public Optional<User> setupUserProfile(UserDtoUpdate userDtoUpdate) {
-
-        // Проверка: может ли текущий пользователь обновлять этого юзера?
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetails currentUser = (UserDetails) auth.getPrincipal();
         User user = userRepository.findByUsername(
                 currentUser.getUsername()).orElseThrow(() -> new NotFound("Пользователь не найден"));
-
         validatorUser.userForbidden(getUserByUserName(currentUser.getUsername())
                 .orElseThrow(() -> new NotFound("Пользователь не найден")), user.getId());
         userDtoUpdate.setId(user.getId());
+        if (userDtoUpdate.getCity() == null) {
+            throw new BadRequest("Город не указан");
+        }
+        City city = geocodingService.getCityByName(userDtoUpdate.getCity());
+
         int affectedRows =
                 userRepository.userUpdate(
                         userDtoUpdate.getGender().toString(),
@@ -150,7 +162,8 @@ public class UserServiceImpl implements UserService {
                         userDtoUpdate.getEmail(),
                         userDtoUpdate.getBirthDate(),
                         userDtoUpdate.getAboutMe(),
-                        userDtoUpdate.getId());
+                        userDtoUpdate.getId(),
+                        city.getId());
         entityManager.refresh(userRepository.findById(user.getId()).orElseThrow());
 
         if (affectedRows == 0) {
@@ -159,7 +172,10 @@ public class UserServiceImpl implements UserService {
         }
         user.setStatus(Status.COMPLETE);
         user = userRepository.findById(user.getId()).orElseThrow(() -> new NotFound("Пользователь не найден"));
+
         log.info("Обновление пользователя с ID = {} прошло успешно", user.getId());
+        if (user.getEmail() != null)
+            userRepository.updateEmailStatus(user.getId());
         return Optional.of(user);
     }
 

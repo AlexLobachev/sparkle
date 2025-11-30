@@ -70,26 +70,20 @@ public class ValidatorUser {
 
     public UserDtoUpdate invalidRequest(User user, UserDtoUpdate userDtoUpdate) {
         UserDtoUpdateValidator userDtoUpdateValidator = UserMapper.userDtoUpdateValidator(user);
-
         if (userDtoUpdate.getGender() != null) userDtoUpdateValidator.setGender(userDtoUpdate.getGender());
         else
             userDtoUpdateValidator.setGender(user.getGender());
         if (userDtoUpdate.getPreferredGender() != null)
             userDtoUpdateValidator.setPreferredGender(userDtoUpdate.getPreferredGender());
         else
-            userDtoUpdateValidator.setPreferredGender(user.getGender());
+            userDtoUpdateValidator.setPreferredGender(user.getPreferredGender());
         if (userDtoUpdate.getEmail() != null) userDtoUpdateValidator.setEmail(userDtoUpdate.getEmail());
         if (userDtoUpdate.getBirthDate() != null) userDtoUpdateValidator.setBirthDate(userDtoUpdate.getBirthDate());
         if (userDtoUpdate.getAboutMe() != null) userDtoUpdateValidator.setAboutMe(userDtoUpdate.getAboutMe());
-        log.debug("userDtoUpdateValidator>>>>>>>" +userDtoUpdateValidator);
         log.info("Валидация данных");
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-
-
         Set<ConstraintViolation<UserDtoUpdateValidator>> violations = validator.validate(userDtoUpdateValidator);
-
         if (!violations.isEmpty()) {
-            // Собираем ошибки
             List<String> errors = violations.stream()
                     .map(ConstraintViolation::getMessage).toList();
             throw new ValidationException("Ошибки валидации: " + errors);
@@ -100,25 +94,25 @@ public class ValidatorUser {
 
 
     public void invalidEmail(DataIntegrityViolationException ex) {
-            // Переводим SQLException в более конкретный тип
-            Throwable rootCause = ex.getRootCause();
-            if (rootCause instanceof java.sql.SQLException sqlEx) {
-                String sqlState = sqlEx.getSQLState();
-                String errorCode = sqlEx.getErrorCode() + "";
+        // Переводим SQLException в более конкретный тип
+        Throwable rootCause = ex.getRootCause();
+        if (rootCause instanceof java.sql.SQLException sqlEx) {
+            String sqlState = sqlEx.getSQLState();
+            String errorCode = sqlEx.getErrorCode() + "";
 
-                // Для PostgreSQL: SQL State 23514 = check_violation
-                if ("23514".equals(sqlState)) {
-                    if (ex.getMessage().contains("valid_email_check")) {
-                        throw new BadRequest(
-                                "Некорректный email: должен быть заполнен и соответствовать формату name@domain.com"
-                        );
-                    }
+            // Для PostgreSQL: SQL State 23514 = check_violation
+            if ("23514".equals(sqlState)) {
+                if (ex.getMessage().contains("valid_email_check")) {
+                    throw new BadRequest(
+                            "Некорректный email: должен быть заполнен и соответствовать формату name@domain.com"
+                    );
                 }
             }
-            // Если не наша ошибка — перебрасываем как есть
-            throw ex;
         }
+        // Если не наша ошибка — перебрасываем как есть
+        throw ex;
     }
+}
 
 
 

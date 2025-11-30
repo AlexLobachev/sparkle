@@ -18,6 +18,7 @@ import java.util.Objects;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class City {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,15 +30,21 @@ public class City {
     @Column(columnDefinition = "geometry(Point,4326)", nullable = false)
     private Point location;
 
+    @Column(name = "source", nullable = false) // 'gps', 'wifi', 'ip', 'user_input'
+    private String source;
+
+    @Column(name = "accuracy", nullable = true) // В метрах
+    private Integer accuracy;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof City city)) return false;
-        return Objects.equals(id, city.id);
+        return Objects.equals(getId(), city.getId()) && Objects.equals(getName(), city.getName()) && Objects.equals(getLocation(), city.getLocation()) && Objects.equals(getSource(), city.getSource()) && Objects.equals(getAccuracy(), city.getAccuracy());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(getId(), getName(), getLocation(), getSource(), getAccuracy());
     }
 }

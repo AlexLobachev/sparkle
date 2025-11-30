@@ -17,8 +17,13 @@
 --(
 --    id        SERIAL PRIMARY KEY,
 --    city_name VARCHAR(255),
---    location  geometry(Point, 4326)
+--    location  geometry(Point, 4326),
+--    source    VARCHAR(25),
+--    accuracy int
 --);
+
+
+
 --
 ---- 1. Таблица users
 --CREATE TABLE users (
@@ -158,36 +163,6 @@
 --        FALSE);
 
 
---update users set city_id = 1 where id = 8;
-
-
---update matches
---set match_status = true
---where first_user_id = 1
---  and second_user_id = 10;
-
-SELECT *
-FROM chats
-WHERE (sender_id = 10 OR receiver_id = 10)
-  AND NOT (sender_id = 10 AND receiver_id = 10);
-
-SELECT chats.id
-FROM chats
-WHERE (sender_id = 10 AND receiver_id != 10) /* вы — отправитель, не чат с собой */
-   OR (receiver_id = 10 AND sender_id != 10);
-/* вы 0— получатель, не чат с собой */
-
---INSERT INTO matches (first_user_id, second_user_id, match_status) VALUES (3, 10, false);
-
---delete
---from matches
---where first_user_id = 3;
---delete
---from matches
---where first_user_id = 10;
---delete
---from matches
---where first_user_id = 10;
 
 SELECT *
 FROM user_photo
@@ -217,102 +192,19 @@ WHERE user_id = 35;
 --insert into user_photo (user_id, photo_id) values (5, 8);
 
 
-
-
-
---update matches
---set match_status = true
---where first_user_id = 10;
---INSERT INTO chats (sender_id, receiver_id, sent_at)
---VALUES (10, 1, now());
---insert into messages (content, sent_at, sender_id, chat_id)
---values ('Оу! Привет!', now(), 1, 3);
-
-
---INSERT INTO chats (sender_id, receiver_id, sent_at)
---VALUES (2, 1, now());
-
---delete from chats where (sender_id = 1 AND receiver_id = 10) OR (sender_id = 10 AND receiver_id = 1);
-
-SELECT *
-FROM chats
-WHERE (sender_id = 1 AND receiver_id = 10)
-   OR (sender_id = 10 AND receiver_id = 1);
-
---DELETE
---FROM matches
---WHERE (first_user_id = 1 AND second_user_id = 10)
---   OR (first_user_id = 10 AND second_user_id = 1);
-
-
 --ТЕСТЫ
 
-TRUNCATE  TABLE  matches cascade;
-TRUNCATE  TABLE  chats cascade;
-TRUNCATE  TABLE  deleted_chats cascade;
-TRUNCATE  TABLE  messages cascade;
-
-insert into matches (first_user_id, second_user_id, match_status) values (2, 9, 'LIKE');
-
-
-
-
---insert into messages (content, sent_at, sender_id, chat_id) values ('Привет!', now(), 2, 41);
-
---INSERT INTO matches (created_at,first_user_id, second_user_id, match_status)
---VALUES (now(), 1, 10, 'LIKE');
-
---insert into chats (sender_id, receiver_id, sent_at) values (3, 10, now());
-
-
---TRUNCATE  TABLE  chats cascade;
-
---delete  from deleted_chats where user_id = 10;
---delete  from chats where sender_id = 10;
---delete from matches where second_user_id = 2;
---delete from matches where second_user_id = 2;
---delete from matches where second_user_id = 3;
---delete from matches where second_user_id = 4;
---delete from matches where first_user_id = 3 and second_user_id = 10 and match_status = 'LIKE';
-
-SELECT *
-FROM chats
-WHERE (
-              (sender_id = 10 AND receiver_id != 10)
-              OR
-              (receiver_id = 10 AND sender_id != 10));
-
-
-SELECT second_user_id, match_status, first_user_id
-FROM matches
-WHERE match_status IN ('LIKE', 'MATCHED')
-  AND first_user_id = 10;  -- замените 123 на реальный ID пользователя
-
-
-
-SELECT
-    c.id AS chat_id,
-    c.sent_at AS sent_at,
-    u.id AS user_id,
-    u.username AS username,
-    u.gender AS gender,
-    u.birth_date AS birth_date,
-    u.about_me AS about_me
-FROM chats c
-         JOIN users u ON (
-        (c.sender_id = 10 AND u.id = c.receiver_id)
-        OR (c.receiver_id = 10 AND u.id = c.sender_id)
-    )
-WHERE (
-        (c.sender_id = 10 AND c.receiver_id != 10)
-        OR
-        (c.receiver_id = 10 AND c.sender_id != 10)
-    );
-  --AND (:excludedChatIds IS NULL OR c.id NOT IN (:excludedChatIds))
-
-delete from matches where first_user_id = 10 and second_user_id = 3;
 --TRUNCATE  TABLE  matches cascade;
-INSERT INTO matches (created_at,first_user_id, second_user_id, match_status)
-VALUES (now(),3, 10, 'LIKE');
+--TRUNCATE  TABLE  chats cascade;
+--TRUNCATE  TABLE  deleted_chats cascade;
+--TRUNCATE  TABLE  messages cascade;
+--
+--insert into matches (first_user_id, second_user_id, match_status) values (2, 9, 'LIKE');
+
+
+
+
+
+
 
 

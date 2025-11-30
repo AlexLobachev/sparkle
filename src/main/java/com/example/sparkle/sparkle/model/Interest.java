@@ -3,6 +3,9 @@ package com.example.sparkle.sparkle.model;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Перечисление интересов пользователей с локализованными метками.
  */
@@ -43,5 +46,12 @@ public enum Interest {
     //@JsonValue
     public String getLabel() {
         return label;
+    }
+    public static List<Interest> getRandomInterest() {
+        if (Math.random() > 0.5) {
+            return List.of(Interest.FOOTBALL, Interest.LITRBALL, Interest.BASKETBALL);
+        } else {
+            return List.of(Interest.TENNIS, Interest.SWIMMING, Interest.GYM);
+        }
     }
 }

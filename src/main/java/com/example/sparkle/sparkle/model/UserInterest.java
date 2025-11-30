@@ -1,10 +1,10 @@
 package com.example.sparkle.sparkle.model;
 
-import com.example.sparkle.sparkle.dto.user.UserInterestsDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -31,6 +31,15 @@ public class UserInterest {
     @Column(name = "interest", nullable = false)
     private Interest interest;
 
+
+    public UserInterest() {
+
+    }
+
+    public UserInterest(Interest interest) {
+        this.interest = interest;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -43,19 +52,6 @@ public class UserInterest {
         return Objects.hash(id);
     }
 
-    /**
-     * Преобразует список интересов в DTO
-     */
-    public static UserInterestsDto toUserInterestDto(List<UserInterest> userInterest) {
-        if (userInterest == null || userInterest.isEmpty()) {
-            throw new IllegalArgumentException("Список интересов не может быть пустым");
-        }
-        UserInterestsDto dto = new UserInterestsDto();
-        User first = userInterest.get(0).getUser();
-        dto.setUserId(first.getId());
-        dto.setInterests(userInterest.stream().map(UserInterest::getInterest).toList());
-        return dto;
-    }
 
     /**
      * Создаёт упрощённого пользователя из интереса (устаревшее?)
@@ -73,5 +69,13 @@ public class UserInterest {
         user.setAboutMe(source.getAboutMe());
         user.setInterests(source.getInterests());
         return user;
+    }
+
+
+    public static List<UserInterest> toListUserInterest() {
+        List<Interest> interest = new ArrayList<>(Interest.getRandomInterest());
+        List<UserInterest> userInterest = new ArrayList<>();
+        interest.forEach(interest1 -> userInterest.add(new UserInterest(interest1)));
+        return userInterest;
     }
 }

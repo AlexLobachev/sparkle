@@ -1,5 +1,6 @@
 package com.example.sparkle.sparkle.service;
 
+import com.example.sparkle.sparkle.exception.NotFound;
 import com.example.sparkle.sparkle.model.City;
 import com.example.sparkle.sparkle.repository.CityRepository;
 import com.google.gson.Gson;
@@ -76,6 +77,14 @@ public class GeocodingServiceImpl implements GeocodingService {
         return cityRepository.findByLocation(point).orElseThrow();
 
         //return cityRepository.findByCoordinates(point).orElseThrow();
+    }
+    @Override
+    public City getCityByName(String name) {
+        if (name == null) {
+            return null;
+        } else {
+            return cityRepository.findByName(name).orElseThrow(()-> new NotFound("Город не найден"));
+        }
     }
 
     private String getCityNameFromAddressComponents(JsonObject result) {

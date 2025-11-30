@@ -1,8 +1,10 @@
 package com.example.sparkle.sparkle.controller;
 
 import com.example.sparkle.sparkle.dto.LocationRequestDto;
+import com.example.sparkle.sparkle.dto.city.CityDtoLocation;
 import com.example.sparkle.sparkle.model.City;
 import com.example.sparkle.sparkle.service.CityService;
+import com.example.sparkle.sparkle.service.CityServiceImpl;
 import com.example.sparkle.sparkle.service.GeocodingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,32 +13,24 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/sparkle/city")
 public class CityController {
-    private final GeocodingService geocodingService;
+
     private final CityService cityService;
 
     @Autowired
-    public CityController(GeocodingService geocodingService, CityService cityService) {
-        this.geocodingService = geocodingService;
+    public CityController(
+                          CityService cityService) {
         this.cityService = cityService;
     }
 
+
+
     @PostMapping("/location")
-    public ResponseEntity<?> saveUserLocation(@RequestBody LocationRequestDto location) {
-        // Получаем город по координатам
-        City city = geocodingService.getCityByCoordinates(location.getLatitude(), location.getLongitude());
-
-        if (city == null) {
-            return ResponseEntity.badRequest().body("Не удалось определить город");
-        }
-
-        // Сохраняем город в БД
-        cityService.saveCity(city);
-
-        return ResponseEntity.ok().build();
+    public ResponseEntity<CityDtoLocation> saveUserLocation(@RequestBody CityDtoLocation location) {
+        return ResponseEntity.ok(cityService.saveUserLocation(location));
     }
+
     @GetMapping("/get-all-cities")
     public ResponseEntity<?> getAllCityFromDataBase() {
-
-        return ResponseEntity.ok().body(cityService.getAllCityFromDataBase());
+        return ResponseEntity.ok(cityService.getAllCityFromDataBase());
     }
 }

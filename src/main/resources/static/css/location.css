@@ -1,0 +1,122 @@
+/* === Модальное окно: Определение местоположения === */
+.location-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.location-content {
+    background: var(--white);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.location-content h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.3rem;
+    color: var(--dark);
+}
+
+.location-content p {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin-bottom: 1.25rem;
+}
+
+.location-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    padding: 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+}
+
+.btn-text {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.btn-text:hover {
+    color: var(--primary-hover);
+}
+
+.manual-input {
+    margin-top: 1rem;
+    text-align: left;
+}
+
+.manual-input label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+}
+
+.manual-input input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+}
+
+.btn-small {
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.btn-small:hover {
+    background: var(--primary-hover);
+}
+
+.alert-info {
+    background: #f0f9ff;
+    color: var(--primary);
+    padding: 0.5rem;
+    border: 1px solid var(--primary);
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
