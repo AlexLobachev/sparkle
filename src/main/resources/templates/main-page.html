@@ -1,0 +1,114 @@
+<!-- Главная страница -->
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.thymeleaf.org ">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Sparkle — Знакомьтесь с новыми людьми!</title>
+
+    <!-- Подключаем иконки Remix Icon (резерв) -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+
+    <!-- Предзагрузка критических ресурсов -->
+    <link rel="preload" href="/css/main-page.css" as="style">
+    <link rel="preload" href="/js/main-page.js" as="script">
+
+    <link rel="stylesheet" th:href="@{/css/main-page.css}" media="screen">
+    <meta name="csrf-token" th:content="${_csrf.token}"/>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+    <!-- Шапка приложения -->
+    <header class="app-header">
+        <h1 class="app-title">
+            <span class="logo">Sparkle</span>
+            <span class="subtitle"><strong>— Знакомьтесь с новыми людьми!</strong></span>
+        </h1>
+    </header>
+
+    <main>
+        <!-- Уведомление о email -->
+        <th:block th:if="${user != null and user.emailPending}">
+            <div class="alert" role="alert" aria-live="polite">
+                <p>✉️ Укажите email для улучшения безопасности:</p>
+                <form method="post" th:action="@{/update-email}" novalidate>
+                    <label for="email-input" class="sr-only">Email</label>
+                    <input type="email"
+                           id="email-input"
+                           name="email"
+                           class="email-input"
+                           placeholder="example@domain.com"
+                           required>
+                    <button type="submit" class="action-btn">Сохранить</button>
+                    <small>Мы не передаём email третьим лицам</small>
+                </form>
+            </div>
+        </th:block>
+
+        <!-- Карточка профиля -->
+        <section class="profile-card-container" id="profileViewer" aria-label="Просмотр профилей">
+            <div class="profile-card">
+                <div class="photo-slider" id="photoSlider">
+                    <div class="photo" id="currentPhoto"></div>
+                    <button class="slide-btn prev-photo" id="prevPhoto" aria-label="Предыдущее фото">‹</button>
+                    <button class="slide-btn next-photo" id="nextPhoto" aria-label="Следующее фото">›</button>
+
+                    <!-- Кнопки лайк/дизлайк поверх фото -->
+                    <div class="action-overlay">
+                        <button class="action-circle dislike-btn" id="dislikeBtn" aria-label="Пропустить">
+                            <img src="/images/icons/dislike.svg" th:src="@{/images/icons/dislike.svg}" alt="Дизлайк" class="btn-icon">
+                        </button>
+                        <button class="action-circle like-btn" id="likeBtn" aria-label="Поставить лайк">
+                            <img src="/images/icons/like.svg" th:src="@{/images/icons/like.svg}" alt="Лайк" class="btn-icon">
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Информация о пользователе -->
+                <div class="profile-info" id="profileInfo"></div>
+            </div>
+
+            <!-- Круглые иконки действий (внизу) -->
+            <div class="action-frame">
+                <div class="action-buttons">
+                    <!-- Кнопка «Дизлайк» (для подстраховки, можно убрать, если не нужна) -->
+                    <!-- Убраны, т.к. дублируются с action-overlay -->
+                </div>
+
+                <!-- Нижняя навигация -->
+                <div class="bottom-nav">
+                    <button class="nav-btn" id="profileBtn" aria-label="Мой профиль">
+                        <img src="/images/icons/profile.svg" th:src="@{/images/icons/profile.svg}" alt="Профиль" class="btn-icon">
+                    </button>
+                    <button class="nav-btn" id="editProfileBtn" aria-label="Настройки профиля">
+                        <img src="/images/icons/settings-profile.svg" th:src="@{/images/icons/settings-profile.svg}" alt="Настройки" class="btn-icon">
+                    </button>
+                    <button class="nav-btn" id="chatsMatchesBtn" aria-label="Чаты и мэтчи">
+                        <img src="/images/icons/heart-chats.svg" th:src="@{/images/icons/heart-chats.svg}" alt="Чаты и мэтчи" class="btn-icon">
+                    </button>
+                    <button class="nav-btn" id="logoutBtn" aria-label="Выйти из аккаунта">
+                        <img src="/images/icons/exit.svg" th:src="@{/images/icons/exit.svg}" alt="Выход" class="btn-icon">
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy')}">2025</span> Sparkle. Все права защищены.</p>
+    </footer>
+</div>
+
+<script th:src="@{/js/main-page.js}" defer></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    window.currentUserId = /*[[${userId}]]*/ null;
+    /*]]>*/
+</script>
+</body>
+</html>

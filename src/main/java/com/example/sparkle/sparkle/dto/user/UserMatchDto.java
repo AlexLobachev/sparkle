@@ -1,6 +1,6 @@
 package com.example.sparkle.sparkle.dto.user;
 
-import com.example.sparkle.sparkle.dto.CityDto;
+import com.example.sparkle.sparkle.dto.city.CityDto;
 import com.example.sparkle.sparkle.dto.photo.PhotoDto;
 import com.example.sparkle.sparkle.model.Gender;
 import com.example.sparkle.sparkle.model.Interest;

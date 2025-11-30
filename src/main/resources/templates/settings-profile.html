@@ -1,0 +1,109 @@
+<!-- НАСТРОЙКА ПРОФИЛЯ email, пол, дата рождения -->
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Настройка профиля — Sparkle</title>
+    <link rel="stylesheet" th:href="@{/css/settings-profile.css}" media="screen"/>
+    <meta name="csrf-token" th:content="${_csrf.token}"/>
+</head>
+<body>
+
+<div class="page-wrapper">
+    <!-- Шапка -->
+    <header class="header">
+        <h1>Настройка профиля</h1>
+    </header>
+
+    <main class="main-content">
+        <!-- Скрытый ID -->
+        <input type="hidden" id="user-id" th:value="${userId}" />
+
+        <!-- Форма -->
+        <form id="profileForm" class="settings-form">
+            <div class="form-card">
+                <!-- Пол -->
+                <div class="form-group centered">
+                    <label>Пол</label>
+                    <div class="gender-options">
+                        <label class="gender-option">
+                            <input type="radio" name="gender" value="MEN" required>
+                            <div class="icon-circle">
+                                <img src="/images/icons/gender-male.svg" th:src="@{/images/icons/gender-male.svg}" alt="Мужской">
+                            </div>
+                        </label>
+                        <label class="gender-option">
+                            <input type="radio" name="gender" value="WOMEN" required>
+                            <div class="icon-circle">
+                                <img src="/images/icons/gender-female.svg" th:src="@{/images/icons/gender-female.svg}" alt="Женский">
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Предпочитаемый пол -->
+                <div class="form-group centered">
+                    <label>Предпочитаемый пол</label>
+                    <div class="gender-options">
+                        <label class="gender-option">
+                            <input type="radio" name="preferredGender" value="MEN">
+                            <div class="icon-circle">
+                                <img src="/images/icons/gender-male.svg" th:src="@{/images/icons/gender-male.svg}" alt="Мужской">
+                            </div>
+                        </label>
+                        <label class="gender-option">
+                            <input type="radio" name="preferredGender" value="WOMEN">
+                            <div class="icon-circle">
+                                <img src="/images/icons/gender-female.svg" th:src="@{/images/icons/gender-female.svg}" alt="Женский">
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="example@domain.com"/>
+                </div>
+
+                <!-- Дата рождения -->
+                <div class="form-group">
+                    <label for="birthDate">Дата рождения</label>
+                    <input type="date" id="birthDate" name="birthDate"/>
+                </div>
+            </div>
+
+            <!-- Кнопки действий — в одном ряду -->
+            <div class="actions-row">
+                <button type="submit" class="action-option-btn">
+                    <div class="icon-circle primary">
+                        <img src="/images/icons/save.svg" th:src="@{/images/icons/save.svg}" alt="Сохранить">
+                    </div>
+                </button>
+                <button type="button" id="deleteProfileBtn" class="action-option-btn">
+                    <div class="icon-circle danger">
+                        <img src="/images/icons/delete-account.svg" th:src="@{/images/icons/delete-account.svg}" alt="Удалить аккаунт">
+                    </div>
+                </button>
+                <button type="button" id="backBtn" class="action-option-btn">
+                    <div class="icon-circle primary">
+                        <img src="/images/icons/back-two-arrows.svg" th:src="@{/images/icons/back-two-arrows.svg}" alt="Назад">
+                    </div>
+                </button>
+            </div>
+        </form> <!-- ✅ Закрыт тег form -->
+
+        <!-- Сообщения об отклике -->
+        <div id="messages"></div>
+    </main>
+
+    <footer class="footer">
+        <p>© <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy')}">2025</span> Sparkle. Все права защищены.</p>
+    </footer>
+</div>
+
+<script th:src="@{/js/init-user.js}" th:nonce="${cspNonce}"></script>
+<script th:src="@{/js/settings-profile.js}" th:nonce="${cspNonce}"></script>
+</body>
+</html>

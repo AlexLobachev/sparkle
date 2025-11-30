@@ -33,17 +33,34 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
                         
             SELECT *
             FROM chats
-            WHERE 
+            WHERE (
                 (sender_id = :senderId AND receiver_id != :receiverId)
                 OR
-                (receiver_id = :senderId AND sender_id != :receiverId)
-                        
-                        
+                (receiver_id = :senderId AND sender_id != :receiverId) 
+                ) 
+            
             """, nativeQuery = true)
     List<Chat> findAllBySenderIdAndReceiverId(@Param("senderId") Long senderId,
                                               @Param("receiverId") Long receiverId);
 
 
+
+    @Query(value = """
+    SELECT *
+    FROM chats
+    WHERE (
+        (sender_id = :userId AND receiver_id != :userId)  -- Я отправил не себе
+        OR
+        (receiver_id = :userId AND sender_id != :userId)  -- Мне отправили не от меня
+    )
+    
+    """, nativeQuery = true)
+    List<Chat> findChatsWhereUserIsParticipant(
+            @Param("userId") Long userId,
+            @Param("excludedChatIds") List<Long> excludedChatIds
+    );
+
+    //AND id NOT IN (:excludedChatIds)
     @Query(value = """
             SELECT *
             FROM chats c

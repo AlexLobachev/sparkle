@@ -1,99 +1,154 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns:th="https://thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="https://thymeleaf.org ">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Заполнение профиля</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
-    <!-- CSRF-токен -->
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Настройка профиля — Sparkle</title>
+    <link rel="stylesheet" th:href="@{/css/registration.css}" media="screen"/>
     <meta name="csrf-token" th:content="${_csrf.token}"/>
-    <script th:src="@{/js/setup-profile.js}" th:nonce="${cspNonce}" defer></script>
+    <meta name="csrf-header" th:content="${_csrf.headerName}"/>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const currentUserId = /*[[${userId}]]*/ null;
+        /*]]>*/
+    </script>
 </head>
 <body>
-<div class="setup-container">
 
+<div class="page-wrapper">
 
-
-
-    <header class="setup-header">
-        <h1>Добро пожаловать!</h1>
-        <p>Пожалуйста, заполните основные данные профиля</p>
+    <header class="header">
+        <h1>Настройка профиля</h1>
     </header>
 
-    <form id="setupForm" class="setup-form">
-        <!-- Пол (обязательный) -->
-        <div class="form-group">
-            <label for="gender">Ваш пол <span class="required">*</span></label>
-            <select id="gender" name="gender" required>
-                <option value="">Выберите</option>
-                <option value="MAN">Мужской</option>
-                <option value="WOMEN">Женский</option>
-            </select>
+    <main class="main-content">
+
+        <!-- Основная карточка -->
+        <div class="tabs-card">
+            <form id="profileForm">
+
+                <!-- Пол -->
+                <div class="form-group">
+                    <label>Ваш пол</label>
+                    <div class="gender-options">
+                        <label class="gender-option">
+                            <input type="radio" name="gender" value="MEN" required>
+                            <div class="icon-circle">
+                                <img src="/images/icons/gender-male.svg" th:src="@{/images/icons/gender-male.svg}" alt="Мужской">
+                            </div>
+                        </label>
+                        <label class="gender-option">
+                            <input type="radio" name="gender" value="WOMEN" required>
+                            <div class="icon-circle">
+                                <img src="/images/icons/gender-female.svg" th:src="@{/images/icons/gender-female.svg}" alt="Женский">
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Предпочтительный пол (без "Любой") -->
+                <div class="form-group">
+                    <label>Предпочтительный пол</label>
+                    <div class="gender-options">
+                        <label class="gender-option">
+                            <input type="radio" name="preferredGender" value="MEN" required>
+                            <div class="icon-circle">
+                                <img src="/images/icons/gender-male.svg" th:src="@{/images/icons/gender-male.svg}" alt="Мужской">
+                            </div>
+                        </label>
+                        <label class="gender-option">
+                            <input type="radio" name="preferredGender" value="WOMEN" required>
+                            <div class="icon-circle">
+                                <img src="/images/icons/gender-female.svg" th:src="@{/images/icons/gender-female.svg}" alt="Женский">
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Город -->
+                <div class="form-group">
+                    <label for="city">Город</label>
+                    <input type="text" id="city" name="city" placeholder="Введите город" required>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="example@domain.com">
+                </div>
+
+                <!-- Дата рождения (обязательна) -->
+                <div class="form-group">
+                    <label for="birthDate">Дата рождения</label>
+                    <input type="date" id="birthDate" name="birthDate" required>
+                </div>
+
+                <!-- Обо мне -->
+                <div class="form-group">
+                    <label for="aboutMe">Обо мне</label>
+                    <textarea id="aboutMe" name="aboutMe" rows="4" placeholder="Расскажите о себе..."></textarea>
+                </div>
+
+                <!-- Интересы -->
+                <div class="form-group">
+                    <label>Интересы</label>
+                    <div id="interestList" class="interest-tags"></div>
+                    <div class="interest-controls">
+                        <select id="interestSelect">
+                            <option value="">Выбрать</option>
+                        </select>
+                        <button type="button" id="addInterestBtn" class="icon-btn">
+                            <img src="/images/icons/interest-add.svg" th:src="@{/images/icons/interest-add.svg}" alt="Добавить">
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Фото -->
+                <div class="form-group">
+                    <label>Фото профиля</label>
+                    <div class="photo-slider">
+                        <div class="photo" id="currentPhoto"></div>
+                    </div>
+                    <div class="photo-controls">
+                        <input type="file" id="profilePhoto" accept="image/*" style="display: none;">
+                        <button type="button" id="uploadBtn" class="icon-btn">
+                            <img src="/images/icons/picture-upload.svg" th:src="@{/images/icons/picture-upload.svg}" alt="Загрузить">
+                        </button>
+                        <button type="button" id="deleteBtn" class="icon-btn danger" disabled>
+                            <img src="/images/icons/picture-remove.svg" th:src="@{/images/icons/picture-remove.svg}" alt="Удалить">
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Сохранить -->
+                <div class="form-actions">
+                    <button type="submit" id="saveBtn" class="icon-btn">
+                        <img src="/images/icons/save.svg" th:src="@{/images/icons/save.svg}" alt="Сохранить">
+                    </button>
+                </div>
+
+            </form>
         </div>
 
-        <!-- Предпочитаемый пол для знакомства (обязательный) -->
-        <div class="form-group">
-            <label for="preferredGender">Предпочтительный пол <span class="required">*</span></label>
-            <select id="preferredGender" name="preferredGender" required>
-                <option value="">Выберите</option>
-                <option value="MAN">Мужской</option>
-                <option value="WOMEN">Женский</option>
-                <option value="BOTH">Любой</option>
-            </select>
+        <!-- Сообщения -->
+        <div id="messages"></div>
+
+        <!-- Кнопка выхода -->
+        <div class="bottom-action">
+            <button id="logoutBtn" class="nav-btn-large">
+                <img src="/images/icons/exit.svg" th:src="@{/images/icons/exit.svg}" alt="Выход">
+            </button>
         </div>
 
-        <!-- Дата рождения (обязательная) -->
-        <div class="form-group">
-            <label for="birthDate">Дата рождения <span class="required">*</span></label>
-            <input type="date" id="birthDate" name="birthDate" required>
-        </div>
+    </main>
 
-        <!-- Город (обязательный) -->
-        <div class="form-group">
-            <label for="city">Город <span class="required">*</span></label>
-            <input type="text" id="city" name="city" placeholder="Введите город" required>
-        </div>
+    <footer class="footer">
+        <p>© <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy')}">2025</span> Sparkle. Все права защищены.</p>
+    </footer>
 
-        <!-- Email (необязательный) -->
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" placeholder="example@domain.com">
-        </div>
-
-        <!-- Фото профиля (необязательное) -->
-        <div class="form-group">
-            <label for="profilePhoto">Фото профиля</label>
-            <input type="file" id="profilePhoto" name="profilePhoto" accept="image/*">
-            <div class="photo-preview" id="photoPreview"></div>
-        </div>
-
-        <!-- Обо мне (необязательное) -->
-        <div class="form-group">
-            <label for="aboutMe">Обо мне</label>
-            <textarea id="aboutMe" name="aboutMe" rows="4" placeholder="Расскажите о себе..."></textarea>
-        </div>
-
-        <!-- Интересы (необязательные) -->
-        <div class="form-group">
-            <label>Интересы</label>
-            <div class="interests-grid" id="interestsContainer">
-                <!-- Динамически генерируемые чекбоксы -->
-            </div>
-        </div>
-
-          <div class="auth-controls">
-                <button id="logoutBtn" class="action-btn logout">Выход</button>
-            </div>
-
-        <!-- Кнопка отправки -->
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Сохранить и продолжить</button>
-        </div>
-    </form>
-
-    <!-- Сообщения об ошибках/успехе -->
-    <div id="messages" class="messages"></div>
 </div>
+
+<script th:src="@{/js/init-user.js}" th:nonce="${cspNonce}"></script>
+<script th:src="@{/js/registration.js}" th:nonce="${cspNonce}"></script>
 </body>
 </html>

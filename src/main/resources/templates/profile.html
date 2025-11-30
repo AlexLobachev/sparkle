@@ -1,3 +1,4 @@
+<!-- НАСТРОЙКА ПРОФИЛЯ фоток и интересов -->
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -6,7 +7,7 @@
     <meta name="csrf-token" th:content="${_csrf.token}"/>
     <meta name="csrf-header" th:content="${_csrf.headerName}"/>
     <title>Мой профиль — Sparkle</title>
-    <link rel="stylesheet" th:href="@{/css/profile-user.css}" media="screen"/>
+    <link rel="stylesheet" th:href="@{/css/profile.css}" media="screen"/>
     <script th:inline="javascript">
         /*<![CDATA[*/
         const currentUserId = /*[[${userId}]]*/ null;
@@ -19,7 +20,6 @@
 
     <header class="header">
         <h1>Мой профиль</h1>
-        <button id="backBtn" class="action-btn back">← Назад</button>
     </header>
 
     <main class="main-content">
@@ -35,8 +35,12 @@
 
             <div class="photo-controls">
                 <input type="file" id="photoInput" accept="image/*" style="display: none;"/>
-                <button id="uploadBtn" class="action-btn primary">Загрузить фото</button>
-                <button id="deleteBtn" class="action-btn danger" disabled>Удалить фото</button>
+                <button id="uploadBtn" class="action-btn primary icon-btn">
+                    <img src="/images/icons/picture-upload.svg" th:src="@{/images/icons/picture-upload.svg}" alt="Загрузить фото">
+                </button>
+                <button id="deleteBtn" class="action-btn danger icon-btn" disabled>
+                    <img src="/images/icons/picture-remove.svg" th:src="@{/images/icons/picture-remove.svg}" alt="Удалить фото">
+                </button>
             </div>
 
             <div class="thumbnails" id="thumbnails"></div>
@@ -53,8 +57,9 @@
                 <select id="interestSelect" multiple>
                     <option value="">Выбрать интересы</option>
                 </select>
-                <button id="addInterestBtn" class="action-btn primary">Добавить</button>
-                <button id="removeInterestBtn" class="action-btn danger">Удалить</button>
+                <button id="addInterestBtn" class="action-btn primary icon-btn">
+                    <img src="/images/icons/interest-add.svg" th:src="@{/images/icons/interest-add.svg}" alt="Добавить интерес">
+                </button>
             </div>
         </section>
 
@@ -63,11 +68,19 @@
             <h2>О себе</h2>
             <div class="about-me">
                 <textarea id="aboutMe" rows="4" placeholder="Расскажите о себе..."></textarea>
-                <button id="saveAboutBtn" class="action-btn primary full-width">Сохранить</button>
+                <button id="saveAboutBtn" class="action-btn primary icon-btn full-width">
+                    <img src="/images/icons/add.svg" th:src="@{/images/icons/add.svg}" alt="Сохранить">
+                </button>
             </div>
         </section>
 
         <div id="messages"></div>
+
+        <div class="bottom-action">
+            <button id="backBtn" class="nav-btn-large">
+                <img src="/images/icons/back-two-arrows.svg" th:src="@{/images/icons/back-two-arrows.svg}" alt="Назад">
+            </button>
+        </div>
 
     </main>
 

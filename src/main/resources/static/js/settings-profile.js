@@ -1,23 +1,11 @@
-/**
- * Скрипт для формы настроек профиля
- */
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('profileForm');
     const deleteBtn = document.getElementById('deleteProfileBtn');
     const backBtn = document.getElementById('backBtn');
     const messages = document.getElementById('messages');
 
-    // Кнопка "Назад"
-    if (backBtn) {
-        backBtn.addEventListener('click', () => {
-            window.location.href = '/main';
-        });
-    }
-
-    // CSRF токен
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-    // Загрузка текущих данных
     loadProfileData();
 
     async function loadProfileData() {
@@ -32,42 +20,37 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) throw new Error('Не удалось загрузить данные');
-
             const user = await response.json();
             fillForm(user);
         } catch (error) {
             console.error('Ошибка при загрузке профиля:', error);
-            showMessage('Не удалось загрузить данные профиля', 'error');
+            showMessage('Не удалось загрузить данные', 'error');
         }
     }
 
     function fillForm(user) {
-        document.getElementById('gender').value = user.gender || '';
-        document.getElementById('preferredGender').value = user.preferredGender || '';
+        if (user.gender) {
+            document.querySelector(`input[name="gender"][value="${user.gender}"]`)?.click();
+        }
+        if (user.preferredGender) {
+            document.querySelector(`input[name="preferredGender"][value="${user.preferredGender}"]`)?.click();
+        }
         document.getElementById('email').value = user.email || '';
         if (user.birthDate) {
             document.getElementById('birthDate').value = user.birthDate.split('T')[0];
         }
     }
 
-
-    // Сохранение формы
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const formData = new FormData(form);
         const data = {};
 
-        // Обрабатываем каждое поле вручную, чтобы контролировать null
         for (let [key, value] of formData.entries()) {
-            // Если значение — строка и состоит только из пробелов — отправляем null
-            if (typeof value === 'string') {
-                value = value.trim();
-            }
-
+            if (typeof value === 'string') value = value.trim();
             data[key] = value === '' ? null : value;
         }
-
         data.userId = window.currentUserId;
 
         try {
@@ -82,29 +65,22 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.ok) {
-                showMessage('Данные успешно обновлены', 'success');
+                showMessage('Данные сохранены', 'success');
             } else {
-                const error = await response.text();
-                throw new Error(error);
+                throw new Error('Ошибка сервера');
             }
         } catch (error) {
-            console.error('Ошибка при сохранении:', error);
-            showMessage('Не удалось сохранить изменения', 'error');
+            showMessage('Не удалось сохранить', 'error');
         }
     });
 
-    // Удаление профиля
     deleteBtn?.addEventListener('click', async () => {
-        if (!confirm('Вы уверены, что хотите удалить профиль? Это действие нельзя отменить.')) {
-            return;
-        }
+        if (!confirm('Удалить профиль? Это нельзя отменить.')) return;
 
         try {
             const response = await fetch(`/sparkle/users/delete/${window.currentUserId}`, {
                 method: 'DELETE',
-                headers: {
-                    'X-XSRF-TOKEN': csrfToken
-                },
+                headers: { 'X-XSRF-TOKEN': csrfToken },
                 credentials: 'include'
             });
 
@@ -112,12 +88,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Профиль удалён');
                 window.location.href = '/logout';
             } else {
-                throw new Error('Не удалось удалить профиль');
+                showMessage('Ошибка при удалении', 'error');
             }
         } catch (error) {
-            console.error('Ошибка при удалении:', error);
-            showMessage('Не удалось удалить профиль', 'error');
+            showMessage('Не удалось удалить', 'error');
         }
+    });
+
+    backBtn?.addEventListener('click', () => {
+        window.location.href = '/main';
     });
 
     function showMessage(text, type) {
@@ -127,10 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
         msg.textContent = text;
         messages.appendChild(msg);
 
-        setTimeout(() => {
-            if (msg.parentNode === messages) {
-                msg.remove();
-            }
-        }, 3000);
+        setTimeout(() => msg.remove(), 3000);
     }
 });

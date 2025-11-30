@@ -1,4 +1,4 @@
-package com.example.sparkle.sparkle.dto;
+package com.example.sparkle.sparkle.dto.city;
 
 import com.example.sparkle.sparkle.model.City;
 import lombok.Builder;

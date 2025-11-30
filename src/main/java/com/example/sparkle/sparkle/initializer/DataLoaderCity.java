@@ -35,88 +35,59 @@ public class DataLoaderCity implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-
         if (cityRepository.count() == 0) {
             List<City> cities = new ArrayList<>();
-            City city;
             GeometryFactory geometryFactory = new GeometryFactory();
-            Point point;
-            ClassPathResource resource = new ClassPathResource("db/ru.csv");
+            ClassPathResource resource = new ClassPathResource("db/new_cities.csv");
+
+            int lineNumber;
             try (BufferedReader br = new BufferedReader(
-                    (new InputStreamReader(resource.getInputStream())))) {
+                    new InputStreamReader(resource.getInputStream()))) {
+
                 String line;
-                boolean isFirstLine = true;  // Флаг для пропуска заголовка
+                lineNumber = 0;
                 while ((line = br.readLine()) != null) {
-                    if (isFirstLine) {
-                        isFirstLine = false;  // Пропускаем первую строку
+                    lineNumber++;
+                    if (lineNumber == 1) continue; // Пропускаем заголовок
+
+                    String[] parts = line.split(",");
+                    if (parts.length < 19) { // Проверяем наличие всех необходимых полей
+                        log.warn("Строка {} пропущена (недостаточно полей): {}", lineNumber, line);
                         continue;
                     }
-                    String[] parts = line.split(",");
-                    if (parts.length < 3) continue; // Пропускаем некорректные строки
 
-                    String cityName = parts[0].trim();
-                    log.info("parts[1].trim() >>>>" + parts[1].trim());
-                    double lng = Double.parseDouble(parts[1].trim());
-                    double lat = Double.parseDouble(parts[2].trim());
+                    try {
+                        String cityName = parts[6].trim(); // Город
+                        double lat = Double.parseDouble(parts[17].trim().replace(',', '.')); // Широта
+                        double lng = Double.parseDouble(parts[18].trim().replace(',', '.')); // Долгота
 
-                    city = new City();
-                    point = geometryFactory.createPoint(new Coordinate(lat,lng));
-                    city.setName(cityName);
-                    city.setLocation(point);
-                    cities.add(city);
+                        if (lng < -180 || lng > 180 || lat < -90 || lat > 90) {
+                            log.warn("Строка {}: некорректные координаты для {}: {}, {}",
+                                    lineNumber, cityName, lat, lng);
+                            continue;
+                        }
 
+                        City city = new City();
+                        Point point = geometryFactory.createPoint(new Coordinate(lng, lat));
+                        city.setName(cityName);
+                        city.setLocation(point);
+                        cities.add(city);
 
+                    } catch (NumberFormatException e) {
+                        log.warn("Строка {}: ошибка парсинга координат в '{}'", lineNumber, line, e);
+                    }
                 }
             } catch (Exception e) {
                 log.error("Ошибка загрузки CSV: {}", e.getMessage(), e);
                 throw e;
             }
+
             cityRepository.saveAll(cities);
-            log.info("Загружено {} городов", cities.size());
+            log.info("Загружено {} городов из {} строк CSV", cities.size(), lineNumber - 1);
         }
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-            /*City city = new City();
-
-            GeometryFactory geometryFactory = new GeometryFactory();
-
-            Point point = geometryFactory.createPoint(new Coordinate( 37.6173,55.7558));
-            city.setName("Москва");
-            city.setLocation(point);
-            cityRepository.save(city);
-
-            city = new City();
-            point = geometryFactory.createPoint(new Coordinate( 37.2777,55.678));
-            city.setName("Одинцово");
-            city.setLocation(point);
-            cityRepository.save(city);
-
-            city = new City();
-            point = geometryFactory.createPoint(new Coordinate( 36.73,55.39));
-            city.setName("Наро-Фоминск");
-            city.setLocation(point);
-            cityRepository.save(city);
-
-            city = new City();
-            point = geometryFactory.createPoint(new Coordinate( 37.97,55.93));
-            city.setName("Щёлково");
-            city.setLocation(point);
-            cityRepository.save(city);*/
-    //}
 
 }
 

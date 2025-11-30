@@ -1,82 +1,99 @@
+<!-- Чаты и мэтчи -->
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Чаты и мэтчи — Sparkle</title>
+    <link rel="stylesheet" th:href="@{/css/chats-matches.css}" media="screen"/>
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <title>Чаты и Мэтчи — Sparkle</title>
-    <link rel="preload" href="/css/chats-matches.css" as="style">
-    <link rel="stylesheet" th:href="@{/css/chats-matches.css}" media="screen">
+
 </head>
+
 <body>
 
 <div class="page-wrapper">
 
+    <!-- Шапка -->
     <header class="header">
-        <h1>Чаты и Мэтчи</h1>
-        <button id="backBtn" class="action-btn back">← Назад</button>
+        <h1>Чаты и мэтчи</h1>
     </header>
 
     <main class="main-content">
-
-        <!-- Вкладки -->
-        <nav class="tabs" role="tablist">
-            <button class="tab active" data-tab="matches" type="button" role="tab" aria-selected="true">Мои Мэтчи</button>
-            <button class="tab" data-tab="chats" type="button" role="tab" aria-selected="false">Мои чаты</button>
-            <button class="tab" data-tab="my-likes" type="button" role="tab" aria-selected="false">Кому я понравился</button>
-            <button class="tab" data-tab="who-liked-me" type="button" role="tab" aria-selected="false">Кто мне понравился</button>
-        </nav>
-
-        <!-- Контент вкладок -->
-        <div class="tab-content">
-
-            <!-- Мэтчи -->
-            <div id="matches" class="tab-pane active">
-                <div class="loader" id="matchesLoader">Загрузка мэтчей...</div>
-                <ul class="user-list" id="matchesList"></ul>
-                <div class="no-data" id="noMatches">Нет мэтчей</div>
+        <!-- Белый блок с вкладками -->
+        <div class="tabs-card">
+            <div class="tabs">
+                <button class="tab active" data-tab="matches">
+                    <img src="/images/icons/sisters-love-relationships-people.svg" th:src="@{/images/icons/sisters-love-relationships-people.svg}" alt="Мои мэтчи">
+                </button>
+                <button class="tab" data-tab="chats">
+                    <img src="/images/icons/chats-2-line.svg" th:src="@{/images/icons/chats-2-line.svg}" alt="Мои чаты">
+                </button>
+                <button class="tab" data-tab="my-likes">
+                    <img src="/images/icons/love-feel-emotion.svg" th:src="@{/images/icons/love-feel-emotion.svg}" alt="Кто мне нравится">
+                </button>
+                <button class="tab" data-tab="who-liked-me">
+                    <img src="/images/icons/love-2.svg" th:src="@{/images/icons/love-2.svg}" alt="Кому я понравился">
+                </button>
             </div>
 
-            <!-- Чаты -->
-            <div id="chats" class="tab-pane">
-                <div class="loader" id="chatsLoader">Загрузка чатов...</div>
-                <ul class="user-list" id="chatsList"></ul>
-                <div class="no-data" id="noChats">Нет чатов</div>
-            </div>
+            <div class="tab-content">
+                <!-- Список мэтчей -->
+                <div id="matches" class="tab-pane active">
+                    <div id="matchesLoader" class="loader">Загрузка мэтчей...</div>
+                    <ul id="matchesList" class="user-list"></ul>
+                    <div id="noMatches" class="no-data">Нет мэтчей</div>
+                </div>
 
-            <!-- Мои лайки -->
-            <div id="my-likes" class="tab-pane">
-                <div class="loader" id="likesLoader">Загрузка лайков...</div>
-                <ul class="user-list" id="likesList"></ul>
-                <div class="no-data" id="noLikes">Вам никто не поставил лайк</div>
-            </div>
+                <!-- Список чатов -->
+                <div id="chats" class="tab-pane">
+                    <div id="chatsLoader" class="loader">Загрузка чатов...</div>
+                    <ul id="chatsList" class="user-list"></ul>
+                    <div id="noChats" class="no-data">Нет чатов</div>
+                </div>
 
-            <div id="who-liked-me" class="tab-pane">
-                <div class="loader" id="whoLikedLoader">Загрузка...</div>
-                <ul class="user-list" id="whoLikedList"></ul>
-                <div class="no-data" id="noWhoLiked">Вам еще никто не понравился</div>
-            </div>
+                <!-- Кому я понравился -->
+                <div id="my-likes" class="tab-pane">
+                    <div id="likesLoader" class="loader">Загрузка...</div>
+                    <ul id="likesList" class="user-list"></ul>
+                    <div id="noLikes" class="no-data">Пока нет лайков</div>
+                </div>
 
+                <!-- Кто мне понравился -->
+                <div id="who-liked-me" class="tab-pane">
+                    <div id="whoLikedLoader" class="loader">Загрузка...</div>
+                    <ul id="whoLikedList" class="user-list"></ul>
+                    <div id="noWhoLiked" class="no-data">Никто пока не понравился</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопка "Назад" внизу белого блока -->
+        <div class="bottom-action">
+            <button id="bottomBackBtn" class="nav-btn-large">
+                <img src="/images/icons/back-two-arrows.svg" th:src="@{/images/icons/back-two-arrows.svg}" alt="Назад">
+            </button>
         </div>
     </main>
-    <div class="chat-modal" id="chatModal">
-        <div class="chat-container" id="chatContainer">
+
+    <!-- Модальное окно чата -->
+    <div id="chatModal" class="chat-modal">
+        <div class="chat-container">
             <div class="chat-header">
-                <h3 id="chatHeader">Чат</h3>
-                <button class="chat-close" id="chatCloseBtn">&times;</button>
+                <h3 id="chatHeader"></h3>
+                <button id="chatCloseBtn" class="chat-close">&times;</button>
             </div>
-            <div class="chat-messages" id="chatMessages"></div>
+            <div id="chatMessages" class="chat-messages"></div>
             <div class="chat-input">
-                <input type="text" id="chatInput" placeholder="Введите сообщение...">
+                <input type="text" id="chatInput" placeholder="Напишите сообщение..." maxlength="500"/>
                 <button id="chatSendBtn">Отправить</button>
             </div>
-
         </div>
     </div>
 
     <footer class="footer">
-        <p>© <span id="year"></span> Sparkle. Все права защищены.</p>
+        <p>© <span id="year">2025</span> Sparkle. Все права защищены.</p>
     </footer>
 
 </div>
@@ -85,8 +102,6 @@
     window.currentUserId = [[${#authentication.principal.id}]];
     /*]]>*/
 </script>
-
-<script th:src="@{js/chats-matches.js}" defer></script>
-
+<script th:src="@{/js/chats-matches.js}" th:nonce="${cspNonce}"></script>
 </body>
 </html>

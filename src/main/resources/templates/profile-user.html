@@ -1,3 +1,4 @@
+<!-- Профиль пользователя -->
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -17,9 +18,9 @@
 <body>
 <div class="page-wrapper">
 
+    <!-- Шапка -->
     <header class="header">
         <h1>Профиль пользователя</h1>
-        <button id="backBtn" class="action-btn back">← Назад</button>
     </header>
 
     <main class="main-content">
@@ -51,12 +52,23 @@
                 <ul></ul>
             </div>
 
-            <button id="sendMessageBtn" class="action-btn primary full-width">Написать</button>
+            <!-- Кнопки действий -->
+            <div class="actions-row">
+                <button id="sendMessageBtn" class="action-option-btn">
+                    <div class="icon-circle primary">
+                        <img src="/images/icons/chats-2-line.svg" th:src="@{/images/icons/chats-2-line.svg}" alt="Написать">
+                    </div>
+                </button>
+                <button id="bottomBackBtn" class="action-option-btn">
+                    <div class="icon-circle primary">
+                        <img src="/images/icons/back-two-arrows.svg" th:src="@{/images/icons/back-two-arrows.svg}" alt="Назад">
+                    </div>
+                </button>
+            </div>
         </section>
-
     </main>
 
-    <!-- ✅ Модальное окно чата — ВНЕ <main> -->
+    <!-- Модальное окно чата -->
     <div class="chat-modal" id="chatModal">
         <div class="chat-container" id="chatContainer">
             <div class="chat-header">
@@ -74,10 +86,8 @@
     <footer class="footer">
         <p>© <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy')}">2025</span> Sparkle. Все права защищены.</p>
     </footer>
-
 </div>
 
-</script>
-<script th:src="@{/js/profile-user.js}" defer></script>
+<script th:src="@{/js/profile-user.js}" defer th:nonce="${cspNonce}"></script>
 </body>
 </html>

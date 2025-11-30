@@ -49,7 +49,7 @@ public class HomePage {
             return settings(userDetails, request, model, "registration", null);
         }
 
-        return settings(userDetails, request, model, "main", null);
+        return settings(userDetails, request, model, "main-page", null);
     }
 
     /**
@@ -69,7 +69,7 @@ public class HomePage {
     public String profileSettingsAfterRegistration(@AuthenticationPrincipal UserDetails userDetails,
                                                    HttpServletRequest request,
                                                    Model model) {
-        return settings(userDetails, request, model, "settings", null);
+        return settings(userDetails, request, model, "settings-profile", null);
     }
 
     /**
@@ -154,6 +154,5 @@ public class HomePage {
         return page;
     }
 
-    // Удалён /refresh-csrf — он не нужен в обычном сценарии с Thymeleaf.
-    // CSRF-токен автоматически доступен в шаблонах через ${_csrf}.
+
 }

@@ -6,10 +6,7 @@ import com.example.sparkle.sparkle.service.CityService;
 import com.example.sparkle.sparkle.service.GeocodingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/sparkle/city")
@@ -36,5 +33,10 @@ public class CityController {
         cityService.saveCity(city);
 
         return ResponseEntity.ok().build();
+    }
+    @GetMapping("/get-all-cities")
+    public ResponseEntity<?> getAllCityFromDataBase() {
+
+        return ResponseEntity.ok().body(cityService.getAllCityFromDataBase());
     }
 }

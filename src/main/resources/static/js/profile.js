@@ -7,12 +7,9 @@
 window.currentPhotoIndex = 0;
 window.photos = [];
 window.interests = [];
-window.csrfToken = null;
-window.currentPhotoIndex = 0;
-window.photos = [];
-window.interests = [];
 let csrfHeader = null;
-window.csrfToken = null;
+let csrfToken = null;
+
 // Словарь переводов интересов
 const INTERESTS_TRANSLATIONS = {
     "FOOTBALL": { ru: "Футбол", en: "Football" },
@@ -74,21 +71,17 @@ async function loadInterestLabels() {
  */
 document.addEventListener('DOMContentLoaded', async () => {
     // Читаем CSRF токен и заголовок из meta-тегов
-    window.csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     csrfHeader = document.querySelector('meta[name="csrf-header"]')?.getAttribute('content');
 
-    console.log('CSRF Token:', window.csrfToken);
-    console.log('CSRF Header:', csrfHeader);
-
-    // Проверяем наличие токена
-    if (!window.csrfToken) {
+    if (!csrfToken) {
         showError('Ошибка безопасности: CSRF токен не найден в meta-теге "csrf-token"');
         return;
     }
 
     if (!csrfHeader) {
         console.warn('CSRF Header не найден, используем резервный заголовок X-XSRF-TOKEN');
-        csrfHeader = 'X-XSRF-TOKEN'; // резервный вариант
+        csrfHeader = 'X-XSRF-TOKEN';
     }
 
     if (!currentUserId) {
@@ -108,12 +101,11 @@ async function loadUserData() {
     try {
         const headers = {
             'Accept': 'application/json',
-            'X-XSRF-TOKEN': window.csrfToken
+            'X-XSRF-TOKEN': csrfToken
         };
 
-        // Добавляем заголовок CSRF, если он определён
-        if (csrfHeader && window.csrfToken) {
-            headers[csrfHeader] = window.csrfToken;
+        if (csrfHeader && csrfToken) {
+            headers[csrfHeader] = csrfToken;
         }
 
         const response = await fetch(`/sparkle/users/${currentUserId}`, {
@@ -136,10 +128,9 @@ async function loadUserData() {
  */
 function renderProfile(user) {
     window.photos = user.photos || [];
-    window.interests = Array.from(new Set(user.interests || [])); // Уникальные интересы
+    window.interests = Array.from(new Set(user.interests || []));
     const aboutMe = document.getElementById('aboutMe');
 
-    // Фото
     if (window.photos.length > 0) {
         showCurrentPhoto();
         renderThumbnails();
@@ -148,11 +139,9 @@ function renderProfile(user) {
         resetPhotoDisplay();
     }
 
-    // Интересы
     renderInterestList();
     populateInterestSelect();
 
-    // О себе
     if (aboutMe) {
         aboutMe.value = user.aboutMe || '';
     }
@@ -219,8 +208,6 @@ function updatePhotoIndicator() {
  */
 function renderInterestList() {
     const container = document.getElementById('interestList');
-
-    // ✅ Очищаем контейнер — это важно
     container.innerHTML = '';
 
     if (!window.interests.length) {
@@ -231,7 +218,6 @@ function renderInterestList() {
         return;
     }
 
-    // Убираем дубликаты на всякий случай (хотя не должны быть)
     const uniqueInterests = [...new Set(window.interests)];
 
     uniqueInterests.forEach(interestKey => {
@@ -258,8 +244,6 @@ function renderInterestList() {
  */
 function populateInterestSelect() {
     const select = document.getElementById('interestSelect');
-
-    // ✅ Очищаем выпадающий список
     select.innerHTML = '<option value="">Выбрать интересы</option>';
 
     if (!window.interestLabels || typeof window.interestLabels !== 'object' || Array.isArray(window.interestLabels)) {
@@ -267,7 +251,6 @@ function populateInterestSelect() {
         return;
     }
 
-    // Фильтруем только те, которых ещё нет
     Object.keys(window.interestLabels).forEach(key => {
         if (!window.interests.includes(key)) {
             const option = document.createElement('option');
@@ -278,19 +261,17 @@ function populateInterestSelect() {
     });
 }
 
-
 /**
- * Удаление интереса — без confirm()
+ * Удаление интереса
  */
-// Обновляем все функции с fetch, чтобы использовать правильные заголовки
 async function removeInterest(interestKey) {
     try {
         const headers = {
-            'X-XSRF-TOKEN': window.csrfToken
+            'X-XSRF-TOKEN': csrfToken
         };
 
-        if (csrfHeader && window.csrfToken) {
-            headers[csrfHeader] = window.csrfToken;
+        if (csrfHeader && csrfToken) {
+            headers[csrfHeader] = csrfToken;
         }
 
         const response = await fetch(`/sparkle/users/interests/delete/${interestKey}`, {
@@ -384,9 +365,9 @@ async function handlePhotoUpload(file) {
             method: 'POST',
             body: fd,
             headers: {
-                'X-XSRF-TOKEN': window.csrfToken,
-                'X-CSRF-TOKEN': window.csrfToken, // Резервный вариант
-                [csrfHeader]: window.csrfToken // Универсальный подход
+                'X-XSRF-TOKEN': csrfToken,
+                'X-CSRF-TOKEN': csrfToken,
+                [csrfHeader]: csrfToken
             }
         });
 
@@ -415,9 +396,9 @@ async function removePhoto() {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': window.csrfToken,
-                'X-CSRF-TOKEN': window.csrfToken, // Резервный вариант
-                [csrfHeader]: window.csrfToken // Универсальный подход
+                'X-XSRF-TOKEN': csrfToken,
+                'X-CSRF-TOKEN': csrfToken,
+                [csrfHeader]: csrfToken
             },
             body: JSON.stringify({ userId: currentUserId })
         });
@@ -442,25 +423,24 @@ async function removePhoto() {
 }
 
 /**
- * Добавление интересов — правильная версия
+ * Добавление интересов
  */
 async function addInterests(keys) {
     try {
         const headers = {
             'Content-Type': 'application/json',
-            'X-XSRF-TOKEN': window.csrfToken
+            'X-XSRF-TOKEN': csrfToken
         };
 
-        // Добавляем заголовок из meta-тега
         if (csrfHeader) {
-            headers[csrfHeader] = window.csrfToken;
+            headers[csrfHeader] = csrfToken;
         }
 
         const res = await fetch('/sparkle/users/interests/create-all', {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(keys.map(key => ({ interest: key, userId: currentUserId }))),
-            credentials: 'include' // ✅ Обязательно для сессии
+            credentials: 'include'
         });
 
         if (res.ok) {
@@ -486,9 +466,9 @@ async function updateAboutMe(text) {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': window.csrfToken,
-                'X-CSRF-TOKEN': window.csrfToken, // Резервный вариант
-                [csrfHeader]: window.csrfToken // Универсальный подход
+                'X-XSRF-TOKEN': csrfToken,
+                'X-CSRF-TOKEN': csrfToken,
+                [csrfHeader]: csrfToken
             },
             body: JSON.stringify({ aboutMe: text })
         });

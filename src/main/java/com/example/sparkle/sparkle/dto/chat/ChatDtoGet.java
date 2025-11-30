@@ -17,19 +17,23 @@ import java.util.List;
 public class ChatDtoGet {
     private Long chatId;
     private LocalDateTime sentAt;
-    private List<UserMatchDto> users = new ArrayList<>();
+    private UserMatchDto user;
 
 
-    public static ChatDtoGet toChatDtoList(Chat chat){
+    public static ChatDtoGet toChatDtoList(Chat chat, Long currentUserId){
         List<User> usersChat = Arrays.asList(chat.getSender(),chat.getReceiver());
-        List <UserMatchDto> userMatchDtoList = new ArrayList<>();
-        usersChat.forEach(user -> userMatchDtoList.add(UserMatchDto.toUserMatchDto(user)));
-
+        User otherUser = usersChat.stream()
+                .filter(user -> !user.getId().equals(currentUserId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Чат не содержит собеседника (оба участника — текущий пользователь?)"));
         return ChatDtoGet.builder()
                 .chatId(chat.getId())
                 .sentAt(chat.getSentAt())
-                .users(userMatchDtoList)
+                .user(UserMatchDto.toUserMatchDto(otherUser))
                 .build();
     }
+
+
 
 }

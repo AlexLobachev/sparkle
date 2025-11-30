@@ -166,7 +166,7 @@ WHERE ST_DWithin(
 
 --DELETE FROM matches WHERE first_user_id = 10 ;
 
-delete from candidate_batch where user_id = 10;
+
 
 SELECT * FROM messages;
 

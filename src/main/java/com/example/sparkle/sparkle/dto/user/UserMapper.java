@@ -1,12 +1,6 @@
 package com.example.sparkle.sparkle.dto.user;
 
-import com.example.sparkle.sparkle.dto.CityDto;
-import com.example.sparkle.sparkle.model.City;
-import com.example.sparkle.sparkle.model.Interest;
 import com.example.sparkle.sparkle.model.User;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class UserMapper {
 

@@ -66,12 +66,12 @@ public class ChatServiceImpl implements ChatService {
 
         Chat chat = chatRepository.getChatByReceiverIdAndSenderId(sender.getId(), receiverId).orElse(null);
         if (chat != null) {
-        ChatDelete chatDelete = deletedChatsRepository.findByUserIdAndChatId(sender.getId(), chat.getId());
-        if (chatDelete != null) {
-            deletedChatsRepository.deleteByUserIdAndChatId(chatDelete.getUserId(), chatDelete.getChatId());
-               }
+            ChatDelete chatDelete = deletedChatsRepository.findByUserIdAndChatId(sender.getId(), chat.getId());
+            if (chatDelete != null) {
+                deletedChatsRepository.deleteByUserIdAndChatId(chatDelete.getUserId(), chatDelete.getChatId());
+            }
 
-            return ChatDtoGet.toChatDtoList(chat);
+            return ChatDtoGet.toChatDtoList(chat, sender.getId());
         }
         User receiver = userRepository.findById(receiverId)
                 .orElseThrow(() -> new NotFound("Пользователь не найден"));
@@ -80,7 +80,7 @@ public class ChatServiceImpl implements ChatService {
         chat.setReceiver(receiver);
         chat.setSentAt(LocalDateTime.now());
         chat = chatRepository.save(chat);
-        return ChatDtoGet.toChatDtoList(chat);
+        return ChatDtoGet.toChatDtoList(chat, receiverId);
     }
 
     /**
@@ -114,21 +114,29 @@ public class ChatServiceImpl implements ChatService {
     /**
      * Отображение списка чатов текущего пользователя
      */
+
     @Override
     public List<ChatDtoGet> listChatsForCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetails currentUser = (UserDetails) auth.getPrincipal();
-        User user = userRepository.findByUsername(
-                currentUser.getUsername()).orElseThrow(() -> new NotFound("Пользователь не найден"));
+        User user = userRepository.findByUsername(currentUser.getUsername())
+                .orElseThrow(() -> new NotFound("Пользователь не найден"));
 
-        List<Long> chatDelete = deletedChatsRepository.findAllChatId(user.getId());
-        if (chatDelete.isEmpty()) {
-            return chatRepository.findAllBySenderIdAndReceiverId(user.getId(), user.getId()).stream().map(ChatDtoGet::toChatDtoList).toList();
-        }
-        List<Chat> chats = chatRepository.findAllBySenderIdAndReceiverId(user.getId(), user.getId(), chatDelete);
+        // Получаем ID удалённых чатов
+        List<Long> deletedChatIds = deletedChatsRepository.findAllChatId(user.getId());
+
+
+        // Если удалённых чатов нет — передаём пустой список
+        List<Long> excludedIds = deletedChatIds.isEmpty() ? List.of() : deletedChatIds;
+
+        // Ищем чаты, где пользователь — участник, но не ведёт диалог сам с собой
+        List<Chat> chats = chatRepository.findChatsWhereUserIsParticipant(user.getId(), excludedIds);
+
         validatorChatAndMessage.chatNoContent(chats);
 
-        return chats.stream().map(ChatDtoGet::toChatDtoList).toList();
+        return chats.stream()
+                .map(chat -> ChatDtoGet.toChatDtoList(chat, user.getId()))
+                .toList();
     }
 
 
