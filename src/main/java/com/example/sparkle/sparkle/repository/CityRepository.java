@@ -20,5 +20,8 @@ public interface CityRepository extends JpaRepository<City,Long> {
      //Optional<City> findByCoordinates(@Param("latitude") Double latitude, @Param("longitude") Double longitude);
 
     Optional<City> findByLocation(Point point);
+    Optional<City> findByName(String name);
+    @Query("SELECT c FROM City c WHERE LOWER(c.name) = LOWER(:name)")
+    Optional<City> findByNameIgnoreCase(@Param("name") String name);
 
 }

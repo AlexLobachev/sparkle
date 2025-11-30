@@ -1,3 +1,4 @@
+<!-- НАСТРОЙКА ПРОФИЛЯ email, пол, дата рождения при регистрации-->
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -5,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Настройка профиля — Sparkle</title>
     <link rel="stylesheet" th:href="@{/css/registration.css}" media="screen"/>
+    <link rel="stylesheet" th:href="@{/css/location.css}" media="screen"/>
     <meta name="csrf-token" th:content="${_csrf.token}"/>
     <meta name="csrf-header" th:content="${_csrf.headerName}"/>
     <script th:inline="javascript">
@@ -22,6 +24,27 @@
     </header>
 
     <main class="main-content">
+
+        <!-- Модальное окно для определения местоположения -->
+        <div class="location-modal" id="locationModal">
+            <div class="location-content">
+                <h3>Определить ваш город?</h3>
+                <p>Мы можем определить ваше местоположение, чтобы автоматически заполнить поле «Город».</p>
+
+                <div class="location-actions">
+                    <button type="button" id="getLocationBtn" class="btn-primary">Определить место</button>
+                    <button type="button" id="skipLocationBtn" class="btn-text">Ввести вручную</button>
+                </div>
+
+                <!-- Ручной ввод (если геолокация не удалась) -->
+                <div id="manualInput" class="manual-input" style="display: none;">
+                    <label for="cityInput">Введите город:</label>
+                    <input type="text" id="cityInput" placeholder="Например, Москва">
+                    <button type="button" id="confirmCityBtn" class="btn-small">Подтвердить</button>
+                </div>
+            </div>
+        </div>
+
 
         <!-- Основная карточка -->
         <div class="tabs-card">
@@ -150,5 +173,6 @@
 
 <script th:src="@{/js/init-user.js}" th:nonce="${cspNonce}"></script>
 <script th:src="@{/js/registration.js}" th:nonce="${cspNonce}"></script>
+<script th:src="@{/js/location.js}" th:nonce="${cspNonce}"></script>
 </body>
 </html>

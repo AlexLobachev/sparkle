@@ -1,14 +1,13 @@
 package com.example.sparkle.sparkle.service;
 
+import com.example.sparkle.sparkle.dto.interest.UserInterestsDto;
 import com.example.sparkle.sparkle.dto.match.MatchDto;
 import com.example.sparkle.sparkle.dto.match.MatchMapper;
 import com.example.sparkle.sparkle.dto.user.UserMatchDto;
 import com.example.sparkle.sparkle.exception.BadRequest;
 import com.example.sparkle.sparkle.exception.NoContent;
 import com.example.sparkle.sparkle.exception.NotFound;
-import com.example.sparkle.sparkle.model.Chat;
-import com.example.sparkle.sparkle.model.Match;
-import com.example.sparkle.sparkle.model.User;
+import com.example.sparkle.sparkle.model.*;
 import com.example.sparkle.sparkle.repository.MatchRepository;
 import com.example.sparkle.sparkle.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +31,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @Slf4j
 public class MatchServiceImpl implements MatchService {
+    private static final double DEFAULT_X = 37.6176;
+    private static final double DEFAULT_Y = 55.7558;
 
     private final MatchRepository matchRepository;
+
+
     private final UserRepository userRepository;
     private final UserService userService;
 
@@ -324,13 +327,17 @@ public class MatchServiceImpl implements MatchService {
     private void loadNewCandidates(User user, double distance) {
         User currentUser = userRepository.findById(user.getId())
                 .orElseThrow(() -> new NotFound("Пользователь не найден"));
-
-
-        double x = currentUser.getCity().getLocation().getCoordinate().x;
-        double y = currentUser.getCity().getLocation().getCoordinate().y;
-        double finalDistance = distance / 100.0;
-
-        // Теперь не нужно предварительно получать excludedIds — всё в SQL
+        double x = DEFAULT_X;
+        double y = DEFAULT_Y;
+        double finalDistance = 10000 / 100.0;
+        if (currentUser.getCity()!=null) {
+            x = currentUser.getCity().getLocation().getCoordinate().x;
+            y = currentUser.getCity().getLocation().getCoordinate().y;
+            finalDistance = distance / 100.0;
+        }
+        if (currentUser.getInterests().isEmpty()||currentUser.getInterests()==null) {
+            currentUser.setInterests(UserInterest.toListUserInterest());
+        }
         List<Long> candidateIds = userRepository.findCandidateIdsNearLocation(
                 x, y, finalDistance,
                 currentUser.getPreferredGender().toString(),

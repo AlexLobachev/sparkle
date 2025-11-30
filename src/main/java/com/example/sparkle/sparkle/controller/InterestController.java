@@ -1,5 +1,6 @@
 package com.example.sparkle.sparkle.controller;
 
+import com.example.sparkle.sparkle.dto.interest.UserInterestsDto;
 import com.example.sparkle.sparkle.dto.user.UserDto;
 import com.example.sparkle.sparkle.dto.user.UserMapper;
 import com.example.sparkle.sparkle.model.Interest;
@@ -55,7 +56,7 @@ public class InterestController {
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/{userId}")
     public ResponseEntity<?> getAllInterestUserById(@PathVariable Long userId) {
-        return ResponseEntity.ok(UserInterest.toUserInterestDto(
+        return ResponseEntity.ok(UserInterestsDto.toUserInterestDto(
                 userInterestService.getAllInterestUserById(userId)));
     }
 

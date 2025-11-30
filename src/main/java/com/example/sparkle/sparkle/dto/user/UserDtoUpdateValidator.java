@@ -24,7 +24,6 @@ public class UserDtoUpdateValidator {
     private String email;
     @Past(message = "Дата рождения не может быть в будущем или настоящем")
     private LocalDate birthDate;
-    @JsonIgnore
     @Size(max = 200, message = "Максимальная длина сообщения не может быть больше 200 символов")
     private String aboutMe;
 }

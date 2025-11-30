@@ -1,0 +1,6 @@
+<button id="getLocationBtn">Определить моё местоположение</button>
+<div id="manualInput" style="display: none;">
+    <label>Ваш город:</label>
+    <input type="text" id="cityInput" placeholder="Например, Санкт-Петербург">
+    <script th:src="@{/js/location.js}" th:nonce="${cspNonce}"></script>
+</div>

@@ -1,9 +1,7 @@
 package com.example.sparkle.sparkle.repository;
 
 import com.example.sparkle.sparkle.model.AuthProvider;
-import com.example.sparkle.sparkle.model.Interest;
 import com.example.sparkle.sparkle.model.User;
-import com.example.sparkle.sparkle.model.UserInterest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,7 +9,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 
 import java.time.LocalDate;
 import java.util.List;
@@ -56,7 +53,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "    preferred_gender     = COALESCE(:preferredGender, u.preferred_gender), " +
             "    email      = COALESCE (:email, u.email)," +
             "    birth_date  = COALESCE (:birthDate, u.birth_date), " +
-            "    about_me  = COALESCE (:aboutMe, u.about_me) " +
+            "    about_me  = COALESCE (:aboutMe, u.about_me), " +
+            "    city_id  = COALESCE (:cityId, u.city_id) " +
             "WHERE u.id = :id",
             nativeQuery = true)
     int userUpdate(
@@ -65,8 +63,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("email") String email,
             @Param("birthDate") LocalDate birthDate,
             @Param("aboutMe") String aboutMe,
-            @Param("id") Long userId);
+            @Param("id") Long userId,
+            @Param("cityId") Long cityId);
 
+    @Modifying
+    @Query(value = """
+            UPDATE users SET email_pending = false WHERE id = :userId
+            """, nativeQuery = true)
+    int updateEmailStatus(Long userId);
 
     Optional<User> findByUsername(String name);
 

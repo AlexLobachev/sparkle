@@ -1,5 +1,6 @@
 package com.example.sparkle.sparkle.dto.user;
 
+import com.example.sparkle.sparkle.model.City;
 import com.example.sparkle.sparkle.model.Gender;
 import com.example.sparkle.sparkle.model.User;
 import jakarta.validation.constraints.NotBlank;
@@ -24,6 +25,7 @@ public class UserDtoUpdate {
     private LocalDate birthDate;
     private String aboutMe;
     private boolean emailPending = true;
+    private String city;
 
 
 
