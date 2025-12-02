@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Вход — Sparkle</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #1c1e21;
+        }
+
+        .header {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1c1e21;
+        }
+
+        .header-logo {
+            margin-top: 8px;
+        }
+
+        .header-logo img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 32px 24px;
+            margin: 20px auto;
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        .main-title {
+            font-size: 24px;
+            color: #1c1e21;
+            margin-bottom: 8px;
+        }
+
+        .tagline {
+            font-size: 16px;
+            color: #606770;
+            margin-bottom: 24px;
+        }
+
+        #vk-one-tap-container {
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .auth-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .github-login {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #24292f;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .github-login:hover {
+            background-color: #1a1e23;
+        }
+
+        .github-login-icon {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            color: #606770;
+        }
+    </style>
+</head>
+<body>
+<!-- Шапка -->
+<div class="header">
+    <!-- <div class="header-title">Sparkle</div> -->
+    <div class="header-logo">
+        <!-- Твоё лого из папки static/images/logo.png -->
+        <img src="/images/logo/logo.png" alt="Логотип Sparkle" width="1024" height="1024">
+    </div>
+</div>
+
+<!-- Основной контейнер -->
+<div class="container">
+    <h1 class="main-title">Добро пожаловать!</h1>
+    <p class="tagline">Знакомьтесь с новыми людьми</p>
+
+    <!-- Контейнер для кнопок VK ID -->
+    <div id="vk-one-tap-container"></div>
+
+    <!-- Кнопки других провайдеров -->
+    <div class="auth-buttons">
+        <!-- GitHub -->
+        <a href="/oauth2/authorization/github" class="github-login">
+            <svg class="github-login-icon" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+            Войти через GitHub
+        </a>
+    </div>
+</div>
+
+<!-- Подвал -->
+<div class="footer">
+    © 2025 Sparkle. Все права защищены.
+</div>
+
+<!-- Подключаем VK ID SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@vkid/sdk@2.6.2/dist-sdk/umd/index.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        const container = document.getElementById('vk-one-tap-container');
+        let vkInitialized = false;
+        let retryAttempt = false;
+
+        function waitForVKIDSDK(attempts = 50, interval = 100) {
+            if (window.VKIDSDK) {
+                if (!vkInitialized) initVK();
+            } else if (attempts > 0) {
+                setTimeout(() => waitForVKIDSDK(attempts - 1, interval), interval);
+            } else {
+                container.innerHTML = '<p style="color: red;">SDK не загрузилось</p>';
+            }
+        }
+
+        function initVK() {
+            if (vkInitialized) return;
+            vkInitialized = true;
+            container.innerHTML = '';
+
+            const VKID = window.VKIDSDK;
+
+            try {
+                VKID.Config.init({
+                    app: 54349604,
+                    redirectUrl: 'https://sparkle.ru.tuna.am/login/vk/exchange',
+                    responseMode: VKID.ConfigResponseMode.Callback,
+                    source: VKID.ConfigSource.LOWCODE,
+                    scope: 'email'
+                });
+
+                new VKID.OneTap().render({
+                    container: container,
+                    showAlternativeLogin: true,
+                    styles: {
+                        width: '100%',      // Ширина по контейнеру
+                        maxWidth: 400,     // Максимум 400px
+                        borderRadius: 12,
+                        button: {
+                            borderRadius: 12
+                        }
+                    },
+                    oauthList: ['mail_ru', 'ok_ru']
+                })
+                    .on(VKID.WidgetEvents.ERROR, (err) => {
+                        console.error('VK ID ошибка:', err);
+                        if (err.code === 0 && err.text === 'timeout' && !retryAttempt) {
+                            console.warn('VK ID: timeout, делаем одну попытку перезапуска...');
+                            retryAttempt = true;
+                            vkInitialized = false;
+                            container.innerHTML = '<p>Повторная попытка...</p>';
+                            setTimeout(() => {
+                                if (window.VKIDSDK) initVK();
+                            }, 1500);
+                        } else {
+                            container.innerHTML = '<p style="color: red;">Ошибка: ' + (err.message || 'неизвестная') + '</p>';
+                        }
+                    })
+                    .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, (payload) => {
+                        const { code, device_id: deviceId } = payload;
+                        VKID.Auth.exchangeCode(code, deviceId)
+                            .then(data => {
+                                console.log('access_token получен:', data.access_token);
+                                sendTokenToServer(data.access_token);
+                            })
+                            .catch(err => {
+                                console.error('Ошибка обмена кода:', err);
+                                window.location.href = '/entrance?error';
+                            });
+                    });
+            } catch (e) {
+                container.innerHTML = '<p style="color: red;">Ошибка инициализации</p>';
+                console.error('VKID инициализация не удалась:', e);
+            }
+        }
+
+        function sendTokenToServer(accessToken) {
+            fetch('/login/vk/callback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'accessToken=' + encodeURIComponent(accessToken)
+            })
+                .then(response => {
+                    if (response.redirected) window.location.href = response.url;
+                    else if (response.ok) window.location.href = '/main';
+                    else window.location.href = '/entrance?error';
+                })
+                .catch(err => {
+                    console.error('Ошибка отправки токена:', err);
+                    window.location.href = '/entrance?error';
+                });
+        }
+
+        waitForVKIDSDK();
+    });
+</script>
+</body>
+</html>

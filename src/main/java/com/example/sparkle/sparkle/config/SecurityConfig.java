@@ -3,6 +3,7 @@ package com.example.sparkle.sparkle.config;
 import com.example.sparkle.sparkle.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.server.Cookie;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -17,18 +18,22 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.session.SimpleRedirectSessionInformationExpiredStrategy;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.web.cors.CorsConfiguration;
 
 import java.time.Duration;
+import java.util.List;
 
 /**
  * Конфигурация безопасности приложения Sparkle.
- *
+ * <p>
  * Настройки:
- * - Аутентификация через OAuth2 (например, Google, GitHub)
+ * - Аутентификация через OAuth2 (например, Google, GitHub, VK)
  * - Защита от CSRF с использованием куки
  * - Ограничение одной сессии на пользователя
  * - Безопасные заголовки: HSTS, CSP, frameOptions
  * - Управление сессией и куками
+ * - Сохранение SecurityContext между запросами
  */
 @Configuration
 @EnableWebSecurity
@@ -48,13 +53,26 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        configureCors(http);
         configureHttpRequests(http);
         configureOAuth2Login(http);
         configureLogout(http);
         configureHeaders(http);
         configureCsrf(http);
         configureSessionManagement(http);
+        configureSecurityContext(http); // ← Новая настройка
+
         return http.build();
+    }
+
+    /**
+     * Настройка сохранения SecurityContext в сессии.
+     * Обеспечивает, что аутентификация сохраняется между запросами.
+     */
+    private void configureSecurityContext(HttpSecurity http) throws Exception {
+        http.securityContext(sc -> sc
+                .securityContextRepository(new HttpSessionSecurityContextRepository())
+        );
     }
 
     /**
@@ -81,7 +99,11 @@ public class SecurityConfig {
      */
     private void configureHttpRequests(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/", "/login/**", "/oauth2/**", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers(
+                        "/css/**", "/js/**", "/images/**",
+                        "/entrance", "/", "/error", "/favicon.ico",
+                        "/login/vk/exchange", "/login/vk/callback"
+                ).permitAll()
                 .anyRequest().authenticated()
         );
     }
@@ -114,7 +136,6 @@ public class SecurityConfig {
                 .invalidateHttpSession(true)
                 .addLogoutHandler(new SecurityContextLogoutHandler())
                 .addLogoutHandler((request, response, authentication) -> {
-                    // Лучше использовать logger, а не System.out
                     System.out.println("Сессия уничтожена: " + request.getSession(false));
                 })
         );
@@ -128,20 +149,19 @@ public class SecurityConfig {
      */
     private void configureHeaders(HttpSecurity http) throws Exception {
         http.headers(headers -> headers
-                .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
-                .httpStrictTransportSecurity(hsts -> hsts
-                        .includeSubDomains(true)
-                        .maxAgeInSeconds(31536000) // 1 год
-                        .preload(true)
-                )
                 .contentSecurityPolicy(csp -> csp
                         .policyDirectives(
                                 "default-src 'self'; " +
-                                        "script-src 'self' 'unsafe-inline'; " +
-                                        "style-src 'self' 'unsafe-inline'; " +
+                                        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; " +
+                                        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+                                        "font-src 'self' https://fonts.gstatic.com; " +
                                         "img-src 'self' data: https:; " +
-                                        "font-src 'self'; " +
-                                        "object-src 'none';"
+                                        "connect-src 'self' https://id.vk.ru https://mc.yandex.ru https://top-fwz1.mail.ru; " +
+                                        "frame-src 'self' " +
+                                        "https://id.vk.ru " +
+                                        "https://id.vk.com " +
+                                        "https://vk.com " +
+                                        "https://login.vk.ru;" // ✅ Обязательно!
                         )
                 )
         );
@@ -151,15 +171,12 @@ public class SecurityConfig {
      * Настройка защиты от CSRF:
      * - Токен хранится в куке (CookieCsrfTokenRepository)
      * - Кука доступна для чтения JavaScript (для SPA), но установлена как SameSite=Lax
-     * - Игнорируется для /logout (обычно вызывается без токена)
-     * - Для REST API можно добавить "/api/**" в игнор
-     *
-     * Также включает стандартную форму логина (если нужно)
+     * - Игнорируется для /login/vk/callback
      */
     private void configureCsrf(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf
+                .ignoringRequestMatchers("/login/vk/callback")
                 .csrfTokenRepository(csrfTokenRepository())
-                .ignoringRequestMatchers("/logout", "/api/**")
         );
         http.formLogin(Customizer.withDefaults());
     }
@@ -170,7 +187,7 @@ public class SecurityConfig {
      */
     private CsrfTokenRepository csrfTokenRepository() {
         CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
-        repository.setCookiePath("/"); // Доступно по всему приложению
+        repository.setCookiePath("/");
         return repository;
     }
 
@@ -185,10 +202,22 @@ public class SecurityConfig {
         http.sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 .maximumSessions(1)
-                .maxSessionsPreventsLogin(false) // Новая сессия завершает старую
+                .maxSessionsPreventsLogin(false)
                 .expiredSessionStrategy(
                         new SimpleRedirectSessionInformationExpiredStrategy("/login?expired=true")
                 )
+        );
+    }
+
+    private void configureCors(HttpSecurity http) throws Exception {
+        http.cors(cors -> cors
+                .configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+                    config.setAllowedOrigins(List.of("https://id.vk.com"));
+                    config.setAllowedMethods(List.of("GET", "POST"));
+                    config.setAllowCredentials(true);
+                    return config;
+                })
         );
     }
 
@@ -199,5 +228,15 @@ public class SecurityConfig {
     @Bean
     public AuthenticationSuccessHandler oauth2LoginSuccessHandler() {
         return new OAuth2LoginSuccessHandler(userService);
+    }
+
+    @Bean
+    public FilterRegistrationBean<RequestAttributeCspNonceFilter> cspNonceFilterRegistration() {
+        FilterRegistrationBean<RequestAttributeCspNonceFilter> registration =
+                new FilterRegistrationBean<>();
+        registration.setFilter(new RequestAttributeCspNonceFilter());
+        registration.addUrlPatterns("/*");
+        registration.setOrder(1);
+        return registration;
     }
 }

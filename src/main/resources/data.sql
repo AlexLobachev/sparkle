@@ -183,13 +183,13 @@ WHERE user_id = 35;
 --insert into photos (file_path, file_name, file_size, file_type)
 --values ('/images/testuserEvgeny.jpeg', 'testuserEvgeny.jpeg', 1000, 'jpeg');
 
---insert into user_photo (user_id, photo_id) values (4, 2);
---insert into user_photo (user_id, photo_id) values (3, 3);
---insert into user_photo (user_id, photo_id) values (2, 4);
---insert into user_photo (user_id, photo_id) values (1, 5);
---insert into user_photo (user_id, photo_id) values (7, 6);
---insert into user_photo (user_id, photo_id) values (6, 7);
---insert into user_photo (user_id, photo_id) values (5, 8);
+--insert into user_photo (user_id, photo_id) values (4, 34);
+--insert into user_photo (user_id, photo_id) values (3, 35);
+--insert into user_photo (user_id, photo_id) values (2, 36);
+--insert into user_photo (user_id, photo_id) values (1, 37);
+--insert into user_photo (user_id, photo_id) values (7, 38);
+--insert into user_photo (user_id, photo_id) values (6, 39);
+--insert into user_photo (user_id, photo_id) values (5, 40);
 
 
 --ТЕСТЫ
@@ -202,8 +202,8 @@ WHERE user_id = 35;
 --insert into matches (first_user_id, second_user_id, match_status) values (2, 9, 'LIKE');
 
 
-
-
+delete from users where id = 31;
+delete from users where id = 34;
 
 
 
