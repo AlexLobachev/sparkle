@@ -13,17 +13,18 @@ import java.time.LocalDateTime;
 public class ChatMessageDtoSent {
     private Long id;
     private String content;
-    private Long senderId;
-    private Long receiverId;
+    private UserChatDto sender;
+    private UserChatDto receiver;
     private Long chatId;
     private LocalDateTime sentAt;
 
-    public static ChatMessageDtoSent toCatMessageDtoSent(ChatMessage chatMessage) {
+    public static ChatMessageDtoSent toChatMessageDtoSent(ChatMessage chatMessage) {
         return ChatMessageDtoSent.builder()
                 .id(chatMessage.getId())
                 .content(chatMessage.getContent())
-                .senderId(chatMessage.getChat().getSender().getId())
-                .receiverId(chatMessage.getChat().getReceiver().getId())
+                .sender(UserChatDto.toUserChatDto(chatMessage.getChat().getSender()))
+                .receiver(UserChatDto.toUserChatDto(chatMessage.getChat().getReceiver()))
+                .chatId(chatMessage.getChat().getId())
                 .sentAt(chatMessage.getSentAt())
                 .build();
 

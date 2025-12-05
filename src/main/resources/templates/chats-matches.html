@@ -8,13 +8,10 @@
     <link rel="stylesheet" th:href="@{/css/chats-matches.css}" media="screen"/>
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-
 </head>
 
 <body>
-
 <div class="page-wrapper">
-
     <!-- Шапка -->
     <header class="header">
         <h1>Чаты и мэтчи</h1>
@@ -71,7 +68,7 @@
             </div>
         </div>
 
-        <!-- Кнопка "Назад" внизу белого блока -->
+        <!-- Кнопка "Назад" внизу -->
         <div class="bottom-action">
             <button id="bottomBackBtn" class="nav-btn-large">
                 <img src="/images/icons/back-two-arrows.svg" th:src="@{/images/icons/back-two-arrows.svg}" alt="Назад">
@@ -79,26 +76,11 @@
         </div>
     </main>
 
-    <!-- Модальное окно чата -->
-    <div id="chatModal" class="chat-modal">
-        <div class="chat-container">
-            <div class="chat-header">
-                <h3 id="chatHeader"></h3>
-                <button id="chatCloseBtn" class="chat-close">&times;</button>
-            </div>
-            <div id="chatMessages" class="chat-messages"></div>
-            <div class="chat-input">
-                <input type="text" id="chatInput" placeholder="Напишите сообщение..." maxlength="500"/>
-                <button id="chatSendBtn">Отправить</button>
-            </div>
-        </div>
-    </div>
-
     <footer class="footer">
         <p>© <span id="year">2025</span> Sparkle. Все права защищены.</p>
     </footer>
-
 </div>
+
 <script th:inline="javascript">
     /*<![CDATA[*/
     window.currentUserId = [[${#authentication.principal.id}]];

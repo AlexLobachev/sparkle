@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 public class MessageDtoHistory {
     private Long id;
+    private Long chatId;
     private ChatMessageDto sender;
     private String content;
     private LocalDateTime sentAt;
@@ -20,11 +21,13 @@ public class MessageDtoHistory {
     public static MessageDtoHistory toMessageDto(ChatMessage chatMessage) {
         return MessageDtoHistory.builder()
                 .id(chatMessage.getId())
+                .chatId(chatMessage.getChat().getId())
                 .content(chatMessage.getContent())
                 .sentAt(chatMessage.getSentAt())
                 .sender(ChatMessageDto.builder()
                         .userId(chatMessage.getSender().getId())
                         .username(chatMessage.getSender().getUsername())
+                        .photoUrl(chatMessage.getSender().getPhotos().stream().findFirst().get().getPhoto().getUrl())//Сделать выбор главной фото
                         .build())
                 .build();
 

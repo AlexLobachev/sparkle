@@ -35,10 +35,10 @@
 
             <div class="photo-controls">
                 <input type="file" id="photoInput" accept="image/*" style="display: none;"/>
-                <button id="uploadBtn" class="action-btn primary icon-btn">
+                <button id="uploadBtn" class="action-btn icon-btn transparent">
                     <img src="/images/icons/picture-upload.svg" th:src="@{/images/icons/picture-upload.svg}" alt="Загрузить фото">
                 </button>
-                <button id="deleteBtn" class="action-btn danger icon-btn" disabled>
+                <button id="deleteBtn" class="action-btn icon-btn transparent" disabled>
                     <img src="/images/icons/picture-remove.svg" th:src="@{/images/icons/picture-remove.svg}" alt="Удалить фото">
                 </button>
             </div>
@@ -57,7 +57,7 @@
                 <select id="interestSelect" multiple>
                     <option value="">Выбрать интересы</option>
                 </select>
-                <button id="addInterestBtn" class="action-btn primary icon-btn">
+                <button id="addInterestBtn" class="action-btn icon-btn transparent">
                     <img src="/images/icons/interest-add.svg" th:src="@{/images/icons/interest-add.svg}" alt="Добавить интерес">
                 </button>
             </div>
@@ -68,7 +68,7 @@
             <h2>О себе</h2>
             <div class="about-me">
                 <textarea id="aboutMe" rows="4" placeholder="Расскажите о себе..."></textarea>
-                <button id="saveAboutBtn" class="action-btn primary icon-btn full-width">
+                <button id="saveAboutBtn" class="action-btn icon-btn transparent save-btn-bottom">
                     <img src="/images/icons/add.svg" th:src="@{/images/icons/add.svg}" alt="Сохранить">
                 </button>
             </div>

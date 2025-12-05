@@ -2,6 +2,7 @@ package com.example.sparkle.sparkle.service;
 
 import com.example.sparkle.sparkle.dto.chat.ChatDtoGet;
 import com.example.sparkle.sparkle.dto.chat.MessageDtoHistory;
+import com.example.sparkle.sparkle.exception.NotFound;
 import com.example.sparkle.sparkle.model.Chat;
 import com.example.sparkle.sparkle.model.ChatMessage;
 
@@ -18,7 +19,7 @@ public interface ChatService {
      * Отправка сообщения другому пользователю
      */
 
-    MessageDtoHistory sendMessage(ChatMessage savedMessage);
+    MessageDtoHistory sendMessage(ChatMessage message);
 
     /**
      * История сообщений для определенного чата
@@ -45,5 +46,10 @@ public interface ChatService {
      */
 
     Chat getChatByReceiverIdAndSenderId(Long userId1, Long userId2);
+    /**
+     * Получение чата по id
+     */
+
+    public Chat getChatById(Long chatId);
 
 }

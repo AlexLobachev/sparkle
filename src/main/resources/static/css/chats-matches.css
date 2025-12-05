@@ -7,16 +7,21 @@
 }
 
 :root {
-    --primary: #ec4899;
-    --primary-hover: #db2777;
+    --gradient-start: #FFCDA5;
+    --gradient-end: #EE4D5F;
+    --text-light: #ffffff;
+    --text-dark: #333333;
+    --border-light: #e0e0e0;
+    --bg-light: #f9f9f9;
+    --white: #ffffff;
     --gray-100: #f5f7fa;
     --gray-200: #e0e0e0;
     --gray-300: #d1d5db;
     --gray-400: #6b7280;
-    --white: #ffffff;
     --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.1);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
     --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.08);
     --radius-md: 16px;
     --radius-lg: 50%;
     --transition: all 0.3s ease;
@@ -24,8 +29,8 @@
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: var(--gray-100);
-    color: #333;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
     line-height: 1.6;
     min-height: 100vh;
     display: flex;
@@ -38,22 +43,22 @@ body {
     flex-direction: column;
 }
 
-/* Шапка */
+/* === Шапка === */
 .header {
-    background-color: var(--primary);
-    color: var(--white);
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: var(--text-light);
     text-align: center;
     padding: 1.5rem 1.5rem 1.2rem;
     position: relative;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
 }
 
 .header h1 {
     margin: 0;
     font-size: 1.4rem;
     font-weight: 600;
-    color: var(--white);
+    color: var(--text-light);
     letter-spacing: -0.5px;
 }
 
@@ -63,7 +68,7 @@ body {
     top: 50%;
     transform: translateY(-50%);
     background: rgba(255, 255, 255, 0.2);
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -72,6 +77,7 @@ body {
     justify-content: center;
     cursor: pointer;
     transition: var(--transition);
+    backdrop-filter: blur(5px);
 }
 
 #backBtn img {
@@ -82,9 +88,10 @@ body {
 
 #backBtn:hover {
     background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-50%) scale(1.1);
 }
 
-/* Основной контент */
+/* === Основной контент === */
 .main-content {
     flex: 1;
     padding: 1.5rem;
@@ -93,22 +100,23 @@ body {
     width: 100%;
 }
 
-/* Белый блок с вкладками */
+/* === Белый блок с вкладками === */
 .tabs-card {
     background: var(--white);
     border-radius: var(--radius-md);
     padding: 1.25rem 1rem;
     box-shadow: var(--shadow-md);
     margin-bottom: 1.5rem;
+    border: 1px solid var(--border-light);
 }
 
-/* Вкладки */
+/* === Вкладки === */
 .tabs {
     display: flex;
     justify-content: space-around;
     gap: 1rem;
     margin-bottom: 1.25rem;
-    border-bottom: 1px solid var(--gray-200);
+    border-bottom: 1px solid var(--border-light);
     padding-bottom: 0.75rem;
 }
 
@@ -141,7 +149,7 @@ body {
     filter: brightness(0) saturate(100%) invert(30%) sepia(80%) saturate(400%) hue-rotate(310deg);
 }
 
-/* Контент вкладок */
+/* === Контент вкладок === */
 .tab-content {
     min-height: 200px;
 }
@@ -154,7 +162,7 @@ body {
     display: block;
 }
 
-/* Список пользователей */
+/* === Список пользователей === */
 .user-list {
     list-style: none;
     margin: 0;
@@ -172,6 +180,7 @@ body {
     margin-bottom: 0.75rem;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     position: relative;
+    border: 1px solid var(--border-light);
 }
 
 .user-item:hover {
@@ -195,7 +204,7 @@ body {
 .user-info h3 {
     margin: 0 0 0.25rem;
     font-size: 1.1rem;
-    color: var(--primary);
+    color: var(--gradient-end);
     font-weight: 500;
 }
 
@@ -205,7 +214,7 @@ body {
     font-size: 0.9rem;
 }
 
-/* Кнопки действий */
+/* === Кнопки действий === */
 .user-actions {
     position: absolute;
     top: 8px;
@@ -246,7 +255,7 @@ body {
     color: #000;
 }
 
-/* Загрузка и пустые состояния */
+/* === Загрузка и пустые состояния === */
 .loader,
 .no-data {
     text-align: center;
@@ -260,7 +269,7 @@ body {
     display: none;
 }
 
-/* Кнопка "Назад" внизу */
+/* === Кнопка "Назад" внизу === */
 .bottom-action {
     display: flex;
     justify-content: center;
@@ -270,16 +279,14 @@ body {
 .nav-btn-large {
     width: 60px;
     height: 60px;
-    background: var(--primary);
-    border: none;
     border-radius: var(--radius-lg);
-    color: var(--white);
+    border: 1px solid transparent;
+    background: transparent;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
     transition: var(--transition);
-    box-shadow: var(--shadow-md);
     position: relative;
     overflow: hidden;
 }
@@ -288,41 +295,29 @@ body {
     content: '';
     position: absolute;
     inset: 0;
-    background: var(--primary);
+    background: rgba(255, 255, 255, 0.6);
     border-radius: 50%;
     z-index: 1;
+    opacity: 0;
     transition: var(--transition);
 }
 
 .nav-btn-large:hover {
     transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 10px 20px rgba(236, 72, 153, 0.2);
+    box-shadow: var(--shadow-md);
 }
 
 .nav-btn-large:hover::before {
-    background: var(--primary-hover);
+    opacity: 1;
 }
 
 .nav-btn-large img {
     width: 32px;
     height: 32px;
     z-index: 2;
-    filter: brightness(0) saturate(100%) invert(100%);
+    filter: brightness(0) saturate(100%) invert(30%);
 }
 
-/* Модальное окно чата */
-.chat-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
 
 .chat-container {
     width: 90%;
@@ -334,12 +329,12 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-light);
 }
 
 .chat-header {
-    background-color: var(--primary);
-    color: var(--white);
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: var(--text-light);
     padding: 1rem;
     display: flex;
     justify-content: space-between;
@@ -355,7 +350,7 @@ body {
 .chat-close {
     background: none;
     border: none;
-    color: var(--white);
+    color: var(--text-light);
     font-size: 1.5rem;
     cursor: pointer;
     opacity: 0.9;
@@ -372,7 +367,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0.8rem;
-    background-color: var(--gray-100);
+    background-color: var(--bg-light);
 }
 
 .message {
@@ -386,14 +381,14 @@ body {
 .message.received {
     align-self: flex-start;
     background-color: var(--white);
-    border: 1px solid var(--gray-300);
-    color: #333;
+    border: 1px solid var(--border-light);
+    color: var(--text-dark);
 }
 
 .message.sent {
     align-self: flex-end;
-    background-color: var(--primary);
-    color: var(--white);
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: var(--text-light);
 }
 
 .message-time {
@@ -438,28 +433,29 @@ body {
     display: flex;
     padding: 1rem;
     background-color: var(--white);
-    border-top: 1px solid var(--gray-200);
+    border-top: 1px solid var(--border-light);
     gap: 0.5rem;
 }
 
 .chat-input input {
     flex: 1;
     padding: 0.75rem;
-    border: 1px solid var(--gray-300);
+    border: 1px solid var(--border-light);
     border-radius: var(--radius-md);
     font-size: 1rem;
     outline: none;
+    color: var(--text-dark);
 }
 
 .chat-input input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
+    border-color: var(--gradient-end);
+    box-shadow: 0 0 0 3px rgba(238, 77, 95, 0.1);
 }
 
 .chat-input button {
     padding: 0.75rem 1.2rem;
-    background-color: var(--primary);
-    color: var(--white);
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: var(--text-light);
     border: none;
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -467,16 +463,18 @@ body {
 }
 
 .chat-input button:hover {
-    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(238, 77, 95, 0.2);
 }
 
-/* Футер */
+/* === Футер === */
 .footer {
     text-align: center;
     padding: 1rem;
     background-color: var(--white);
-    color: var(--text);
+    color: var(--text-dark);
     font-size: 0.9rem;
-    border-top: 1px solid var(--gray-200);
+    border-top: 1px solid var(--border-light);
     margin-top: auto;
 }
+

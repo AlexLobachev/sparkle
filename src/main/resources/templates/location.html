@@ -1,6 +1,10 @@
-<button id="getLocationBtn">Определить моё местоположение</button>
-<div id="manualInput" style="display: none;">
-    <label>Ваш город:</label>
+<!-- Кнопка "Определить город" -->
+<button id="detectLocationBtn" class="action-btn primary icon-btn">
+    <img src="/images/icons/location.svg" th:src="@{/images/icons/location.svg}" alt="Определить город">
+</button>
+
+<!-- Блок с ручным вводом города (скрыт по умолчанию) -->
+<div id="manualInput" style="display: none; margin-top: 1rem; text-align: center;">
+    <label for="cityInput">Ваш город:</label>
     <input type="text" id="cityInput" placeholder="Например, Санкт-Петербург">
-    <script th:src="@{/js/location.js}" th:nonce="${cspNonce}"></script>
 </div>

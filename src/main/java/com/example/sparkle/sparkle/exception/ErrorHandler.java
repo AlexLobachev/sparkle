@@ -1,5 +1,6 @@
 package com.example.sparkle.sparkle.exception;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -110,7 +111,13 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleAllExceptions(Exception e) {
+    public ResponseEntity<Map<String, String>> handleAllExceptions(Exception e, HttpServletRequest request) {
+        if (request.getRequestURI().startsWith("/ws")) {
+            // Логируем, но не возвращаем ответ — пусть SockJS сам закроется
+            System.out.println("WebSocket error (not handled): " + e.getMessage());
+            return null; // Spring не отправит ответ
+        }
+
         Map<String, String> error = new HashMap<>();
         error.put("error", "Произошла внутренняя ошибка");
         e.printStackTrace();

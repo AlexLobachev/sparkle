@@ -33,7 +33,7 @@ public class MatchController {
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/next-candidate")
     public ResponseEntity<?> getNextCandidate(
-            @RequestParam(defaultValue = "40.0") double distance,
+            @RequestParam(defaultValue = "100.0") double distance,
             @PageableDefault(page = 0, size = 1) Pageable pageable) {
         return ResponseEntity.ok(matchService.getNextCandidate(distance, pageable));
     }

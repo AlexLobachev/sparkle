@@ -1,5 +1,6 @@
 /**
- * Скрипт для страницы чатов и мэтчей
+ * Упрощённая версия скрипта для страницы чатов и мэтчей
+ * ✅ Удалена логика чата — теперь чат на отдельной странице
  */
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('✅ DOM загружен, инициализация скрипта');
@@ -20,23 +21,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
     });
-
-    // Элементы модального окна чата
-    const chatModal = document.getElementById('chatModal');
-    const chatMessages = document.getElementById('chatMessages');
-    const chatInput = document.getElementById('chatInput');
-    const chatSendBtn = document.getElementById('chatSendBtn');
-    const chatCloseBtn = document.getElementById('chatCloseBtn');
-    const chatHeader = document.getElementById('chatHeader');
-
-    let currentChatId = null;
-    const currentUserId = window.currentUserId;
-    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
-
-    // Проверка обязательных элементов
-    if (!chatModal || !chatMessages || !chatInput || !chatSendBtn || !chatCloseBtn || !chatHeader) {
-        console.error('❌ Один или несколько элементов чата не найдены');
-    }
 
     // Вкладки
     const tabs = document.querySelectorAll('.tab');
@@ -111,7 +95,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (tab === 'chats') {
                 data.forEach(chat => {
-                    // Теперь собеседник доступен напрямую через chat.user
                     const interlocutor = chat.user;
                     if (!interlocutor) return;
 
@@ -120,12 +103,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             } else {
                 data.forEach(item => {
-                    // Для других вкладок сохраняем универсальную логику
                     const user = item.user || item;
                     const userId = user.userId || user.id;
                     if (!userId) return;
 
-                    // Определяем ID для действия (чат или пользователь)
                     const id = tab === 'chats' ? item.chatId : userId;
 
                     const li = createUserItemWithActions(user, tab, id);
@@ -141,88 +122,33 @@ document.addEventListener('DOMContentLoaded', async () => {
             loader.style.display = 'none';
         }
 
+        // Автооткрытие чата по chatId из URL
         if (tab === 'chats') {
             const urlParams = new URLSearchParams(window.location.search);
             const chatId = urlParams.get('chatId');
             if (chatId) {
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.delete('chatId');
+                window.history.replaceState({}, '', newUrl);
+
                 setTimeout(() => {
-                    const chatElement = document.querySelector(`.user-item[data-chat-id="${chatId}"]`);
-                    if (chatElement) chatElement.click();
-                }, 300);
+                    const targetChatElement = document.querySelector(`.user-item[data-chat-id="${chatId}"]`);
+                    if (targetChatElement) {
+                        targetChatElement.click();
+                    } else {
+                        console.warn(`❌ Элемент чата с chatId=${chatId} не найден в DOM`);
+                    }
+                }, 500);
             }
         }
-    }
-
-    function appendMessage(id, sender, content, isSent, sentAt) {
-        if (!chatMessages) return;
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
-        messageDiv.dataset.messageId = id;
-
-        let timeString = 'Недавно';
-        if (sentAt) {
-            const dateStr = sentAt.split('.')[0];
-            const date = new Date(dateStr);
-            timeString = isNaN(date.getTime())
-                ? 'Недавно'
-                : date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-        }
-
-        messageDiv.innerHTML = `
-            <strong>${sender}:</strong> ${content}
-            <div class="message-time">
-                ${timeString}
-                ${isSent ? `<button class="delete-message" onclick="deleteMessage(${id})">×</button>` : ''}
-            </div>
-        `;
-        chatMessages.appendChild(messageDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    function openChat(chatId, username) {
-        currentChatId = chatId;
-        chatHeader.textContent = `Чат с ${username}`;
-        chatMessages.innerHTML = '';
-        chatModal.style.display = 'flex';
-
-        fetch(`/sparkle/chats/${chatId}/history`, { method: 'GET', credentials: 'include' })
-            .then(response => {
-                if (response.status === 204) return [];
-                if (!response.ok) throw new Error('Не удалось загрузить историю');
-                return response.json();
-            })
-            .then(messages => {
-                if (messages.length === 0) {
-                    const placeholder = document.createElement('div');
-                    placeholder.textContent = 'Переписка ещё не началась';
-                    placeholder.style.color = '#666';
-                    placeholder.style.textAlign = 'center';
-                    placeholder.style.marginTop = '1rem';
-                    chatMessages.appendChild(placeholder);
-                    return;
-                }
-                messages.forEach(msg => {
-                    const isSent = msg.sender.userId === currentUserId;
-                    appendMessage(msg.id, msg.sender.username, msg.content, isSent, msg.sentAt);
-                });
-            })
-            .catch(err => {
-                console.error('Ошибка загрузки истории:', err);
-                chatMessages.innerHTML = '<div class="error">Не удалось загрузить сообщения</div>';
-            });
     }
 
     function createUserItemWithActions(user, tabType, itemId) {
         const li = document.createElement('li');
         li.className = 'user-item';
         li.style.cursor = 'pointer';
-        li.style.position = 'relative';
 
         const photoUrl = user.photos?.[0]?.url || 'https://placehold.co/60x60/CCCCCC/FFFFFF?text=Нет+фото';
-
-        if (tabType === 'chats') {
-            li.setAttribute('data-chat-id', itemId);
-        }
 
         li.innerHTML = `
             <img class="user-photo" src="${photoUrl}" alt="Фото ${user.username}" onerror="this.src='https://placehold.co/60x60/CCCCCC/FFFFFF?text=Ошибка'">
@@ -241,7 +167,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!e.target.closest('.user-action-btn')) {
                 e.stopPropagation();
                 if (tabType === 'chats') {
-                    openChat(itemId, user.username);
+                    // Открываем чат на отдельной странице
+                    window.location.href = `/chat/${itemId}`;
                 } else {
                     window.location.href = `/profile-user/${itemId}`;
                 }
@@ -251,79 +178,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return li;
     }
 
-    chatSendBtn?.addEventListener('click', () => {
-        const content = chatInput.value.trim();
-        if (!content || !currentChatId) return;
-
-        const message = {
-            content: content,
-            chat: { id: currentChatId }
-        };
-
-        const blob = new Blob([JSON.stringify(message)], {
-            type: 'application/json'
-        });
-
-        fetch('/sparkle/chats/message', {
-            method: 'POST',
-            body: blob,
-            headers: {
-                'X-XSRF-TOKEN': csrfToken
-            },
-            credentials: 'include'
-        })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        console.error('❌ Ошибка сервера:', text);
-                        throw new Error('Не удалось отправить сообщение');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                appendMessage(data.id, data.sender.username, data.content, true, data.sentAt);
-                chatInput.value = '';
-            })
-            .catch(err => {
-                console.error('❌ Ошибка отправки:', err);
-                alert('Не удалось отправить сообщение');
-            });
-    });
-
-    chatCloseBtn?.addEventListener('click', () => {
-        chatModal.style.display = 'none';
-        currentChatId = null;
-    });
-
-    chatModal?.addEventListener('click', e => {
-        if (e.target === chatModal) {
-            chatModal.style.display = 'none';
-            currentChatId = null;
-        }
-    });
-
-    window.deleteMessage = async function (messageId) {
-        if (!confirm('Удалить сообщение?')) return;
-        try {
-            const response = await fetch(`/sparkle/chats/message/${messageId}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-XSRF-TOKEN': csrfToken
-                },
-                credentials: 'include'
-            });
-            if (response.ok) {
-                document.querySelector(`.message[data-message-id="${messageId}"]`)?.remove();
-            } else {
-                alert('Не удалось удалить сообщение');
-            }
-        } catch (err) {
-            console.error('Ошибка при удалении сообщения:', err);
-            alert('Ошибка при удалении');
-        }
-    };
-
+    // Удаление мэтча
     window.deleteMatch = async function (e, userId) {
         e.stopPropagation();
         if (!confirm('Удалить мэтч?')) return;
@@ -331,7 +186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch(`/sparkle/users/match/delete/${userId}`, {
                 method: 'DELETE',
                 headers: {
-                    'X-XSRF-TOKEN': csrfToken
+                    'X-XSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.getAttribute('content')
                 },
                 credentials: 'include'
             });
@@ -346,6 +201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    // Удаление лайка
     window.deleteLike = async function (e, userId) {
         e.stopPropagation();
         if (!confirm('Удалить лайк?')) return;
@@ -353,7 +209,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch(`/sparkle/users/match/like/delete/${userId}`, {
                 method: 'DELETE',
                 headers: {
-                    'X-XSRF-TOKEN': csrfToken
+                    'X-XSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.getAttribute('content')
                 },
                 credentials: 'include'
             });
@@ -369,6 +225,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    // Удаление чата
     window.deleteChat = async function (e, chatId) {
         e.stopPropagation();
         if (!confirm('Удалить чат?')) return;
@@ -376,16 +233,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch(`/sparkle/chats/delete?chatId=${chatId}`, {
                 method: 'DELETE',
                 headers: {
-                    'X-XSRF-TOKEN': csrfToken
+                    'X-XSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.getAttribute('content')
                 },
                 credentials: 'include'
             });
             if (response.ok) {
                 loadData('chats');
-                if (currentChatId === chatId) {
-                    chatModal.style.display = 'none';
-                    currentChatId = null;
-                }
             } else {
                 alert('Не удалось удалить чат');
             }
@@ -393,30 +246,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('Ошибка при удалении чата:', err);
             alert('Ошибка при удалении');
         }
-    }
+    };
 
+    // Автооткрытие чата по chatId из URL
     const urlParams = new URLSearchParams(window.location.search);
     const chatIdParam = urlParams.get('chatId');
     if (chatIdParam) {
-        const newUrl = new URL(window.location);
-        newUrl.searchParams.delete('chatId');
-        window.history.replaceState({}, '', newUrl);
-
-        // Переключаемся на вкладку "Чаты"
         setTimeout(() => {
             const chatsTab = document.querySelector('[data-tab="chats"]');
             if (chatsTab) {
-                chatsTab.click(); // активируем вкладку
-
-                // Ждём, пока список чатов загрузится
-                setTimeout(() => {
-                    const targetChatElement = document.querySelector(`.user-item[data-chat-id="${chatIdParam}"]`);
-                    if (targetChatElement) {
-                        targetChatElement.click(); // кликаем на чат
-                    } else {
-                        console.warn(`❌ Элемент чата с chatId=${chatIdParam} не найден в DOM`);
-                    }
-                }, 500); // даём время на загрузку данных
+                chatsTab.click();
             }
         }, 100);
     }

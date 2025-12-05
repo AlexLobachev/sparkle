@@ -7,79 +7,87 @@
 }
 
 :root {
-    --primary: #ec4899;
-    --primary-hover: #db2777;
-    --success: #10b981;
-    --success-hover: #059669;
-    --danger: #ef4444;
-    --danger-hover: #dc2626;
-    --light: #f9fafb;
-    --dark: #1f2937;
-    --text: #111827;
+    --gradient-start: #FFCDA5;
+    --gradient-end: #EE4D5F;
+    --text-light: #ffffff;
+    --text-dark: #333333;
+    --border-light: #e0e0e0;
+    --bg-light: #f9f9f9;
     --white: #ffffff;
-    --gray-200: #e5e7eb;
-    --gray-300: #d1d5db;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
     --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
-    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.08);
     --radius-sm: 8px;
     --radius-md: 16px;
-    --radius-lg: 9999px;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --radius-lg: 50%;
+    --transition: all 0.3s ease;
 }
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
-    color: var(--text);
+    background: var(--bg-light);
+    color: var(--text-dark);
     line-height: 1.6;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
-/* Шапка */
+.page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* === Шапка === */
 .header {
-    background: var(--primary);
-    color: var(--white);
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: var(--text-light);
     padding: 1.5rem;
     text-align: center;
+    position: relative;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    margin-bottom: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
 }
 
 .header h1 {
     margin: 0;
     font-size: 1.4rem;
     font-weight: 600;
-    letter-spacing: -0.5px;
-    color: var(--white);
+    color: var(--text-light);
 }
 
 .back {
     position: absolute;
     left: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
     background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: var(--white);
-    padding: 0.5rem 0.8rem;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    font-size: 1.1rem;
-    min-width: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--text-light);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
     transition: var(--transition);
+    backdrop-filter: blur(5px);
 }
 
 .back:hover {
     background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-50%) scale(1.1);
 }
 
-/* Основной контент */
+.back img {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) saturate(100%) invert(100%);
+}
+
+/* === Основной контент === */
 .main-content {
     padding: 0 1.5rem 1.5rem;
     max-width: 500px;
@@ -88,29 +96,31 @@ body {
     width: 100%;
 }
 
-/* Секции */
+/* === Секции === */
 .info-section {
     background: var(--white);
     border-radius: var(--radius-md);
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
 }
 
 .info-section h2 {
     font-size: 1.3rem;
-    color: var(--primary);
+    color: var(--gradient-end);
     margin-bottom: 1rem;
     font-weight: 600;
 }
 
-/* Фото */
+/* === Фото === */
 .photo-section {
     background: var(--white);
     border-radius: var(--radius-md);
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
 }
 
 .photo-slider {
@@ -137,7 +147,7 @@ body {
     top: 50%;
     transform: translateY(-50%);
     background: rgba(0, 0, 0, 0.4);
-    color: var(--white);
+    color: var(--text-light);
     border: none;
     width: 40px;
     height: 40px;
@@ -163,7 +173,7 @@ body {
     right: 10px;
 }
 
-/* Индикатор фото */
+/* === Индикатор фото === */
 .photo-indicator {
     display: flex;
     justify-content: center;
@@ -175,16 +185,16 @@ body {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--gray-300);
+    background: var(--border-light);
     transition: var(--transition);
 }
 
 .photo-dot.active {
-    background: var(--primary);
+    background: var(--gradient-end);
     transform: scale(1.2);
 }
 
-/* Контролы фото */
+/* === Контролы фото === */
 .photo-controls {
     display: flex;
     justify-content: center;
@@ -215,11 +225,11 @@ body {
 }
 
 .thumbnail:hover {
-    border-color: var(--primary);
+    border-color: var(--gradient-end);
     transform: scale(1.05);
 }
 
-/* Интересы */
+/* === Интересы === */
 .interest-tags {
     display: flex;
     flex-wrap: wrap;
@@ -228,9 +238,9 @@ body {
 }
 
 .interest-tag {
-    background: #f0f9ff;
-    color: var(--primary);
-    border: 1px solid var(--primary);
+    background: #fff8f0;
+    color: var(--gradient-end);
+    border: 1px solid var(--gradient-end);
     padding: 0.25rem 0.75rem;
     border-radius: 20px;
     font-size: 0.9rem;
@@ -241,7 +251,7 @@ body {
 }
 
 .interest-tag .remove-interest {
-    color: var(--danger);
+    color: var(--gradient-end);
     font-weight: bold;
     cursor: pointer;
     font-size: 1.1rem;
@@ -257,12 +267,19 @@ body {
 #interestSelect {
     flex: 1;
     padding: 0.5rem;
-    border: 1px solid var(--gray-300);
+    border: 1px solid var(--border-light);
     border-radius: var(--radius-sm);
     font-size: 0.9rem;
+    background: var(--white);
+    color: var(--text-dark);
 }
 
-/* О себе */
+#interestSelect:focus {
+    border-color: var(--gradient-end);
+    box-shadow: 0 0 0 3px rgba(238, 77, 95, 0.1);
+}
+
+/* === О себе === */
 .about-me {
     display: flex;
     flex-direction: column;
@@ -272,25 +289,26 @@ body {
 #aboutMe {
     width: 100%;
     padding: 0.75rem;
-    border: 1px solid var(--gray-300);
+    border: 1px solid var(--border-light);
     border-radius: var(--radius-sm);
     font-size: 1rem;
     resize: vertical;
-    background: var(--light);
+    background: var(--white);
     transition: var(--transition);
+    color: var(--text-dark);
 }
 
 #aboutMe:focus {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+    border-color: var(--gradient-end);
+    box-shadow: 0 0 0 3px rgba(238, 77, 95, 0.1);
 }
 
-/* Кнопки */
+/* === Кнопки === */
 .action-btn {
     padding: 0.75rem 1rem;
     border: none;
-    border-radius: var(--radius-md);
+    border-radius: 50%; /* Круглые кнопки */
     cursor: pointer;
     font-size: 1rem;
     font-weight: 500;
@@ -299,101 +317,208 @@ body {
     justify-content: center;
     gap: 0.5rem;
     transition: var(--transition);
-    box-shadow: var(--shadow-sm);
+    box-shadow: none;
+    background: transparent; /* Без заливки */
+    border: 1px solid var(--border-light);
+    color: var(--text-dark);
+    width: 56px;
+    height: 56px;
+    overflow: hidden;
+}
+
+.action-btn:hover {
+    border-color: var(--gradient-end);
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .action-btn.primary {
-    background: var(--primary);
-    color: var(--white);
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: var(--text-light);
+    border: none;
 }
 
 .action-btn.primary:hover {
-    background: var(--primary-hover);
+    background: linear-gradient(135deg, #FFD6B3, #F16878);
     transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(238, 77, 95, 0.2);
 }
 
 .action-btn.danger {
-    background: var(--danger);
-    color: var(--white);
+    background: transparent;
+    border: 1px solid #ef4444;
+    color: #ef4444;
 }
 
 .action-btn.danger:hover {
-    background: var(--danger-hover);
-    transform: translateY(-2px);
+    background: rgba(255, 240, 240, 0.5);
+    border-color: #e74c3c;
+    color: #c0392b;
 }
 
 .action-btn.back {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: var(--white);
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-sm);
-    font-size: 1rem;
-}
-
-.action-btn.back:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-/* Иконки кнопок */
-.icon-btn {
-    width: 48px;
-    height: 48px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--text-light);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
     padding: 0;
-    border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
+.action-btn.back:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--gradient-end);
+}
+
+.action-btn img {
+    width: 24px;
+    height: 24px;
+    transition: var(--transition);
+}
+
+/* === Блок "О себе" с выровненными кнопками === */
+.about-me {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+#aboutMe {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    resize: vertical;
+    background: var(--white);
+    transition: var(--transition);
+    color: var(--text-dark);
+    min-height: 56px;
+}
+
+#aboutMe:focus {
+    outline: none;
+    border-color: var(--gradient-end);
+    box-shadow: 0 0 0 3px rgba(238, 77, 95, 0.1);
+}
+
+/* === Контейнер с кнопками в блоке "О себе" === */
+.about-actions {
+    display: flex;
+    gap: 0.75rem;
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+
+/* === Круглая кнопка "Назад" в блоке "О себе" === */
+.back-in-about {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid var(--border-light);
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.back-in-about::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    z-index: 1;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.back-in-about:hover {
+    border-color: var(--gradient-end);
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.back-in-about:hover::before {
+    opacity: 1;
+}
+
+.back-in-about img {
+    width: 28px;
+    height: 28px;
+    z-index: 2;
+    filter: brightness(0) saturate(100%) invert(30%);
+}
+
+/* === Иконки кнопок === */
 .icon-btn img {
     width: 24px;
     height: 24px;
     filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
 }
 
-/* Полная ширина */
+/* === Полная ширина === */
 .full-width {
     width: 100%;
 }
 
-/* Сообщения */
+/* === Сообщения === */
 #messages {
     margin-top: 1rem;
 }
 
 .alert {
     padding: 0.75rem 1rem;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     font-size: 0.9rem;
     text-align: center;
     margin-bottom: 1rem;
+    border: 1px solid var(--border-light);
+    background: var(--white);
+    color: var(--text-dark);
 }
 
 .alert-success {
     background: #f0fdf4;
-    color: var(--success);
-    border: 1px solid var(--success);
+    color: #16a34a;
+    border-color: #a7f3d0;
 }
 
 .alert-error {
     background: #fef2f2;
-    color: var(--danger);
-    border: 1px solid var(--danger);
+    color: #b91c1c;
+    border-color: #fca5a5;
 }
 
-/* Футер */
+/* === Футер === */
 .footer {
     text-align: center;
     padding: 1rem;
-    color: var(--text);
-    font-size: 0.9rem;
-    margin-top: auto;
     background: var(--white);
-    border-top: 1px solid var(--gray-200);
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border-light);
+    margin-top: auto;
 }
 
-/* === Нижняя кнопка "Назад" === */
+/* === Кнопка "Назад" внизу === */
 .bottom-action {
     display: flex;
     justify-content: center;
@@ -404,16 +529,556 @@ body {
 .nav-btn-large {
     width: 60px;
     height: 60px;
-    background: var(--primary);
-    border: none;
-    border-radius: var(--radius-lg);
-    color: var(--white);
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid var(--border-light);
+    border-radius: 50%;
+    color: var(--text-dark);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(5px);
+    position: relative;
+}
+
+.nav-btn-large::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    z-index: 1;
+    transition: var(--transition);
+}
+
+.nav-btn-large:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: var(--gradient-end);
+    transform: translateY(-3px) scale(1.05);
     box-shadow: var(--shadow-md);
+}
+
+.nav-btn-large img {
+    width: 32px;
+    height: 32px;
+    z-index: 2;
+    filter: brightness(0) saturate(100%) invert(30%);
+}
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --gradient-start: #FFCDA5;
+    --gradient-end: #EE4D5F;
+    --text-light: #ffffff;
+    --text-dark: #333333;
+    --border-light: #e0e0e0;
+    --bg-light: #f9f9f9;
+    --white: #ffffff;
+    --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.08);
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 50%;
+    --transition: all 0.3s ease;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-light);
+    color: var(--text-dark);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* === Шапка === */
+.header {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: var(--text-light);
+    padding: 1.5rem;
+    text-align: center;
+    position: relative;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: var(--shadow-md);
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+/* === Основной контент === */
+.main-content {
+    padding: 0 1.5rem 1.5rem;
+    max-width: 500px;
+    margin: 0 auto;
+    flex: 1;
+    width: 100%;
+}
+
+/* === Секции === */
+.info-section {
+    background: var(--white);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
+}
+
+.info-section h2 {
+    font-size: 1.3rem;
+    color: var(--gradient-end);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+/* === Фото === */
+.photo-section {
+    background: var(--white);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
+}
+
+.photo-slider {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    background-color: #f3f4f6;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.photo {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-color: #e5e7eb;
+    transition: transform 0.3s ease;
+}
+
+.slide-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--text-light);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.slide-btn:hover {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.prev {
+    left: 10px;
+}
+
+.next {
+    right: 10px;
+}
+
+/* === Индикатор фото === */
+.photo-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin: 0.5rem 0;
+}
+
+.photo-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border-light);
+    transition: var(--transition);
+}
+
+.photo-dot.active {
+    background: var(--gradient-end);
+    transform: scale(1.2);
+}
+
+/* === Контролы фото === */
+.photo-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.thumbnails {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+    scrollbar-width: none;
+}
+
+.thumbnails::-webkit-scrollbar {
+    display: none;
+}
+
+.thumbnail {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.thumbnail:hover {
+    border-color: var(--gradient-end);
+    transform: scale(1.05);
+}
+
+/* === Интересы === */
+.interest-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.interest-tag {
+    background: #fff8f0;
+    color: var(--gradient-end);
+    border: 1px solid var(--gradient-end);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.interest-tag .remove-interest {
+    color: var(--gradient-end);
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0 0.25rem;
+}
+
+.interest-controls {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+#interestSelect {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    background: var(--white);
+    color: var(--text-dark);
+}
+
+#interestSelect:focus {
+    border-color: var(--gradient-end);
+    box-shadow: 0 0 0 3px rgba(238, 77, 95, 0.1);
+}
+
+
+/* === О себе === */
+.about-me {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    position: relative;
+    padding: 0 1rem;
+}
+
+#aboutMe {
+    padding: 0.75rem;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    resize: vertical;
+    background: var(--white);
+    transition: var(--transition);
+    color: var(--text-dark);
+    min-height: 100px;
+    align-self: stretch;
+}
+
+#aboutMe:focus {
+    outline: none;
+    border-color: var(--gradient-end);
+    box-shadow: 0 0 0 3px rgba(238, 77, 95, 0.1);
+}
+
+/* Кнопка "Сохранить" под полем ввода */
+#saveAboutBtn {
+    align-self: flex-end;
+    margin-top: 0.5rem;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+#saveAboutBtn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    z-index: 1;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+#saveAboutBtn:hover {
+    border-color: var(--gradient-end);
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+#saveAboutBtn:hover::before {
+    opacity: 1;
+}
+
+#saveAboutBtn img {
+    width: 28px;
+    height: 28px;
+    z-index: 2;
+    filter: brightness(0) saturate(100%) invert(30%);
+}
+
+/* === Контейнер с кнопками в блоке "О себе" === */
+.about-actions {
+    display: flex;
+    gap: 0.75rem;
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+
+/* === Кнопки === */
+.action-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.action-btn img {
+    width: 28px;
+    height: 28px;
+    transition: var(--transition);
+    filter: brightness(0) saturate(100%) invert(30%);
+}
+
+.action-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    z-index: 1;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.action-btn:hover {
+    border-color: var(--gradient-end);
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.action-btn:hover::before {
+    opacity: 1;
+}
+
+.action-btn.primary {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: var(--text-light);
+    border: none;
+}
+
+.action-btn.primary:hover {
+    background: linear-gradient(135deg, #FFD6B3, #F16878);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(238, 77, 95, 0.2);
+}
+
+.action-btn.danger {
+    background: transparent;
+    border: 1px solid #ef4444;
+    color: #ef4444;
+}
+
+.action-btn.danger:hover {
+    background: rgba(255, 240, 240, 0.5);
+    border-color: #e74c3c;
+    color: #c0392b;
+}
+
+/* === Круглая кнопка "Назад" в блоке "О себе" === */
+.back-in-about {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.back-in-about::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    z-index: 1;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.back-in-about:hover {
+    border-color: var(--gradient-end);
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.back-in-about:hover::before {
+    opacity: 1;
+}
+
+.back-in-about img {
+    width: 28px;
+    height: 28px;
+    z-index: 2;
+    filter: brightness(0) saturate(100%) invert(30%);
+}
+
+/* === Сообщения === */
+#messages {
+    margin-top: 1rem;
+}
+
+.alert {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-light);
+    background: var(--white);
+    color: var(--text-dark);
+}
+
+.alert-success {
+    background: #f0fdf4;
+    color: #16a34a;
+    border-color: #a7f3d0;
+}
+
+.alert-error {
+    background: #fef2f2;
+    color: #b91c1c;
+    border-color: #fca5a5;
+}
+
+/* === Футер === */
+.footer {
+    text-align: center;
+    padding: 1rem;
+    background: var(--white);
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border-light);
+    margin-top: auto;
+}
+
+/* === Кнопка "Назад" внизу === */
+.bottom-action {
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem 1rem 2rem;
+    width: 100%;
+}
+
+.nav-btn-large {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
     position: relative;
     overflow: hidden;
 }
@@ -422,24 +1087,27 @@ body {
     content: '';
     position: absolute;
     inset: 0;
-    background: var(--primary);
+    background: rgba(255, 255, 255, 0.6);
     border-radius: 50%;
     z-index: 1;
+    opacity: 0;
     transition: var(--transition);
 }
 
 .nav-btn-large:hover {
+    border-color: var(--gradient-end);
+    background: rgba(255, 255, 255, 0.8);
     transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 10px 20px rgba(236, 72, 153, 0.2);
+    box-shadow: var(--shadow-md);
 }
 
 .nav-btn-large:hover::before {
-    background: var(--primary-hover);
+    opacity: 1;
 }
 
 .nav-btn-large img {
     width: 32px;
     height: 32px;
     z-index: 2;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    filter: brightness(0) saturate(100%) invert(30%);
 }

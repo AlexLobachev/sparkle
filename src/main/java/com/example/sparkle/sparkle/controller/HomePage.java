@@ -1,12 +1,15 @@
 package com.example.sparkle.sparkle.controller;
 
 import com.example.sparkle.sparkle.exception.NotFound;
+import com.example.sparkle.sparkle.model.Chat;
 import com.example.sparkle.sparkle.model.Status;
 import com.example.sparkle.sparkle.model.User;
+import com.example.sparkle.sparkle.service.ChatService;
 import com.example.sparkle.sparkle.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -24,6 +27,7 @@ import java.util.UUID;
 public class HomePage {
 
     private final UserService userService;
+    private final ChatService chatService;
 
     private static final String VK_SDK_URL = "https://unpkg.com/@vkid/sdk/dist-sdk/umd/index.js";
     private static final String NGROK_URL = "https://subjectional-manie-creaky.ngrok-free.dev";
@@ -49,7 +53,21 @@ public class HomePage {
         return "vk-entrance";
     }
 
+    @GetMapping("/chat/{chatId}")
+    public String getChatPage(@PathVariable Long chatId,
+                              Model model,
+                              Authentication authentication) {
+        User currentUser = ((User) authentication.getPrincipal());
 
+        Chat chat = chatService.getChatById(chatId);
+        User interlocutor = chat.getSender().getId().equals(currentUser.getId())
+                ? chat.getReceiver()
+                : chat.getSender();
+
+        model.addAttribute("chatId", chatId);
+        model.addAttribute("interlocutorName", interlocutor.getUsername());
+        return "chat"; // шаблон chat.html
+    }
 
 
 
