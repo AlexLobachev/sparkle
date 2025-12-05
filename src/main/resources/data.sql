@@ -201,10 +201,13 @@ WHERE user_id = 35;
 --
 --insert into matches (first_user_id, second_user_id, match_status) values (2, 9, 'LIKE');
 
-
-delete from users where id = 31;
-delete from users where id = 34;
+TRUNCATE  TABLE  matches cascade;
 
 
-
+--insert into matches (created_at,first_user_id, second_user_id, match_status) values (now(),4, 35, 'LIKE');
+--insert into user_interests (user_id, interest) values (7, 'MUSIC');
+--insert into user_interests (user_id, interest) values (7, 'FOOTBALL');
+--insert into user_interests (user_id, interest) values (7, 'LITRBALL');
+--insert into user_interests (user_id, interest) values (7, 'BASKETBALL');
+--insert into user_interests (user_id, interest) values (7, 'TENNIS');
 

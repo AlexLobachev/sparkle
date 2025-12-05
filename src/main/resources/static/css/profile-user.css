@@ -7,53 +7,52 @@
 }
 
 :root {
-    --primary: #ec4899;
-    --primary-hover: #db2777;
-    --light: #f9fafb;
-    --dark: #1f2937;
-    --text: #111827;
+    --gradient-start: #FFCDA5;
+    --gradient-end: #EE4D5F;
+    --text-light: #ffffff;
+    --text-dark: #333333;
+    --border-light: #e0e0e0;
+    --bg-light: #f9f9f9;
     --white: #ffffff;
     --gray-200: #e5e7eb;
     --gray-300: #d1d5db;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
     --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
     --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.08);
     --radius-md: 16px;
     --radius-lg: 50%;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition: all 0.3s ease;
 }
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
-    color: var(--text);
+    background: var(--bg-light);
+    color: var(--text-dark);
     line-height: 1.6;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
-/* Шапка */
+/* === Шапка === */
 .header {
-    background: var(--primary);
-    color: var(--white);
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: var(--text-light);
     padding: 1.5rem;
     text-align: center;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    margin-bottom: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
 }
 
 .header h1 {
     margin: 0;
     font-size: 1.4rem;
     font-weight: 600;
-    letter-spacing: -0.5px;
-    color: var(--white);
+    color: var(--text-light);
 }
 
-/* Основной контент */
+/* === Основной контент === */
 .main-content {
     padding: 0 1.5rem 1.5rem;
     max-width: 500px;
@@ -62,29 +61,31 @@ body {
     width: 100%;
 }
 
-/* Секции */
+/* === Секции === */
 .info-section {
     background: var(--white);
     border-radius: var(--radius-md);
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
 }
 
 .info-section h2 {
     font-size: 1.3rem;
-    color: var(--primary);
+    color: var(--gradient-end);
     margin-bottom: 1rem;
     font-weight: 600;
 }
 
-/* Фото */
+/* === Фото === */
 .photo-section {
     background: var(--white);
     border-radius: var(--radius-md);
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
 }
 
 .photo-slider {
@@ -111,7 +112,7 @@ body {
     top: 50%;
     transform: translateY(-50%);
     background: rgba(0, 0, 0, 0.4);
-    color: var(--white);
+    color: var(--text-light);
     border: none;
     width: 40px;
     height: 40px;
@@ -137,7 +138,7 @@ body {
     right: 10px;
 }
 
-/* Индикатор фото */
+/* === Индикатор фото === */
 .photo-indicator {
     display: flex;
     justify-content: center;
@@ -149,16 +150,16 @@ body {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--gray-300);
+    background: var(--border-light);
     transition: var(--transition);
 }
 
 .photo-dot.active {
-    background: var(--primary);
+    background: var(--gradient-end);
     transform: scale(1.2);
 }
 
-/* Интересы */
+/* === Интересы === */
 .interests ul {
     display: flex;
     flex-wrap: wrap;
@@ -167,9 +168,9 @@ body {
 }
 
 .interests li {
-    background: #f0f9ff;
-    color: var(--primary);
-    border: 1px solid var(--primary);
+    background: #fff8f0;
+    color: var(--gradient-end);
+    border: 1px solid var(--gradient-end);
     padding: 0.25rem 0.75rem;
     border-radius: 20px;
     font-size: 0.9rem;
@@ -182,7 +183,7 @@ body {
     font-style: italic;
 }
 
-/* О себе */
+/* === О себе === */
 .about-me {
     margin: 1rem 0;
 }
@@ -193,14 +194,14 @@ body {
     font-style: italic;
 }
 
-/* Кнопки действий — в ряду */
+/* === Кнопки действий — в ряду === */
 .actions-row {
     display: flex;
     justify-content: center;
     gap: 2.5rem;
     margin-top: 1.5rem;
     padding: 1rem 0;
-    border-top: 1px solid var(--gray-200);
+    border-top: 1px solid var(--border-light);
     background: var(--white);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
@@ -213,43 +214,52 @@ body {
     cursor: pointer;
 }
 
-/* Круглая иконка */
+/* === Круглая иконка === */
 .icon-circle {
     width: 60px;
     height: 60px;
-    background: var(--primary);
     border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: var(--transition);
-    box-shadow: var(--shadow-md);
     position: relative;
     overflow: hidden;
+    border: 1px solid transparent;
+    background: transparent;
 }
 
 .icon-circle::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: var(--primary);
+    background: rgba(255, 255, 255, 0.6);
     border-radius: 50%;
     z-index: 1;
+    opacity: 0;
     transition: var(--transition);
 }
 
+.icon-circle:hover {
+    border-color: var(--gradient-end);
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
 .icon-circle:hover::before {
-    background: var(--primary-hover);
+    opacity: 1;
 }
 
 .icon-circle img {
     width: 32px;
     height: 32px;
     z-index: 2;
-    filter: brightness(0) saturate(100%) invert(100%);
+    filter: brightness(0) saturate(100%) invert(30%);
+    transition: var(--transition);
 }
 
-/* Сообщения */
+/* === Сообщения === */
 #messages {
     margin-top: 1rem;
     text-align: center;
@@ -257,190 +267,36 @@ body {
 
 .alert {
     padding: 0.75rem 1rem;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     font-size: 0.9rem;
     margin-bottom: 1rem;
+    border: 1px solid var(--border-light);
+    background: var(--white);
+    color: var(--text-dark);
 }
 
 .alert-success {
     background: #f0fdf4;
     color: #16a34a;
-    border: 1px solid #a7f3d0;
+    border-color: #a7f3d0;
 }
 
 .alert-error {
     background: #fef2f2;
     color: #b91c1c;
-    border: 1px solid #fca5a5;
+    border-color: #fca5a5;
 }
 
-/* Футер */
+/* === Футер === */
 .footer {
     text-align: center;
     padding: 1rem;
-    color: var(--text);
-    font-size: 0.9rem;
-    margin-top: auto;
     background: var(--white);
-    border-top: 1px solid var(--gray-200);
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border-light);
+    margin-top: auto;
 }
 
-/* ===================== */
-/* === Модальное окно чата === */
-/* ===================== */
-
-.chat-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.chat-container {
-    width: 90%;
-    max-width: 800px;
-    height: 80vh;
-    background-color: var(--white);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.chat-header {
-    background-color: var(--primary);
-    color: var(--white);
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.chat-header h3 {
-    margin: 0;
-    font-size: 1.2rem;
-    font-weight: 500;
-}
-
-.chat-close {
-    background: none;
-    border: none;
-    color: var(--white);
-    font-size: 1.5rem;
-    cursor: pointer;
-}
-
-.chat-close:hover {
-    opacity: 0.9;
-}
-
-.chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-    background-color: var(--gray-100);
-}
-
-.message {
-    max-width: 70%;
-    padding: 0.8rem;
-    border-radius: var(--radius-md);
-    font-size: 0.95rem;
-}
-
-.message.received {
-    align-self: flex-start;
-    background-color: var(--white);
-    border: 1px solid var(--gray-300);
-    color: #333;
-}
-
-.message.sent {
-    align-self: flex-end;
-    background-color: var(--primary);
-    color: var(--white);
-}
-
-.message-time {
-    font-size: 0.75rem;
-    color: #999;
-    text-align: right;
-    margin-top: 4px;
-    opacity: 0.8;
-}
-
-.delete-message {
-    background-color: #fff;
-    color: #e74c3c;
-    border: 2px solid #e74c3c;
-    border-radius: 50%;
-    width: 22px;
-    height: 22px;
-    font-size: 1rem;
-    font-weight: bold;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 6px;
-    cursor: pointer;
-    opacity: 0;
-    transition: all 0.2s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.message:hover .delete-message {
-    opacity: 1;
-}
-
-.delete-message:hover {
-    background-color: #e74c3c;
-    color: #fff;
-    transform: scale(1.1);
-}
-
-.chat-input {
-    display: flex;
-    padding: 1rem;
-    background-color: var(--white);
-    border-top: 1px solid var(--gray-200);
-    gap: 0.5rem;
-}
-
-.chat-input input {
-    flex: 1;
-    padding: 0.75rem;
-    border: 1px solid var(--gray-300);
-    border-radius: var(--radius-md);
-    font-size: 1rem;
-    outline: none;
-}
-
-.chat-input input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
-}
-
-.chat-input button {
-    padding: 0.75rem 1.2rem;
-    background-color: var(--primary);
-    color: var(--white);
-    border: none;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.chat-input button:hover {
-    background-color: var(--primary-hover);
-}
+/* === Удалён стили модального окна чата === */
+/* Модальное окно чата больше не используется — чат на отдельной странице */

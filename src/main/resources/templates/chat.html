@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Чат — Sparkle</title>
+    <link rel="stylesheet" th:href="@{/css/chat.css}" media="screen"/>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <!-- WebSocket -->
+    <script th:src="@{/js/lib/sockjs.min.js}" th:nonce="${cspNonce}"></script>
+    <script th:src="@{/js/lib/stomp.min.js}" th:nonce="${cspNonce}"></script>
+</head>
+<body>
+<div class="page-wrapper">
+    <!-- Шапка -->
+    <header class="header">
+        <button id="backBtn" class="back-btn">
+            <img src="/images/icons/back-two-arrows.svg" th:src="@{/images/icons/back-two-arrows.svg}" alt="Назад">
+        </button>
+        <h1 id="chatTitle">Чат</h1>
+    </header>
+
+    <main class="main-content">
+        <!-- Белый блок с чатом -->
+        <div class="chat-card">
+            <div class="chat-container">
+                <div id="chatMessages" class="chat-messages"></div>
+                <div class="chat-input">
+                    <input type="text" id="chatInput" placeholder="Напишите сообщение..." maxlength="500"/>
+                    <button id="chatSendBtn">Отправить</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>© <span id="year">2025</span> Sparkle. Все права защищены.</p>
+    </footer>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    window.currentUserId = [[${#authentication.principal.id}]];
+    window.currentChatId = [[${chatId}]];
+    window.interlocutorName = [[${interlocutorName}]];
+    /*]]>*/
+</script>
+<script th:src="@{/js/chat.js}" th:nonce="${cspNonce}"></script>
+</body>
+</html>

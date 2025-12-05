@@ -10,4 +10,5 @@ import lombok.Setter;
 public class ChatMessageDto {
     private Long userId;
     private String username;
+    private String photoUrl;
 }

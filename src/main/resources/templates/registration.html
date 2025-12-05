@@ -32,8 +32,10 @@
                 <p>Мы можем определить ваше местоположение, чтобы автоматически заполнить поле «Город».</p>
 
                 <div class="location-actions">
-                    <button type="button" id="getLocationBtn" class="btn-primary">Определить место</button>
-                    <button type="button" id="skipLocationBtn" class="btn-text">Ввести вручную</button>
+                    <button type="button" id="getLocationBtn" class="btn-icon-circle">
+                        <img src="/images/icons/location.svg" th:src="@{/images/icons/location.svg}" alt="Определить место">
+                    </button>
+                    <button type="button" id="skipLocationBtn" class="btn-text">Я не хочу оставлять цифровой след</button>
                 </div>
 
                 <!-- Ручной ввод (если геолокация не удалась) -->

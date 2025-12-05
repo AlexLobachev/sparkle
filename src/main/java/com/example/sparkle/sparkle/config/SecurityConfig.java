@@ -1,6 +1,7 @@
 package com.example.sparkle.sparkle.config;
 
 import com.example.sparkle.sparkle.service.UserService;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.server.Cookie;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -39,6 +41,11 @@ import java.util.List;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+    @PostConstruct
+    public void init() {
+        // ✅ Устанавливаем стратегию, чтобы SecurityContext наследовался потоками
+        SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+    }
 
     private final UserService userService;
 
@@ -60,7 +67,7 @@ public class SecurityConfig {
         configureHeaders(http);
         configureCsrf(http);
         configureSessionManagement(http);
-        configureSecurityContext(http); // ← Новая настройка
+        http.securityContext(Customizer.withDefaults());
 
         return http.build();
     }
@@ -69,11 +76,11 @@ public class SecurityConfig {
      * Настройка сохранения SecurityContext в сессии.
      * Обеспечивает, что аутентификация сохраняется между запросами.
      */
-    private void configureSecurityContext(HttpSecurity http) throws Exception {
-        http.securityContext(sc -> sc
-                .securityContextRepository(new HttpSessionSecurityContextRepository())
-        );
-    }
+    //private void configureSecurityContext(HttpSecurity http) throws Exception {
+    //    http.securityContext(sc -> sc
+    //            .securityContextRepository(new HttpSessionSecurityContextRepository())
+    //    );
+    //}
 
     /**
      * Настройка свойств куки сессии:
@@ -102,7 +109,8 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/css/**", "/js/**", "/images/**",
                         "/entrance", "/", "/error", "/favicon.ico",
-                        "/login/vk/exchange", "/login/vk/callback"
+                        "/login/vk/exchange", "/login/vk/callback",
+                        "/ws/**"
                 ).permitAll()
                 .anyRequest().authenticated()
         );
@@ -175,7 +183,7 @@ public class SecurityConfig {
      */
     private void configureCsrf(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf
-                .ignoringRequestMatchers("/login/vk/callback")
+                .ignoringRequestMatchers("/login/vk/callback", "/ws/**")
                 .csrfTokenRepository(csrfTokenRepository())
         );
         http.formLogin(Customizer.withDefaults());
@@ -239,4 +247,8 @@ public class SecurityConfig {
         registration.setOrder(1);
         return registration;
     }
+
+
+
+
 }

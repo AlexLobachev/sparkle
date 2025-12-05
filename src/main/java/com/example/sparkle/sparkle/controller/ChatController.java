@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Role;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,14 +48,6 @@ public class ChatController {
     }
 
 
-    /**
-     * Отправка сообщения другому пользователю
-     */
-    @PostMapping("/message")
-    public ResponseEntity<?> sendMessage(@RequestBody ChatMessage savedMessage) {
-
-        return ResponseEntity.created(null).body(chatService.sendMessage(savedMessage));
-    }
         /**
      * История сообщений для определенного чата
      */

@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,8 +33,8 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 @Slf4j
-public class User implements UserDetails {
-
+public class User implements UserDetails, Serializable {
+    private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -95,10 +97,13 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoles().getRole().toUpperCase()))
-                .collect(Collectors.toSet());
+        return roles == null ? Collections.emptyList() :
+                roles.stream()
+                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoles().getRole().toUpperCase()))
+                        .collect(Collectors.toList());
     }
+
+
 
     @Override
     public String getPassword() {
